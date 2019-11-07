@@ -1,0 +1,2 @@
+- https://uprightgo.de/products/upright-go-2
+- https://www.rsiguard.com/
