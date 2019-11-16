@@ -147,6 +147,11 @@ class PoseNet extends Component {
           poses.push(pose)
           break
         }
+        default: {
+          throw new Error(
+            'algorithm not found'
+          )
+        }
       }
 
       canvasContext.clearRect(0, 0, videoWidth, videoHeight)
