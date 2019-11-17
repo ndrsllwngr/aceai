@@ -2,39 +2,43 @@
 import React, { useEffect, useState } from 'react'
 import * as posenet from '@tensorflow-models/posenet'
 
-import { drawBoundingBox, drawKeypoints, drawSkeleton, isMobile } from './demo-utils';
+import { drawBoundingBox, drawKeypoints, drawSkeleton, isMobile } from './utils';
 
 // Ui
 import Box from '@material-ui/core/Box';
-import green from '@material-ui/core/colors/green';
-import red from '@material-ui/core/colors/red';
-import grey from '@material-ui/core/colors/grey';
-import { CheckCircle, Error } from '@material-ui/icons';
+import Grid from '@material-ui/core/Grid';
+import Fade from '@material-ui/core/Fade';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Typography from '@material-ui/core/Typography';
 
 // Chart
 import { Line } from 'react-chartjs-2';
 import 'chartjs-plugin-streaming';
+import { PaperSheet } from '../paper';
+import { IconAvatars } from '../status';
 
 const videoWidth = 600;
 const videoHeight = 500;
 
 const datas = [];
 
-var chartColors = {
-  red: 'rgb(255, 99, 132)',
-  orange: 'rgb(255, 159, 64)',
-  yellow: 'rgb(255, 205, 86)',
-  green: 'rgb(75, 192, 192)',
-  blue: 'rgb(54, 162, 235)',
-  purple: 'rgb(153, 102, 255)',
-  grey: 'rgb(201, 203, 207)'
-};
+// var chartColors = {
+//   red: 'rgb(255, 99, 132)',
+//   orange: 'rgb(255, 159, 64)',
+//   yellow: 'rgb(255, 205, 86)',
+//   green: 'rgb(75, 192, 192)',
+//   blue: 'rgb(54, 162, 235)',
+//   purple: 'rgb(153, 102, 255)',
+//   grey: 'rgb(201, 203, 207)'
+// };
 
 export const PoseNetCamera = props => {
-  const [goodBad, setGoodBad] = useState({})
+  const [goodBad, setGoodBad] = useState({ msg: "Loading...", value: 0.0, status: "default" })
   const [chartData, setChartData] = useState([])
+  const [loading, setLoading] = useState(true)
   useEffect(() => {
     async function bind() {
+      setLoading(true)
       const net = await posenet.load({
         architecture: guiState.input.architecture,
         outputStride: guiState.input.outputStride,
@@ -42,7 +46,7 @@ export const PoseNetCamera = props => {
         multiplier: guiState.input.multiplier,
         quantBytes: guiState.input.quantBytes
       });
-      // toggleLoadingUI(false);
+
 
       let video;
 
@@ -55,7 +59,7 @@ export const PoseNetCamera = props => {
         info.style.display = 'block';
         throw e;
       }
-
+      setLoading(false)
       guiState.net = net;
       // setupFPS();
       detectPoseInRealTime(video, net);
@@ -76,9 +80,9 @@ export const PoseNetCamera = props => {
             let rightShoulder = currentData.keypoints.filter(x => x.part == "rightShoulder")[0]
             // console.log(currentData, leftShoulder, rightShoulder, Math.abs(leftShoulder.position.y - rightShoulder.position.y))
             if (Math.abs(leftShoulder.position.y - rightShoulder.position.y) > 10) {
-              setGoodBad({ msg: `Bad posture: ${Math.abs(leftShoulder.position.y - rightShoulder.position.y)}`, color: red[600], icon: <Error></Error> })
+              setGoodBad({ msg: `Bad posture`, value: Math.abs(leftShoulder.position.y - rightShoulder.position.y).toFixed(2), status: "bad" })
             } else {
-              setGoodBad({ msg: `Good posture!`, color: green[600], icon: <CheckCircle></CheckCircle> })
+              setGoodBad({ msg: `Good posture`, value: Math.abs(leftShoulder.position.y - rightShoulder.position.y).toFixed(2), status: "good" })
             }
             let copy = chartData
             copy.push({ x: Date.now(), y: Math.abs(leftShoulder.position.y - rightShoulder.position.y) })
@@ -92,28 +96,53 @@ export const PoseNetCamera = props => {
 
 
   return (
-    <>
-      <Box display="flex" flexDirection="row">
-        <Box display="flex" flexDirection="column">
+    <Grid
+      container
+      direction="row"
+      justify="center"
+      alignItems="start"
+    >
+      <PaperSheet>
+        <Box height={videoHeight} width={videoWidth}>
           <video id="video" playsinline style={{ transform: "scaleX(-1)", display: "none" }}>
           </video>
+          <Fade
+            in={loading}
+            style={{
+              transitionDelay: loading ? '100ms' : '0ms',
+            }}
+            unmountOnExit
+          >
+            <Box position="fixed">
+              <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center" height={videoHeight} width={videoWidth}>
+                <CircularProgress color="primary" />
+              </Box>
+            </Box>
+          </Fade>
           <canvas id="output" />
-          <Box display="flex" p={1} color={grey[900]} bgcolor={goodBad !== undefined && goodBad.color} maxWidth={videoWidth} marginTop="10px">
-            {goodBad !== undefined && goodBad.icon}
-            <span style={{ marginLeft: "10px" }}>{goodBad !== undefined && goodBad.msg}</span>
-          </Box>
         </Box>
-        <Box maxWidth={videoWidth}>
+      </PaperSheet>
+      <Box display="flex" flexDirection="column" maxWidth={videoWidth} minWidth="300px" alignItems="top">
+        <PaperSheet>
+          <Box display="flex" alignItems="center" justifyContent="space-between" maxWidth={videoWidth}>
+            <Box display="flex" flexDirection="column" alignItems="start" justifyContent="space-between">
+              {goodBad &&
+                <>
+                  <Typography variant="overline" display="block" style={{ fontSize: "11px", lineHeight: "13px", letterSpacing: "0.33px", marginBottom: "8px", color: "#546e7a" }}>
+                    {goodBad.msg}</Typography>
+                  <Typography variant="h6" style={{ fontSize: "24px", lineHeight: "28px", letterSpacing: "0.33px", letterSpacing: "-0.06px", color: "#263238" }}>
+                    {goodBad.value}</Typography></>
+              }
+            </Box>
+            <IconAvatars status={goodBad.status}></IconAvatars>
+          </Box>
+        </PaperSheet>
+        <PaperSheet>
           <Line
             type="line"
             data={{
               datasets: [{
                 label: 'Math.abs (left and right shoulder)',
-                backgroundColor: chartColors.red,
-                borderColor: chartColors.red,
-                fill: false,
-                lineTension: 0,
-                borderDash: [8, 4],
                 data: chartData
               }]
             }}
@@ -141,9 +170,9 @@ export const PoseNetCamera = props => {
               }]
             }}
           />
-        </Box>
+        </PaperSheet>
       </Box>
-    </>
+    </Grid>
   )
 }
 
