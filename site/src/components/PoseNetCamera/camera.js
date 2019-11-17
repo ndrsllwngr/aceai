@@ -4,14 +4,14 @@ import * as posenet from '@tensorflow-models/posenet'
 
 import { drawBoundingBox, drawKeypoints, drawSkeleton, isMobile } from './demo-utils';
 
-// UI
+// Ui
 import Box from '@material-ui/core/Box';
 import green from '@material-ui/core/colors/green';
 import red from '@material-ui/core/colors/red';
 import grey from '@material-ui/core/colors/grey';
 import { CheckCircle, Error } from '@material-ui/icons';
 
-// CHART
+// Chart
 import { Line } from 'react-chartjs-2';
 import 'chartjs-plugin-streaming';
 
