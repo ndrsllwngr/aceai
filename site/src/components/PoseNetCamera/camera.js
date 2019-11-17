@@ -3,23 +3,36 @@ import React, { useEffect, useState } from 'react'
 import * as posenet from '@tensorflow-models/posenet'
 
 import { drawBoundingBox, drawKeypoints, drawSkeleton, isMobile } from './demo-utils';
+
+// UI
 import Box from '@material-ui/core/Box';
 import green from '@material-ui/core/colors/green';
 import red from '@material-ui/core/colors/red';
 import grey from '@material-ui/core/colors/grey';
-import { CheckCircle, Error, Check } from '@material-ui/icons';
-// import { data } from '@tensorflow/tfjs';
+import { CheckCircle, Error } from '@material-ui/icons';
 
-
-// import "./style.css"
+// CHART
+import { Line } from 'react-chartjs-2';
+import 'chartjs-plugin-streaming';
 
 const videoWidth = 600;
 const videoHeight = 500;
 
 const datas = [];
 
+var chartColors = {
+  red: 'rgb(255, 99, 132)',
+  orange: 'rgb(255, 159, 64)',
+  yellow: 'rgb(255, 205, 86)',
+  green: 'rgb(75, 192, 192)',
+  blue: 'rgb(54, 162, 235)',
+  purple: 'rgb(153, 102, 255)',
+  grey: 'rgb(201, 203, 207)'
+};
+
 export const PoseNetCamera = props => {
   const [goodBad, setGoodBad] = useState({})
+  const [chartData, setChartData] = useState([])
   useEffect(() => {
     async function bind() {
       const net = await posenet.load({
@@ -67,22 +80,68 @@ export const PoseNetCamera = props => {
             } else {
               setGoodBad({ msg: `Good posture!`, color: green[600], icon: <CheckCircle></CheckCircle> })
             }
+            let copy = chartData
+            copy.push({ x: Date.now(), y: Math.abs(leftShoulder.position.y - rightShoulder.position.y) })
+            setChartData(copy)
           }
         }
       }
     }, 500);
     return () => { console.log("unMount"); clearTimeout(timer); }
-  }, []);
+  }, [chartData]);
 
 
   return (
     <>
-      <video id="video" playsinline style={{ transform: "scaleX(-1)", display: "none" }}>
-      </video>
-      <canvas id="output" />
-      <Box display="flex" p={1} color={grey[900]} bgcolor={goodBad !== undefined && goodBad.color} maxWidth={videoWidth}>
-        {goodBad !== undefined && goodBad.icon}
-        <span style={{marginLeft: "10px"}}>{goodBad !== undefined && goodBad.msg}</span>
+      <Box display="flex" flexDirection="row">
+        <Box display="flex" flexDirection="column">
+          <video id="video" playsinline style={{ transform: "scaleX(-1)", display: "none" }}>
+          </video>
+          <canvas id="output" />
+          <Box display="flex" p={1} color={grey[900]} bgcolor={goodBad !== undefined && goodBad.color} maxWidth={videoWidth} marginTop="10px">
+            {goodBad !== undefined && goodBad.icon}
+            <span style={{ marginLeft: "10px" }}>{goodBad !== undefined && goodBad.msg}</span>
+          </Box>
+        </Box>
+        <Box maxWidth={videoWidth}>
+          <Line
+            type="line"
+            data={{
+              datasets: [{
+                label: 'Math.abs (left and right shoulder)',
+                backgroundColor: chartColors.red,
+                borderColor: chartColors.red,
+                fill: false,
+                lineTension: 0,
+                borderDash: [8, 4],
+                data: chartData
+              }]
+            }}
+            options={{
+              scales: {
+                xAxes: [{
+                  type: 'realtime'
+                }]
+              }
+            }}
+            scales={{
+              xAxes: [{
+                type: 'realtime',
+                realtime: {
+                  duration: 20000,
+                  refresh: 1000,
+                  delay: 2000,
+                }
+              }],
+              yAxes: [{
+                scaleLabel: {
+                  display: true,
+                  labelString: 'value'
+                }
+              }]
+            }}
+          />
+        </Box>
       </Box>
     </>
   )
