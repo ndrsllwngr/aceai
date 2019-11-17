@@ -9,7 +9,7 @@ class PoseNet extends Component {
     videoWidth: 900,
     videoHeight: 700,
     flipHorizontal: true,
-    algorithm: 'single-pose',
+    algorithm: 'multi-pose',
     showVideo: true,
     showSkeleton: true,
     showPoints: true,
