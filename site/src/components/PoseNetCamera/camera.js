@@ -283,5 +283,6 @@ export async function bindPage() {
   detectPoseInRealTime(video, net);
 }
 
-navigator.getUserMedia = navigator.getUserMedia ||
-  navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+// TODO maybe fix later
+// navigator.getUserMedia = navigator.getUserMedia ||
+  // navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
