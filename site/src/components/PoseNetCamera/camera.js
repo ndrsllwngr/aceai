@@ -4,6 +4,10 @@ import * as posenet from '@tensorflow-models/posenet'
 
 import { drawBoundingBox, drawKeypoints, drawSkeleton, isMobile } from './demo-utils';
 import Box from '@material-ui/core/Box';
+import green from '@material-ui/core/colors/green';
+import red from '@material-ui/core/colors/red';
+import grey from '@material-ui/core/colors/grey';
+import { CheckCircle, Error, Check } from '@material-ui/icons';
 // import { data } from '@tensorflow/tfjs';
 
 
@@ -15,7 +19,7 @@ const videoHeight = 500;
 const datas = [];
 
 export const PoseNetCamera = props => {
-  const [goodBad, setGoodBad] = useState("default")
+  const [goodBad, setGoodBad] = useState({})
   useEffect(() => {
     async function bind() {
       const net = await posenet.load({
@@ -59,14 +63,14 @@ export const PoseNetCamera = props => {
             let rightShoulder = currentData.keypoints.filter(x => x.part == "rightShoulder")[0]
             console.log(currentData, leftShoulder, rightShoulder, Math.abs(leftShoulder.position.y - rightShoulder.position.y))
             if (Math.abs(leftShoulder.position.y - rightShoulder.position.y) > 10) {
-              setGoodBad(`bad: ${Math.abs(leftShoulder.position.y - rightShoulder.position.y)}`)
+              setGoodBad({ msg: `Bad posture: ${Math.abs(leftShoulder.position.y - rightShoulder.position.y)}`, color: red[600], icon: <Error></Error> })
             } else {
-              setGoodBad("good")
+              setGoodBad({ msg: `Good posture!`, color: green[600], icon: <CheckCircle></CheckCircle> })
             }
           }
         }
       }
-    }, 1000);
+    }, 500);
     return () => { console.log("unMount"); clearTimeout(timer); }
   }, []);
 
@@ -76,8 +80,9 @@ export const PoseNetCamera = props => {
       <video id="video" playsinline style={{ transform: "scaleX(-1)", display: "none" }}>
       </video>
       <canvas id="output" />
-      <Box display="flex" p={1} bgcolor={(goodBad === "good") ? "green" : "red"}>
-        <span>{goodBad}</span>
+      <Box display="flex" p={1} color={grey[900]} bgcolor={goodBad !== undefined && goodBad.color} maxWidth={videoWidth}>
+        {goodBad !== undefined && goodBad.icon}
+        <span style={{marginLeft: "10px"}}>{goodBad !== undefined && goodBad.msg}</span>
       </Box>
     </>
   )
