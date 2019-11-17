@@ -61,7 +61,7 @@ export const PoseNetCamera = props => {
           if (currentData.keypoints) {
             let leftShoulder = currentData.keypoints.filter(x => x.part == "leftShoulder")[0]
             let rightShoulder = currentData.keypoints.filter(x => x.part == "rightShoulder")[0]
-            console.log(currentData, leftShoulder, rightShoulder, Math.abs(leftShoulder.position.y - rightShoulder.position.y))
+            // console.log(currentData, leftShoulder, rightShoulder, Math.abs(leftShoulder.position.y - rightShoulder.position.y))
             if (Math.abs(leftShoulder.position.y - rightShoulder.position.y) > 10) {
               setGoodBad({ msg: `Bad posture: ${Math.abs(leftShoulder.position.y - rightShoulder.position.y)}`, color: red[600], icon: <Error></Error> })
             } else {
