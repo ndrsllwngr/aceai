@@ -58,7 +58,7 @@ export const PoseNetCamera = props => {
             let leftShoulder = currentData.keypoints.filter(x => x.part == "leftShoulder")[0]
             let rightShoulder = currentData.keypoints.filter(x => x.part == "rightShoulder")[0]
             console.log(currentData, leftShoulder, rightShoulder, Math.abs(leftShoulder.position.y - rightShoulder.position.y))
-            if (Math.abs(leftShoulder.position.y - rightShoulder.position.y) > 5) {
+            if (Math.abs(leftShoulder.position.y - rightShoulder.position.y) > 10) {
               setGoodBad(`bad: ${Math.abs(leftShoulder.position.y - rightShoulder.position.y)}`)
             } else {
               setGoodBad("good")
@@ -76,7 +76,9 @@ export const PoseNetCamera = props => {
       <video id="video" playsinline style={{ transform: "scaleX(-1)", display: "none" }}>
       </video>
       <canvas id="output" />
-      <span>{goodBad}</span>
+      <Box display="flex" p={1} bgcolor={(goodBad === "good") ? "green" : "red"}>
+        <span>{goodBad}</span>
+      </Box>
     </>
   )
 }
