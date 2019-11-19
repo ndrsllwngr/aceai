@@ -16,6 +16,8 @@ import { Line } from 'react-chartjs-2';
 import 'chartjs-plugin-streaming';
 import { PaperSheet } from '../paper';
 import { IconAvatars } from '../status';
+import { useWebcam } from '../useWebcam';
+
 
 const videoWidth = 600;
 const videoHeight = 500;
@@ -32,47 +34,59 @@ const datas = [];
 //   grey: 'rgb(201, 203, 207)'
 // };
 
+const emptyState = { msg: "Loading...", value: 0.0, status: "default" }
+var _streamCopy = null;
+
 export const PoseNetCamera = props => {
-  const [goodBad, setGoodBad] = useState({ msg: "Loading...", value: 0.0, status: "default" })
+  const [goodBad, setGoodBad] = useState(emptyState)
   const [chartData, setChartData] = useState([])
   const [loading, setLoading] = useState(true)
+  const [webcamContext] = useWebcam();
   useEffect(() => {
-    async function bind() {
-      setLoading(true)
-      const net = await posenet.load({
-        architecture: guiState.input.architecture,
-        outputStride: guiState.input.outputStride,
-        inputResolution: guiState.input.inputResolution,
-        multiplier: guiState.input.multiplier,
-        quantBytes: guiState.input.quantBytes
-      });
-
-
-      let video;
-
-      try {
-        video = await loadVideo();
-      } catch (e) {
-        let info = document.getElementById('info');
-        info.textContent = 'this browser does not support video capture,' +
-          'or this device does not have a camera';
-        info.style.display = 'block';
-        throw e;
+    if (webcamContext.webCam) {
+      async function bind() {
+        setLoading(true)
+        const net = await posenet.load({
+          architecture: guiState.input.architecture,
+          outputStride: guiState.input.outputStride,
+          inputResolution: guiState.input.inputResolution,
+          multiplier: guiState.input.multiplier,
+          quantBytes: guiState.input.quantBytes
+        });
+        let video;
+        try {
+          video = await loadVideo();
+        } catch (e) {
+          let info = document.getElementById('info');
+          info.textContent = 'this browser does not support video capture,' +
+            'or this device does not have a camera';
+          info.style.display = 'block';
+          throw e;
+        }
+        setLoading(false)
+        guiState.net = net;
+        // setupFPS();
+        detectPoseInRealTime(video, net);
       }
-      setLoading(false)
-      guiState.net = net;
-      // setupFPS();
-      detectPoseInRealTime(video, net);
+      bind()
+    } else {
+      async function bind2() {
+        setLoading(true)
+        setGoodBad(emptyState)
+        setChartData([])
+        stopStreamedVideo()
+        clearCanvas()
+      }
+      bind2()
     }
-    bind()
   }
 
-    , []);
+    , [webcamContext]);
 
   useEffect(() => {
     const timer = setInterval(() => {
       // console.log(datas)
-      if (datas.length > 0) {
+      if (webcamContext.webCam && datas.length > 0) {
         if (datas[datas.length - 1].poseData) {
           let currentData = datas[datas.length - 1].poseData
           if (currentData.keypoints) {
@@ -92,7 +106,7 @@ export const PoseNetCamera = props => {
       }
     }, 500);
     return () => { console.log("unMount"); clearTimeout(timer); }
-  }, [chartData]);
+  }, [chartData, webcamContext]);
 
 
   return (
@@ -122,10 +136,10 @@ export const PoseNetCamera = props => {
           <canvas id="output" />
         </Box>
       </PaperSheet>
-      <Box display="flex" flexDirection="column" maxWidth={videoWidth} minWidth="300px" alignItems="top">
+      <Box display="flex" flexDirection="column" maxWidth={videoWidth} alignItems="top">
         <PaperSheet>
           <Box display="flex" alignItems="center" justifyContent="space-between" maxWidth={videoWidth}>
-            <Box display="flex" flexDirection="column" alignItems="start" justifyContent="space-between">
+            <Box display="flex" flexDirection="column" alignItems="start" justifyContent="space-between" minWidth="300px">
               {goodBad &&
                 <>
                   <Typography variant="overline" display="block" style={{ fontSize: "11px", lineHeight: "13px", letterSpacing: "0.33px", marginBottom: "8px", color: "#546e7a" }}>
@@ -137,40 +151,42 @@ export const PoseNetCamera = props => {
             <IconAvatars status={goodBad.status}></IconAvatars>
           </Box>
         </PaperSheet>
-        <PaperSheet>
-          <Line
-            type="line"
-            data={{
-              datasets: [{
-                label: 'Math.abs (left and right shoulder)',
-                data: chartData
-              }]
-            }}
-            options={{
-              scales: {
-                xAxes: [{
-                  type: 'realtime'
+        {webcamContext.webCam &&
+          <PaperSheet>
+            <Line
+              type="line"
+              data={{
+                datasets: [{
+                  label: 'Math.abs (left and right shoulder)',
+                  data: chartData
                 }]
-              }
-            }}
-            scales={{
-              xAxes: [{
-                type: 'realtime',
-                realtime: {
-                  duration: 20000,
-                  refresh: 1000,
-                  delay: 2000,
+              }}
+              options={{
+                scales: {
+                  xAxes: [{
+                    type: 'realtime'
+                  }]
                 }
-              }],
-              yAxes: [{
-                scaleLabel: {
-                  display: true,
-                  labelString: 'value'
-                }
-              }]
-            }}
-          />
-        </PaperSheet>
+              }}
+              scales={{
+                xAxes: [{
+                  type: 'realtime',
+                  realtime: {
+                    duration: 20000,
+                    refresh: 1000,
+                    delay: 2000,
+                  }
+                }],
+                yAxes: [{
+                  scaleLabel: {
+                    display: true,
+                    labelString: 'value'
+                  }
+                }]
+              }}
+            />
+          </PaperSheet>
+        }
       </Box>
     </Grid>
   )
@@ -199,6 +215,7 @@ async function setupCamera() {
       height: mobile ? undefined : videoHeight,
     },
   });
+  _streamCopy = stream;
   video.srcObject = stream;
 
   return new Promise((resolve) => {
@@ -213,6 +230,24 @@ async function loadVideo() {
   video.play();
 
   return video;
+}
+
+function stopStreamedVideo() {
+  try {
+    try {
+      _streamCopy.stop(); // if this method doesn't exist, the catch will be executed.
+    } catch (e) {
+      _streamCopy.getVideoTracks()[0].stop(); // then stop the first video track of the stream
+    }
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+function clearCanvas() {
+  const canvas = document.getElementById('output');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, videoWidth, videoHeight);
 }
 
 const defaultQuantBytes = 4;
@@ -271,71 +306,72 @@ function detectPoseInRealTime(video, net) {
   canvas.height = videoHeight;
 
   async function poseDetectionFrame() {
+    try {
+      let poses = [];
+      let minPoseConfidence;
+      let minPartConfidence;
+      switch (guiState.algorithm) {
+        case 'single-pose':
+          const pose = await guiState.net.estimatePoses(video, {
+            flipHorizontal: flipPoseHorizontal,
+            decodingMethod: 'single-person'
+          });
+          poses = poses.concat(pose);
+          minPoseConfidence = +guiState.singlePoseDetection.minPoseConfidence;
+          minPartConfidence = +guiState.singlePoseDetection.minPartConfidence;
+          break;
+        case 'multi-pose':
+          let all_poses = await guiState.net.estimatePoses(video, {
+            flipHorizontal: flipPoseHorizontal,
+            decodingMethod: 'multi-person',
+            maxDetections: guiState.multiPoseDetection.maxPoseDetections,
+            scoreThreshold: guiState.multiPoseDetection.minPartConfidence,
+            nmsRadius: guiState.multiPoseDetection.nmsRadius
+          });
 
-    let poses = [];
-    let minPoseConfidence;
-    let minPartConfidence;
-    switch (guiState.algorithm) {
-      case 'single-pose':
-        const pose = await guiState.net.estimatePoses(video, {
-          flipHorizontal: flipPoseHorizontal,
-          decodingMethod: 'single-person'
-        });
-        poses = poses.concat(pose);
-        minPoseConfidence = +guiState.singlePoseDetection.minPoseConfidence;
-        minPartConfidence = +guiState.singlePoseDetection.minPartConfidence;
-        break;
-      case 'multi-pose':
-        let all_poses = await guiState.net.estimatePoses(video, {
-          flipHorizontal: flipPoseHorizontal,
-          decodingMethod: 'multi-person',
-          maxDetections: guiState.multiPoseDetection.maxPoseDetections,
-          scoreThreshold: guiState.multiPoseDetection.minPartConfidence,
-          nmsRadius: guiState.multiPoseDetection.nmsRadius
-        });
-
-        poses = poses.concat(all_poses);
-        minPoseConfidence = +guiState.multiPoseDetection.minPoseConfidence;
-        minPartConfidence = +guiState.multiPoseDetection.minPartConfidence;
-        break;
-    }
-
-    ctx.clearRect(0, 0, videoWidth, videoHeight);
-
-    if (guiState.output.showVideo) {
-      ctx.save();
-      ctx.scale(-1, 1);
-      ctx.translate(-videoWidth, 0);
-      ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
-      ctx.restore();
-    }
-
-    // For each pose (i.e. person) detected in an image, loop through the poses
-    // and draw the resulting skeleton and keypoints if over certain confidence
-    // scores
-    poses.forEach(({ score, keypoints }) => {
-      if (score >= minPoseConfidence) {
-        if (guiState.output.showPoints) {
-          drawKeypoints(keypoints, minPartConfidence, ctx);
-        }
-        if (guiState.output.showSkeleton) {
-          drawSkeleton(keypoints, minPartConfidence, ctx);
-        }
-        if (guiState.output.showBoundingBox) {
-          drawBoundingBox(keypoints, ctx);
-        }
+          poses = poses.concat(all_poses);
+          minPoseConfidence = +guiState.multiPoseDetection.minPoseConfidence;
+          minPartConfidence = +guiState.multiPoseDetection.minPartConfidence;
+          break;
       }
-    });
 
-    // End monitoring code for frames per second
-    // stats.end();
+      ctx.clearRect(0, 0, videoWidth, videoHeight);
 
-    datas.push({ time: Date.now(), poseData: poses[0] });
-    // console.log(datas)
+      if (guiState.output.showVideo) {
+        ctx.save();
+        ctx.scale(-1, 1);
+        ctx.translate(-videoWidth, 0);
+        ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
+        ctx.restore();
+      }
 
-    requestAnimationFrame(poseDetectionFrame);
+      // For each pose (i.e. person) detected in an image, loop through the poses
+      // and draw the resulting skeleton and keypoints if over certain confidence
+      // scores
+      poses.forEach(({ score, keypoints }) => {
+        if (score >= minPoseConfidence) {
+          if (guiState.output.showPoints) {
+            drawKeypoints(keypoints, minPartConfidence, ctx);
+          }
+          if (guiState.output.showSkeleton) {
+            drawSkeleton(keypoints, minPartConfidence, ctx);
+          }
+          if (guiState.output.showBoundingBox) {
+            drawBoundingBox(keypoints, ctx);
+          }
+        }
+      });
+
+      // End monitoring code for frames per second
+      // stats.end();
+
+      datas.push({ time: Date.now(), poseData: poses[0] });
+      // console.log(datas)
+      requestAnimationFrame(poseDetectionFrame);
+    } catch (e) {
+      console.log("ERROR in async poseDetectionFrame")
+    }
   }
-
   poseDetectionFrame();
 }
 

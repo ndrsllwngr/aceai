@@ -6,6 +6,10 @@ import Typography from '@material-ui/core/Typography';
 // import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
+import { useWebcam } from './useWebcam';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -23,21 +27,38 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export function ButtonAppBar() {
-    const classes = useStyles();
-  
-    return (
-      <div className={classes.root}>
-        <AppBar position="static" className={classes.appBar}>
-          <Toolbar>
-            <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" className={classes.title}>
-              Body posture
+  const classes = useStyles();
+
+  // const [state, setState] = React.useState({
+  //   webCam: false
+  // });
+  const [webcamContext, setWebcamContext] = useWebcam();
+
+  const handleChange = name => event => {
+    setWebcamContext({ ...webcamContext, [name]: event.target.checked });
+  };
+
+  return (
+    <div className={classes.root}>
+      <AppBar position="static" className={classes.appBar}>
+        <Toolbar>
+          <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" className={classes.title}>
+            Body posture
             </Typography>
-            {/* <Button color="inherit">Login</Button> */}
-          </Toolbar>
-        </AppBar>
-      </div>
-    );
-  }
+          <FormGroup row>
+            <FormControlLabel
+              control={
+                <Switch checked={webcamContext.webCam} onChange={handleChange('webCam')} value="webCam" />
+              }
+              label="Webcam"
+            />
+          </FormGroup>
+          {/* <Button color="inherit">Login</Button> */}
+        </Toolbar>
+      </AppBar>
+    </div>
+  );
+}
