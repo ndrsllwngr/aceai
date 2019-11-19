@@ -19,7 +19,7 @@ const useStyles = makeStyles(theme => ({
     marginRight: theme.spacing(2),
   },
   appBar: {
-    backgroundColor: "#3f51b5"
+    backgroundColor: '#3f51b5',
   },
   title: {
     flexGrow: 1,
@@ -42,16 +42,25 @@ export function ButtonAppBar() {
     <div className={classes.root}>
       <AppBar position="static" className={classes.appBar}>
         <Toolbar>
-          <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
+          <IconButton
+            edge="start"
+            className={classes.menuButton}
+            color="inherit"
+            aria-label="menu"
+          >
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" className={classes.title}>
             Body posture
-            </Typography>
+          </Typography>
           <FormGroup row>
             <FormControlLabel
               control={
-                <Switch checked={webcamContext.webCam} onChange={handleChange('webCam')} value="webCam" />
+                <Switch
+                  checked={webcamContext.webCam}
+                  onChange={handleChange('webCam')}
+                  value="webCam"
+                />
               }
               label="Webcam"
             />

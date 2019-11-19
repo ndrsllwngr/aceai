@@ -13,9 +13,7 @@ export function WebcamProvider({ children }) {
     webcamContext,
   ]);
   return (
-    <WebcamContext.Provider value={value}>
-      {children}
-    </WebcamContext.Provider>
+    <WebcamContext.Provider value={value}>{children}</WebcamContext.Provider>
   );
 }
 

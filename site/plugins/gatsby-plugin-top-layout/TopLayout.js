@@ -7,7 +7,7 @@ import theme from '../../src/theme';
 
 export default function TopLayout(props) {
   return (
-    <React.Fragment>
+    <>
       <Helmet>
         <meta
           name="viewport"
@@ -23,7 +23,7 @@ export default function TopLayout(props) {
         <CssBaseline />
         {props.children}
       </ThemeProvider>
-    </React.Fragment>
+    </>
   );
 }
 

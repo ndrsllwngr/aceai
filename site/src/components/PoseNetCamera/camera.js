@@ -1,8 +1,9 @@
+/* eslint-disable no-console */
+/* eslint-disable no-inner-declarations */
+/* eslint-disable jsx-a11y/media-has-caption */
 // import {drawKeyPoints, drawSkeleton} from './utils'
-import React, { useEffect, useState } from 'react'
-import * as posenet from '@tensorflow-models/posenet'
-
-import { drawBoundingBox, drawKeypoints, drawSkeleton, isMobile } from './utils';
+import React, { useEffect, useState } from 'react';
+import * as posenet from '@tensorflow-models/posenet';
 
 // Ui
 import Box from '@material-ui/core/Box';
@@ -13,11 +14,16 @@ import Typography from '@material-ui/core/Typography';
 
 // Chart
 import { Line } from 'react-chartjs-2';
+import {
+  drawBoundingBox,
+  drawKeypoints,
+  drawSkeleton,
+  isMobile,
+} from './utils';
 import 'chartjs-plugin-streaming';
 import { PaperSheet } from '../paper';
 import { IconAvatars } from '../status';
 import { useWebcam } from '../useWebcam';
-
 
 const videoWidth = 600;
 const videoHeight = 500;
@@ -34,92 +40,113 @@ const datas = [];
 //   grey: 'rgb(201, 203, 207)'
 // };
 
-const emptyState = { msg: "Loading...", value: 0.0, status: "default" }
-var _streamCopy = null;
+const emptyState = { msg: 'Loading...', value: 0.0, status: 'default' };
+// eslint-disable-next-line no-underscore-dangle
+let _streamCopy = null;
 
-export const PoseNetCamera = props => {
-  const [goodBad, setGoodBad] = useState(emptyState)
-  const [chartData, setChartData] = useState([])
-  const [loading, setLoading] = useState(true)
+export const PoseNetCamera = () => {
+  const [goodBad, setGoodBad] = useState(emptyState);
+  const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [webcamContext] = useWebcam();
   useEffect(() => {
     if (webcamContext.webCam) {
       async function bind() {
-        setLoading(true)
+        setLoading(true);
         const net = await posenet.load({
           architecture: guiState.input.architecture,
           outputStride: guiState.input.outputStride,
           inputResolution: guiState.input.inputResolution,
           multiplier: guiState.input.multiplier,
-          quantBytes: guiState.input.quantBytes
+          quantBytes: guiState.input.quantBytes,
         });
         let video;
         try {
           video = await loadVideo();
         } catch (e) {
-          let info = document.getElementById('info');
-          info.textContent = 'this browser does not support video capture,' +
+          const info = document.getElementById('info');
+          info.textContent =
+            'this browser does not support video capture,' +
             'or this device does not have a camera';
           info.style.display = 'block';
           throw e;
         }
-        setLoading(false)
+        setLoading(false);
         guiState.net = net;
         // setupFPS();
         detectPoseInRealTime(video, net);
       }
-      bind()
+      bind();
     } else {
       async function bind2() {
-        setLoading(true)
-        setGoodBad(emptyState)
-        setChartData([])
-        stopStreamedVideo()
-        clearCanvas()
+        setLoading(true);
+        setGoodBad(emptyState);
+        setChartData([]);
+        stopStreamedVideo();
+        clearCanvas();
       }
-      bind2()
+      bind2();
     }
-  }
-
-    , [webcamContext]);
+  }, [webcamContext]);
 
   useEffect(() => {
     const timer = setInterval(() => {
       // console.log(datas)
       if (webcamContext.webCam && datas.length > 0) {
         if (datas[datas.length - 1].poseData) {
-          let currentData = datas[datas.length - 1].poseData
+          const currentData = datas[datas.length - 1].poseData;
           if (currentData.keypoints) {
-            let leftShoulder = currentData.keypoints.filter(x => x.part === "leftShoulder")[0]
-            let rightShoulder = currentData.keypoints.filter(x => x.part === "rightShoulder")[0]
+            const leftShoulder = currentData.keypoints.filter(
+              x => x.part === 'leftShoulder',
+            )[0];
+            const rightShoulder = currentData.keypoints.filter(
+              x => x.part === 'rightShoulder',
+            )[0];
             // console.log(currentData, leftShoulder, rightShoulder, Math.abs(leftShoulder.position.y - rightShoulder.position.y))
-            if (Math.abs(leftShoulder.position.y - rightShoulder.position.y) > 10) {
-              setGoodBad({ msg: `Bad posture`, value: Math.abs(leftShoulder.position.y - rightShoulder.position.y).toFixed(2), status: "bad" })
+            if (
+              Math.abs(leftShoulder.position.y - rightShoulder.position.y) > 10
+            ) {
+              setGoodBad({
+                msg: `Bad posture`,
+                value: Math.abs(
+                  leftShoulder.position.y - rightShoulder.position.y,
+                ).toFixed(2),
+                status: 'bad',
+              });
             } else {
-              setGoodBad({ msg: `Good posture`, value: Math.abs(leftShoulder.position.y - rightShoulder.position.y).toFixed(2), status: "good" })
+              setGoodBad({
+                msg: `Good posture`,
+                value: Math.abs(
+                  leftShoulder.position.y - rightShoulder.position.y,
+                ).toFixed(2),
+                status: 'good',
+              });
             }
-            let copy = chartData
-            copy.push({ x: Date.now(), y: Math.abs(leftShoulder.position.y - rightShoulder.position.y) })
-            setChartData(copy)
+            const copy = chartData;
+            copy.push({
+              x: Date.now(),
+              y: Math.abs(leftShoulder.position.y - rightShoulder.position.y),
+            });
+            setChartData(copy);
           }
         }
       }
     }, 500);
-    return () => { console.log("unMount"); clearTimeout(timer); }
+    return () => {
+      console.log('unMount');
+      clearTimeout(timer);
+    };
   }, [chartData, webcamContext]);
 
-
   return (
-    <Grid
-      container
-      direction="row"
-      justify="center"
-      alignItems="start"
-    >
+    <Grid container direction="row" justify="center" alignItems="start">
       <PaperSheet>
         <Box height={videoHeight} width={videoWidth}>
-          <video id="video" playsinline style={{ transform: "scaleX(-1)", display: "none" }}>
-          </video>
+          <video
+            id="video"
+            playsinline
+            style={{ transform: 'scaleX(-1)', display: 'none' }}
+          ></video>
           <Fade
             in={loading}
             style={{
@@ -128,7 +155,14 @@ export const PoseNetCamera = props => {
             unmountOnExit
           >
             <Box position="fixed">
-              <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center" height={videoHeight} width={videoWidth}>
+              <Box
+                display="flex"
+                flexDirection="row"
+                alignItems="center"
+                justifyContent="center"
+                height={videoHeight}
+                width={videoWidth}
+              >
                 <CircularProgress color="primary" />
               </Box>
             </Box>
@@ -136,61 +170,106 @@ export const PoseNetCamera = props => {
           <canvas id="output" />
         </Box>
       </PaperSheet>
-      <Box display="flex" flexDirection="column" maxWidth={videoWidth} alignItems="top">
+      <Box
+        display="flex"
+        flexDirection="column"
+        maxWidth={videoWidth}
+        alignItems="top"
+      >
         <PaperSheet>
-          <Box display="flex" alignItems="center" justifyContent="space-between" maxWidth={videoWidth}>
-            <Box display="flex" flexDirection="column" alignItems="start" justifyContent="space-between" minWidth="300px">
-              {goodBad &&
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            maxWidth={videoWidth}
+          >
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="start"
+              justifyContent="space-between"
+              minWidth="300px"
+            >
+              {goodBad && (
                 <>
-                  <Typography variant="overline" display="block" style={{ fontSize: "11px", lineHeight: "13px", letterSpacing: "0.33px", marginBottom: "8px", color: "#546e7a" }}>
-                    {goodBad.msg}</Typography>
-                  <Typography variant="h6" style={{ fontSize: "24px", lineHeight: "28px", letterSpacing: "-0.06px", color: "#263238" }}>
-                    {goodBad.value}</Typography></>
-              }
+                  <Typography
+                    variant="overline"
+                    display="block"
+                    style={{
+                      fontSize: '11px',
+                      lineHeight: '13px',
+                      letterSpacing: '0.33px',
+                      marginBottom: '8px',
+                      color: '#546e7a',
+                    }}
+                  >
+                    {goodBad.msg}
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    style={{
+                      fontSize: '24px',
+                      lineHeight: '28px',
+                      letterSpacing: '-0.06px',
+                      color: '#263238',
+                    }}
+                  >
+                    {goodBad.value}
+                  </Typography>
+                </>
+              )}
             </Box>
             <IconAvatars status={goodBad.status}></IconAvatars>
           </Box>
         </PaperSheet>
-        {webcamContext.webCam &&
+        {webcamContext.webCam && (
           <PaperSheet>
             <Line
               type="line"
               data={{
-                datasets: [{
-                  label: 'Math.abs (left and right shoulder)',
-                  data: chartData
-                }]
+                datasets: [
+                  {
+                    label: 'Math.abs (left and right shoulder)',
+                    data: chartData,
+                  },
+                ],
               }}
               options={{
                 scales: {
-                  xAxes: [{
-                    type: 'realtime'
-                  }]
-                }
+                  xAxes: [
+                    {
+                      type: 'realtime',
+                    },
+                  ],
+                },
               }}
               scales={{
-                xAxes: [{
-                  type: 'realtime',
-                  realtime: {
-                    duration: 20000,
-                    refresh: 1000,
-                    delay: 2000,
-                  }
-                }],
-                yAxes: [{
-                  scaleLabel: {
-                    display: true,
-                    labelString: 'value'
-                  }
-                }]
+                xAxes: [
+                  {
+                    type: 'realtime',
+                    realtime: {
+                      duration: 20000,
+                      refresh: 1000,
+                      delay: 2000,
+                    },
+                  },
+                ],
+                yAxes: [
+                  {
+                    scaleLabel: {
+                      display: true,
+                      labelString: 'value',
+                    },
+                  },
+                ],
               }}
             />
           </PaperSheet>
-        }
+        )}
       </Box>
     </Grid>
-  )
-}
+  );
+};
 
 /**
  * Loads a the camera to be used in the demo
@@ -199,7 +278,8 @@ export const PoseNetCamera = props => {
 async function setupCamera() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     throw new Error(
-      'Browser API navigator.mediaDevices.getUserMedia not available');
+      'Browser API navigator.mediaDevices.getUserMedia not available',
+    );
   }
 
   const video = document.getElementById('video');
@@ -208,8 +288,8 @@ async function setupCamera() {
 
   const mobile = isMobile();
   const stream = await navigator.mediaDevices.getUserMedia({
-    'audio': false,
-    'video': {
+    audio: false,
+    video: {
       facingMode: 'user',
       width: mobile ? undefined : videoWidth,
       height: mobile ? undefined : videoHeight,
@@ -218,7 +298,7 @@ async function setupCamera() {
   _streamCopy = stream;
   video.srcObject = stream;
 
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     video.onloadedmetadata = () => {
       resolve(video);
     };
@@ -240,7 +320,7 @@ function stopStreamedVideo() {
       _streamCopy.getVideoTracks()[0].stop(); // then stop the first video track of the stream
     }
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
 }
 
@@ -252,13 +332,13 @@ function clearCanvas() {
 
 const defaultQuantBytes = 4;
 
-const defaultMobileNetMultiplier = isMobile() ? 0.50 : 0.75;
+const defaultMobileNetMultiplier = isMobile() ? 0.5 : 0.75;
 const defaultMobileNetStride = 16;
 const defaultMobileNetInputResolution = 350;
 
-const defaultResNetMultiplier = 0.75;
-const defaultResNetStride = 32;
-const defaultResNetInputResolution = 250;
+// const defaultResNetMultiplier = 0.75;
+// const defaultResNetStride = 32;
+// const defaultResNetInputResolution = 250;
 
 const guiState = {
   algorithm: 'multi-pose',
@@ -267,7 +347,7 @@ const guiState = {
     outputStride: defaultMobileNetStride,
     inputResolution: defaultMobileNetInputResolution,
     multiplier: defaultMobileNetMultiplier,
-    quantBytes: defaultQuantBytes
+    quantBytes: defaultQuantBytes,
   },
   singlePoseDetection: {
     minPoseConfidence: 0.1,
@@ -292,7 +372,8 @@ const guiState = {
  * Feeds an image to posenet to estimate poses - this is where the magic
  * happens. This function loops with a requestAnimationFrame method.
  */
-function detectPoseInRealTime(video, net) {
+// eslint-disable-next-line no-unused-vars
+function detectPoseInRealTime(video, _net) {
   const canvas = document.getElementById('output');
   const ctx = canvas.getContext('2d');
 
@@ -312,27 +393,31 @@ function detectPoseInRealTime(video, net) {
       let minPartConfidence;
       switch (guiState.algorithm) {
         case 'single-pose':
+          // eslint-disable-next-line no-case-declarations
           const pose = await guiState.net.estimatePoses(video, {
             flipHorizontal: flipPoseHorizontal,
-            decodingMethod: 'single-person'
+            decodingMethod: 'single-person',
           });
           poses = poses.concat(pose);
           minPoseConfidence = +guiState.singlePoseDetection.minPoseConfidence;
           minPartConfidence = +guiState.singlePoseDetection.minPartConfidence;
           break;
         case 'multi-pose':
-          let all_poses = await guiState.net.estimatePoses(video, {
+          // eslint-disable-next-line no-case-declarations
+          const allPoses = await guiState.net.estimatePoses(video, {
             flipHorizontal: flipPoseHorizontal,
             decodingMethod: 'multi-person',
             maxDetections: guiState.multiPoseDetection.maxPoseDetections,
             scoreThreshold: guiState.multiPoseDetection.minPartConfidence,
-            nmsRadius: guiState.multiPoseDetection.nmsRadius
+            nmsRadius: guiState.multiPoseDetection.nmsRadius,
           });
 
-          poses = poses.concat(all_poses);
+          poses = poses.concat(allPoses);
           minPoseConfidence = +guiState.multiPoseDetection.minPoseConfidence;
           minPartConfidence = +guiState.multiPoseDetection.minPartConfidence;
           break;
+        default:
+          console.log('reached default case (poseDetectionFrame)');
       }
 
       ctx.clearRect(0, 0, videoWidth, videoHeight);
@@ -369,7 +454,7 @@ function detectPoseInRealTime(video, net) {
       // console.log(datas)
       requestAnimationFrame(poseDetectionFrame);
     } catch (e) {
-      console.log("ERROR in async poseDetectionFrame")
+      console.log('ERROR in async poseDetectionFrame');
     }
   }
   poseDetectionFrame();
@@ -386,7 +471,7 @@ export async function bindPage() {
     outputStride: guiState.input.outputStride,
     inputResolution: guiState.input.inputResolution,
     multiplier: guiState.input.multiplier,
-    quantBytes: guiState.input.quantBytes
+    quantBytes: guiState.input.quantBytes,
   });
   // toggleLoadingUI(false);
 
@@ -395,8 +480,9 @@ export async function bindPage() {
   try {
     video = await loadVideo();
   } catch (e) {
-    let info = document.getElementById('info');
-    info.textContent = 'this browser does not support video capture,' +
+    const info = document.getElementById('info');
+    info.textContent =
+      'this browser does not support video capture,' +
       'or this device does not have a camera';
     info.style.display = 'block';
     throw e;
@@ -409,4 +495,4 @@ export async function bindPage() {
 
 // TODO maybe fix later
 // navigator.getUserMedia = navigator.getUserMedia ||
-  // navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+// navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
