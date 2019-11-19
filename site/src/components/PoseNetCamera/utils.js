@@ -44,7 +44,7 @@ function setDatGuiPropertyCss(propertyText, liCssString, spanCssString = '') {
     var spans = document.getElementsByClassName('property-name');
     for (var i = 0; i < spans.length; i++) {
         var text = spans[i].textContent || spans[i].innerText;
-        if (text == propertyText) {
+        if (text === propertyText) {
             spans[i].parentNode.parentNode.style = liCssString;
             if (spanCssString !== '') {
                 spans[i].style = spanCssString;
@@ -215,6 +215,7 @@ function drawPoints(ctx, points, radius, color) {
  */
 export function drawOffsetVectors(
     heatMapValues, offsets, outputStride, scale = 1, ctx) {
+        // TODO "export 'singlePose' (imported as 'posenet') was not found in '@tensorflow-models/posenet'
     const offsetPoints =
         posenet.singlePose.getOffsetPoints(heatMapValues, outputStride, offsets);
 

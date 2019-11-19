@@ -76,8 +76,8 @@ export const PoseNetCamera = props => {
         if (datas[datas.length - 1].poseData) {
           let currentData = datas[datas.length - 1].poseData
           if (currentData.keypoints) {
-            let leftShoulder = currentData.keypoints.filter(x => x.part == "leftShoulder")[0]
-            let rightShoulder = currentData.keypoints.filter(x => x.part == "rightShoulder")[0]
+            let leftShoulder = currentData.keypoints.filter(x => x.part === "leftShoulder")[0]
+            let rightShoulder = currentData.keypoints.filter(x => x.part === "rightShoulder")[0]
             // console.log(currentData, leftShoulder, rightShoulder, Math.abs(leftShoulder.position.y - rightShoulder.position.y))
             if (Math.abs(leftShoulder.position.y - rightShoulder.position.y) > 10) {
               setGoodBad({ msg: `Bad posture`, value: Math.abs(leftShoulder.position.y - rightShoulder.position.y).toFixed(2), status: "bad" })
@@ -130,7 +130,7 @@ export const PoseNetCamera = props => {
                 <>
                   <Typography variant="overline" display="block" style={{ fontSize: "11px", lineHeight: "13px", letterSpacing: "0.33px", marginBottom: "8px", color: "#546e7a" }}>
                     {goodBad.msg}</Typography>
-                  <Typography variant="h6" style={{ fontSize: "24px", lineHeight: "28px", letterSpacing: "0.33px", letterSpacing: "-0.06px", color: "#263238" }}>
+                  <Typography variant="h6" style={{ fontSize: "24px", lineHeight: "28px", letterSpacing: "-0.06px", color: "#263238" }}>
                     {goodBad.value}</Typography></>
               }
             </Box>

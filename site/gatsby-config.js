@@ -11,10 +11,11 @@ module.exports = {
       // If you want to use styled components you should change the injection order.
       options: {
         // stylesProvider: {
-        //   injectFirst: true,
+          injectFirst: true,
         // },
       },
     },
+    `gatsby-plugin-styled-components`,
     `gatsby-plugin-react-helmet`,
     {
       resolve: `gatsby-source-filesystem`,
