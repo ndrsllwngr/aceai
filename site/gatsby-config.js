@@ -5,7 +5,19 @@ module.exports = {
     author: `@gatsbyjs`,
   },
   plugins: [
+    'gatsby-plugin-top-layout',
+    {
+      resolve: 'gatsby-plugin-material-ui',
+      // If you want to use styled components you should change the injection order.
+      options: {
+        // stylesProvider: {
+        injectFirst: true,
+        // },
+      },
+    },
+    `gatsby-plugin-styled-components`,
     `gatsby-plugin-react-helmet`,
+    'gatsby-plugin-eslint',
     {
       resolve: `gatsby-source-filesystem`,
       options: {
@@ -31,4 +43,4 @@ module.exports = {
     // To learn more, visit: https://gatsby.dev/offline
     // `gatsby-plugin-offline`,
   ],
-}
+};
