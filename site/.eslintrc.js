@@ -35,7 +35,7 @@ module.exports = {
     'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
     'react-hooks/exhaustive-deps': 'warn', // Checks effect dependencies
     'prettier/prettier': ['error', prettierOptions],
-    'arrow-body-style': [2, 'as-needed'],
+    'arrow-body-style': [0, 'as-needed'],
     'class-methods-use-this': 0,
     'comma-dangle': [2, 'always-multiline'],
     'import/imports-first': 0,

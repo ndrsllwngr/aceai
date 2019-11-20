@@ -1,60 +1,59 @@
 /* eslint-disable no-console */
 /* eslint-disable no-inner-declarations */
-/* eslint-disable jsx-a11y/media-has-caption */
-// import {drawKeyPoints, drawSkeleton} from './utils'
 import React, { useEffect, useState } from 'react';
 import * as posenet from '@tensorflow-models/posenet';
-
-// Ui
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import Fade from '@material-ui/core/Fade';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Typography from '@material-ui/core/Typography';
-import Slider from '@material-ui/core/Slider';
-import Input from '@material-ui/core/Input';
-import { makeStyles } from '@material-ui/core/styles';
 
-// Chart
-import { Line } from 'react-chartjs-2';
+import { LineChart } from '../LineChart';
+import { useWebcam } from '../ctx-webcam';
+import { ThresholdSlider } from '../ThresholdSlider';
+import { PostureStatus } from '../PostureStatus';
+import { VideoCanvas } from '../VideoCanvas';
+// PoseNet
 import {
   drawBoundingBox,
   drawKeypoints,
   drawSkeleton,
   isMobile,
 } from './utils';
-import 'chartjs-plugin-streaming';
-import { PaperSheet } from '../paper';
-import { IconAvatars } from '../status';
-import { useWebcam } from '../useWebcam';
 
 const videoWidth = 600;
 const videoHeight = 500;
 
 const datas = [];
 
-// var chartColors = {
-//   red: 'rgb(255, 99, 132)',
-//   orange: 'rgb(255, 159, 64)',
-//   yellow: 'rgb(255, 205, 86)',
-//   green: 'rgb(75, 192, 192)',
-//   blue: 'rgb(54, 162, 235)',
-//   purple: 'rgb(153, 102, 255)',
-//   grey: 'rgb(201, 203, 207)'
-// };
-
 const emptyState = { msg: 'Loading...', value: 0.0, status: 'default' };
 // eslint-disable-next-line no-underscore-dangle
 let _streamCopy = null;
 
-const useStyles = makeStyles({
-  root: {
-    width: 250,
-  },
+const guiState = {
+  algorithm: 'multi-pose',
   input: {
-    width: 42,
+    architecture: 'MobileNetV1',
+    outputStride: defaultMobileNetStride,
+    inputResolution: defaultMobileNetInputResolution,
+    multiplier: defaultMobileNetMultiplier,
+    quantBytes: defaultQuantBytes,
   },
-});
+  singlePoseDetection: {
+    minPoseConfidence: 0.1,
+    minPartConfidence: 0.5,
+  },
+  multiPoseDetection: {
+    maxPoseDetections: 1,
+    minPoseConfidence: 0.1,
+    minPartConfidence: 0.1,
+    nmsRadius: 30.0,
+  },
+  output: {
+    showVideo: true,
+    showSkeleton: true,
+    showPoints: true,
+    showBoundingBox: false,
+  },
+  net: null,
+};
 
 export const PoseNetCamera = () => {
   const [goodBad, setGoodBad] = useState(emptyState);
@@ -62,23 +61,6 @@ export const PoseNetCamera = () => {
   const [threshold, setThreshold] = React.useState(15);
   const [loading, setLoading] = useState(true);
   const [webcamContext] = useWebcam();
-  const classes = useStyles();
-
-  const handleSliderChange = (event, newValue) => {
-    setThreshold(newValue);
-  };
-
-  const handleInputChange = event => {
-    setThreshold(event.target.value === '' ? '' : Number(event.target.value));
-  };
-
-  const handleBlur = () => {
-    if (threshold < 0) {
-      setThreshold(0);
-    } else if (threshold > 100) {
-      setThreshold(100);
-    }
-  };
 
   useEffect(() => {
     if (webcamContext.webCam) {
@@ -172,184 +154,29 @@ export const PoseNetCamera = () => {
 
   return (
     <Grid container direction="row" justify="center" alignItems="start">
-      <PaperSheet>
-        <Box height={videoHeight} width={videoWidth}>
-          <video
-            id="video"
-            playsinline
-            style={{ transform: 'scaleX(-1)', display: 'none' }}
-          ></video>
-          <Fade
-            in={loading}
-            style={{
-              transitionDelay: loading ? '100ms' : '0ms',
-            }}
-            unmountOnExit
-          >
-            <Box position="fixed">
-              <Box
-                display="flex"
-                flexDirection="row"
-                alignItems="center"
-                justifyContent="center"
-                height={videoHeight}
-                width={videoWidth}
-              >
-                <CircularProgress color="primary" />
-              </Box>
-            </Box>
-          </Fade>
-          <canvas id="output" />
-        </Box>
-      </PaperSheet>
+      <VideoCanvas
+        videoHeight={videoHeight}
+        videoWidth={videoWidth}
+        loading={loading}
+      />
       <Box
         display="flex"
         flexDirection="column"
         maxWidth={videoWidth}
         alignItems="top"
       >
-        <PaperSheet>
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-            maxWidth={videoWidth}
-          >
-            <Box
-              display="flex"
-              flexDirection="column"
-              alignItems="start"
-              justifyContent="space-between"
-              minWidth="300px"
-            >
-              {goodBad && (
-                <>
-                  <Typography
-                    variant="overline"
-                    display="block"
-                    style={{
-                      fontSize: '11px',
-                      lineHeight: '13px',
-                      letterSpacing: '0.33px',
-                      marginBottom: '8px',
-                      color: '#546e7a',
-                    }}
-                  >
-                    {goodBad.msg}
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    style={{
-                      fontSize: '24px',
-                      lineHeight: '28px',
-                      letterSpacing: '-0.06px',
-                      color: '#263238',
-                    }}
-                  >
-                    {goodBad.value}
-                  </Typography>
-                </>
-              )}
-            </Box>
-            <IconAvatars status={goodBad.status}></IconAvatars>
-          </Box>
-        </PaperSheet>
-        <PaperSheet>
-          <Box
-            display="flex"
-            alignItems="start"
-            flexDirection="column"
-            justifyContent="space-between"
-            maxWidth={videoWidth}
-          >
-            <Typography
-              variant="overline"
-              display="block"
-              style={{
-                fontSize: '11px',
-                lineHeight: '13px',
-                letterSpacing: '0.33px',
-                marginBottom: '8px',
-                color: '#546e7a',
-              }}
-            >
-              Threshold
-            </Typography>
-            <Box
-              display="flex"
-              flexDirection="row"
-              // alignItems="start"
-              justifyContent="space-between"
-              minWidth="300px"
-              width="100%"
-            >
-              <Slider
-                value={typeof threshold === 'number' ? threshold : 0}
-                onChange={handleSliderChange}
-                aria-labelledby="input-slider"
-                style={{ marginRight: '50px' }}
-              />
-              <Input
-                className={classes.input}
-                value={threshold}
-                margin="dense"
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                inputProps={{
-                  step: 10,
-                  min: 0,
-                  max: 100,
-                  type: 'number',
-                  'aria-labelledby': 'input-slider',
-                }}
-              />
-            </Box>
-          </Box>
-        </PaperSheet>
-        {webcamContext.webCam && (
-          <PaperSheet>
-            <Line
-              type="line"
-              data={{
-                datasets: [
-                  {
-                    label: 'Math.abs (left and right shoulder)',
-                    data: chartData,
-                  },
-                ],
-              }}
-              options={{
-                scales: {
-                  xAxes: [
-                    {
-                      type: 'realtime',
-                    },
-                  ],
-                },
-              }}
-              scales={{
-                xAxes: [
-                  {
-                    type: 'realtime',
-                    realtime: {
-                      duration: 20000,
-                      refresh: 1000,
-                      delay: 2000,
-                    },
-                  },
-                ],
-                yAxes: [
-                  {
-                    scaleLabel: {
-                      display: true,
-                      labelString: 'value',
-                    },
-                  },
-                ],
-              }}
-            />
-          </PaperSheet>
-        )}
+        <PostureStatus
+          maxWidth={videoWidth}
+          msg={goodBad.msg}
+          value={goodBad.value}
+          status={goodBad.status}
+        />
+        <ThresholdSlider
+          maxWidth={videoWidth}
+          threshold={threshold}
+          setThreshold={setThreshold}
+        />
+        {webcamContext.webCam && !loading && <LineChart data={chartData} />}
       </Box>
     </Grid>
   );
@@ -423,34 +250,6 @@ const defaultMobileNetInputResolution = 350;
 // const defaultResNetMultiplier = 0.75;
 // const defaultResNetStride = 32;
 // const defaultResNetInputResolution = 250;
-
-const guiState = {
-  algorithm: 'multi-pose',
-  input: {
-    architecture: 'MobileNetV1',
-    outputStride: defaultMobileNetStride,
-    inputResolution: defaultMobileNetInputResolution,
-    multiplier: defaultMobileNetMultiplier,
-    quantBytes: defaultQuantBytes,
-  },
-  singlePoseDetection: {
-    minPoseConfidence: 0.1,
-    minPartConfidence: 0.5,
-  },
-  multiPoseDetection: {
-    maxPoseDetections: 1,
-    minPoseConfidence: 0.1,
-    minPartConfidence: 0.1,
-    nmsRadius: 30.0,
-  },
-  output: {
-    showVideo: true,
-    showSkeleton: true,
-    showPoints: true,
-    showBoundingBox: false,
-  },
-  net: null,
-};
 
 /**
  * Feeds an image to posenet to estimate poses - this is where the magic

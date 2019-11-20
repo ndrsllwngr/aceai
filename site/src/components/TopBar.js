@@ -9,7 +9,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
-import { useWebcam } from './useWebcam';
+import { useWebcam } from './ctx-webcam';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -26,7 +26,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export function ButtonAppBar() {
+export function TopBar() {
   const classes = useStyles();
 
   // const [state, setState] = React.useState({

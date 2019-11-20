@@ -31,7 +31,7 @@ const useStyles = makeStyles({
   },
 });
 
-export const IconAvatars = ({ status }) => {
+export const StatusIcon = ({ status }) => {
   const classes = useStyles();
 
   return (
@@ -55,6 +55,6 @@ export const IconAvatars = ({ status }) => {
   );
 };
 
-IconAvatars.propTypes = {
+StatusIcon.propTypes = {
   status: PropTypes.string.isRequired,
 };
