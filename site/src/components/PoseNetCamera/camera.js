@@ -11,6 +11,9 @@ import Grid from '@material-ui/core/Grid';
 import Fade from '@material-ui/core/Fade';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Typography from '@material-ui/core/Typography';
+import Slider from '@material-ui/core/Slider';
+import Input from '@material-ui/core/Input';
+import { makeStyles } from '@material-ui/core/styles';
 
 // Chart
 import { Line } from 'react-chartjs-2';
@@ -44,11 +47,39 @@ const emptyState = { msg: 'Loading...', value: 0.0, status: 'default' };
 // eslint-disable-next-line no-underscore-dangle
 let _streamCopy = null;
 
+const useStyles = makeStyles({
+  root: {
+    width: 250,
+  },
+  input: {
+    width: 42,
+  },
+});
+
 export const PoseNetCamera = () => {
   const [goodBad, setGoodBad] = useState(emptyState);
   const [chartData, setChartData] = useState([]);
+  const [threshold, setThreshold] = React.useState(15);
   const [loading, setLoading] = useState(true);
   const [webcamContext] = useWebcam();
+  const classes = useStyles();
+
+  const handleSliderChange = (event, newValue) => {
+    setThreshold(newValue);
+  };
+
+  const handleInputChange = event => {
+    setThreshold(event.target.value === '' ? '' : Number(event.target.value));
+  };
+
+  const handleBlur = () => {
+    if (threshold < 0) {
+      setThreshold(0);
+    } else if (threshold > 100) {
+      setThreshold(100);
+    }
+  };
+
   useEffect(() => {
     if (webcamContext.webCam) {
       async function bind() {
@@ -104,7 +135,8 @@ export const PoseNetCamera = () => {
             )[0];
             // console.log(currentData, leftShoulder, rightShoulder, Math.abs(leftShoulder.position.y - rightShoulder.position.y))
             if (
-              Math.abs(leftShoulder.position.y - rightShoulder.position.y) > 10
+              Math.abs(leftShoulder.position.y - rightShoulder.position.y) >
+              threshold
             ) {
               setGoodBad({
                 msg: `Bad posture`,
@@ -136,7 +168,7 @@ export const PoseNetCamera = () => {
       console.log('unMount');
       clearTimeout(timer);
     };
-  }, [chartData, webcamContext]);
+  }, [chartData, threshold, webcamContext]);
 
   return (
     <Grid container direction="row" justify="center" alignItems="start">
@@ -220,6 +252,58 @@ export const PoseNetCamera = () => {
               )}
             </Box>
             <IconAvatars status={goodBad.status}></IconAvatars>
+          </Box>
+        </PaperSheet>
+        <PaperSheet>
+          <Box
+            display="flex"
+            alignItems="start"
+            flexDirection="column"
+            justifyContent="space-between"
+            maxWidth={videoWidth}
+          >
+            <Typography
+              variant="overline"
+              display="block"
+              style={{
+                fontSize: '11px',
+                lineHeight: '13px',
+                letterSpacing: '0.33px',
+                marginBottom: '8px',
+                color: '#546e7a',
+              }}
+            >
+              Threshold
+            </Typography>
+            <Box
+              display="flex"
+              flexDirection="row"
+              // alignItems="start"
+              justifyContent="space-between"
+              minWidth="300px"
+              width="100%"
+            >
+              <Slider
+                value={typeof threshold === 'number' ? threshold : 0}
+                onChange={handleSliderChange}
+                aria-labelledby="input-slider"
+                style={{ marginRight: '50px' }}
+              />
+              <Input
+                className={classes.input}
+                value={threshold}
+                margin="dense"
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                inputProps={{
+                  step: 10,
+                  min: 0,
+                  max: 100,
+                  type: 'number',
+                  'aria-labelledby': 'input-slider',
+                }}
+              />
+            </Box>
           </Box>
         </PaperSheet>
         {webcamContext.webCam && (
