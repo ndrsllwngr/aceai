@@ -8,8 +8,8 @@ import { PoseNetCamera } from '../components/PoseNetCamera/camera';
 
 const IndexPage = () => (
   <Layout>
-    <PoseNetCamera />
     <SEO title="Body posture" />
+    <PoseNetCamera />
     {/* <Link to="/page-2/">Go to page 2</Link> */}
   </Layout>
 );

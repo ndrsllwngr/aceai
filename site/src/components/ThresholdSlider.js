@@ -59,6 +59,7 @@ export const ThresholdSlider = ({ maxWidth, threshold, setThreshold }) => {
         <Box
           display="flex"
           flexDirection="row"
+          alignItems="center"
           justifyContent="space-between"
           minWidth="300px"
           width="100%"
@@ -67,6 +68,7 @@ export const ThresholdSlider = ({ maxWidth, threshold, setThreshold }) => {
             value={typeof threshold === 'number' ? threshold : 0}
             onChange={handleSliderChange}
             aria-labelledby="input-slider"
+            valueLabelDisplay="auto"
             style={{ marginRight: '50px' }}
           />
           <Input

@@ -1,8 +1,9 @@
 module.exports = {
   siteMetadata: {
-    title: `Body posture`,
+    title: `ACEAI - Body posture`,
     description: `Kick off your next, great Gatsby project with this default starter. This barebones starter ships with the main Gatsby configuration files you might need.`,
     author: `@gatsbyjs`,
+    siteUrl: `https://aceai.netlify.com`,
   },
   plugins: [
     'gatsby-plugin-top-layout',
@@ -28,10 +29,29 @@ module.exports = {
     `gatsby-transformer-sharp`,
     `gatsby-plugin-sharp`,
     {
+      resolve: `gatsby-plugin-nprogress`,
+      options: {
+        // Setting a color is optional.
+        color: `#000`,
+        // Disable the loading spinner.
+        showSpinner: false,
+      },
+    },
+    `gatsby-plugin-netlify`,
+    `gatsby-plugin-sitemap`,
+    {
+      resolve: 'gatsby-plugin-robots-txt',
+      options: {
+        host: 'https://aceai.netlify.com',
+        sitemap: 'https://aceai.netlify.com/sitemap.xml',
+        policy: [{ userAgent: '*', disallow: ['/'] }],
+      },
+    },
+    {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `gatsby-starter-default`,
-        short_name: `starter`,
+        name: `ACEAI - Body posture`,
+        short_name: `ACEAI - BP`,
         start_url: `/`,
         background_color: `#663399`,
         theme_color: `#663399`,
@@ -41,6 +61,6 @@ module.exports = {
     },
     // this (optional) plugin enables Progressive Web App + Offline functionality
     // To learn more, visit: https://gatsby.dev/offline
-    // `gatsby-plugin-offline`,
+    `gatsby-plugin-offline`,
   ],
 };
