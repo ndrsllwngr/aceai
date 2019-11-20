@@ -2,8 +2,8 @@ import React from 'react';
 // import { Link } from "gatsby"
 
 // import Image from "../components/image"
-import SEO from '../components/SEO';
-import Layout from '../components/Layout';
+import SEO from '../components/seo';
+import Layout from '../components/layout';
 import { PoseNetCamera } from '../components/PoseNetCamera/camera';
 
 const IndexPage = () => (

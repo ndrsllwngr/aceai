@@ -27,34 +27,6 @@ const emptyState = { msg: 'Loading...', value: 0.0, status: 'default' };
 // eslint-disable-next-line no-underscore-dangle
 let _streamCopy = null;
 
-const guiState = {
-  algorithm: 'multi-pose',
-  input: {
-    architecture: 'MobileNetV1',
-    outputStride: defaultMobileNetStride,
-    inputResolution: defaultMobileNetInputResolution,
-    multiplier: defaultMobileNetMultiplier,
-    quantBytes: defaultQuantBytes,
-  },
-  singlePoseDetection: {
-    minPoseConfidence: 0.1,
-    minPartConfidence: 0.5,
-  },
-  multiPoseDetection: {
-    maxPoseDetections: 1,
-    minPoseConfidence: 0.1,
-    minPartConfidence: 0.1,
-    nmsRadius: 30.0,
-  },
-  output: {
-    showVideo: true,
-    showSkeleton: true,
-    showPoints: true,
-    showBoundingBox: false,
-  },
-  net: null,
-};
-
 export const PoseNetCamera = () => {
   const [goodBad, setGoodBad] = useState(emptyState);
   const [chartData, setChartData] = useState([]);
@@ -250,6 +222,34 @@ const defaultMobileNetInputResolution = 350;
 // const defaultResNetMultiplier = 0.75;
 // const defaultResNetStride = 32;
 // const defaultResNetInputResolution = 250;
+
+const guiState = {
+  algorithm: 'multi-pose',
+  input: {
+    architecture: 'MobileNetV1',
+    outputStride: defaultMobileNetStride,
+    inputResolution: defaultMobileNetInputResolution,
+    multiplier: defaultMobileNetMultiplier,
+    quantBytes: defaultQuantBytes,
+  },
+  singlePoseDetection: {
+    minPoseConfidence: 0.1,
+    minPartConfidence: 0.5,
+  },
+  multiPoseDetection: {
+    maxPoseDetections: 1,
+    minPoseConfidence: 0.1,
+    minPartConfidence: 0.1,
+    nmsRadius: 30.0,
+  },
+  output: {
+    showVideo: true,
+    showSkeleton: true,
+    showPoints: true,
+    showBoundingBox: false,
+  },
+  net: null,
+};
 
 /**
  * Feeds an image to posenet to estimate poses - this is where the magic
