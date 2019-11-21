@@ -20,9 +20,10 @@ const useStyles = makeStyles(theme => ({
   },
   appBar: {
     // backgroundColor: '#3f51b5',
-    backgroundImage: 'linear-gradient(to right, #017BDA, #09A6DC)',
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: '0 0',
+    backgroundColor: '#fff',
+    // backgroundImage: 'linear-gradient(to right, #017BDA, #09A6DC)',
+    // backgroundRepeat: 'no-repeat',
+    // backgroundPosition: '0 0',
     boxShadow: '0 2px 15px 0 rgba(92, 102, 139, 0.08)',
   },
   toolBar: {
@@ -31,11 +32,11 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     flexGrow: 1,
-    color: '#fff',
+    color: '#222222',
     fontWeight: 800,
   },
   label: {
-    color: '#fff',
+    color: '#222222',
     fontSize: '15px',
     lineHeight: '24px',
   },
@@ -80,7 +81,7 @@ export function TopBar() {
                   checked={webcamContext.webCam}
                   onChange={handleChange('webCam')}
                   value="webCam"
-                  color="secondary"
+                  color="primary"
                 />
               }
               label="Webcam"

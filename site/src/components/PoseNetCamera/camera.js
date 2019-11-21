@@ -31,7 +31,7 @@ export const PoseNetCamera = () => {
   const [goodBad, setGoodBad] = useState(emptyState);
   const [chartData, setChartData] = useState([]);
   const [threshold, setThreshold] = React.useState(15);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [webcamContext] = useWebcam();
 
   useEffect(() => {
@@ -64,7 +64,7 @@ export const PoseNetCamera = () => {
       bind();
     } else {
       async function bind2() {
-        setLoading(true);
+        setLoading(false);
         setGoodBad(emptyState);
         setChartData([]);
         stopStreamedVideo();

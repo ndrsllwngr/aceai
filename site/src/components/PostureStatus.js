@@ -41,7 +41,7 @@ export const PostureStatus = ({ maxWidth, msg, value, status }) => {
                 fontSize: '24px',
                 lineHeight: '28px',
                 letterSpacing: '-0.06px',
-                color: '#263238',
+                color: '#222222',
               }}
             >
               {value}

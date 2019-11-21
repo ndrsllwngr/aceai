@@ -32,7 +32,7 @@ module.exports = {
       resolve: `gatsby-plugin-nprogress`,
       options: {
         // Setting a color is optional.
-        color: `#000`,
+        color: `#0099ff`,
         // Disable the loading spinner.
         showSpinner: false,
       },
@@ -53,10 +53,10 @@ module.exports = {
         name: `ACEAI - Body posture`,
         short_name: `ACEAI - BP`,
         start_url: `/`,
-        background_color: `#663399`,
-        theme_color: `#663399`,
+        background_color: `#fff`,
+        theme_color: `#fff`,
         display: `minimal-ui`,
-        icon: `src/images/gatsby-icon.png`, // This path is relative to the root of the site.
+        icon: `src/images/mascot.png`, // This path is relative to the root of the site.
       },
     },
     // this (optional) plugin enables Progressive Web App + Offline functionality

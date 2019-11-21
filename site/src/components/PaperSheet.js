@@ -19,16 +19,19 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export const PaperSheet = ({ children }) => {
+export const PaperSheet = ({ children, customStyle }) => {
   const classes = useStyles();
 
   return (
     <motion.div whileHover={{ scale: 1.01 }}>
-      <Paper className={classes.root}>{children}</Paper>
+      <Paper className={classes.root} style={customStyle}>
+        {children}
+      </Paper>
     </motion.div>
   );
 };
 
 PaperSheet.propTypes = {
   children: PropTypes.node,
+  customStyle: PropTypes.object,
 };

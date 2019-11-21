@@ -8,7 +8,7 @@ import { PaperSheet } from './PaperSheet';
 
 export const VideoCanvas = ({ videoHeight, videoWidth, loading }) => {
   return (
-    <PaperSheet>
+    <PaperSheet customStyle={{ overflow: 'hidden', padding: '0' }}>
       <Box height={videoHeight} width={videoWidth}>
         <video
           id="video"
