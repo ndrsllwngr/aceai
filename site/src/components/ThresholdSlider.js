@@ -16,7 +16,12 @@ const useStyles = makeStyles({
   },
 });
 
-export const ThresholdSlider = ({ maxWidth, threshold, setThreshold }) => {
+export const ThresholdSlider = ({
+  maxWidth,
+  threshold,
+  setThreshold,
+  children,
+}) => {
   const classes = useStyles();
   const handleSliderChange = (event, newValue) => {
     setThreshold(newValue);
@@ -54,7 +59,7 @@ export const ThresholdSlider = ({ maxWidth, threshold, setThreshold }) => {
             color: '#546e7a',
           }}
         >
-          Threshold
+          Threshold ({children})
         </Typography>
         <Box
           display="flex"
@@ -95,4 +100,5 @@ ThresholdSlider.propTypes = {
   maxWidth: PropTypes.number.isRequired,
   threshold: PropTypes.number.isRequired,
   setThreshold: PropTypes.func.isRequired,
+  children: PropTypes.any,
 };

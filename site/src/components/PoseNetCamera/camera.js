@@ -29,10 +29,12 @@ const emptyState = { msg: 'Loading...', value: 0.0, status: 'default' };
 let _streamCopy = null;
 
 export const PoseNetCamera = () => {
-  const [goodBad, setGoodBad] = useState(emptyState);
+  const [goodBadShoulder, setGoodBadShoulder] = useState(emptyState);
+  const [goodBadEye, setGoodBadEye] = useState(emptyState);
   const [chartData, setChartData] = useState([]);
   const [calibrationData, setCalibrationData] = useState([]);
-  const [threshold, setThreshold] = React.useState(15);
+  const [thresholdShoulder, setThresholdShoulder] = React.useState(15);
+  const [thresholdEye, setThresholdEye] = React.useState(7);
   const [loading, setLoading] = useState(false);
   const [webcamContext] = useWebcam();
 
@@ -71,7 +73,8 @@ export const PoseNetCamera = () => {
     } else {
       async function bind2() {
         setLoading(false);
-        setGoodBad(emptyState);
+        setGoodBadShoulder(emptyState);
+        setGoodBadEye(emptyState);
         setChartData([]);
         stopStreamedVideo();
         clearCanvas();
@@ -86,6 +89,7 @@ export const PoseNetCamera = () => {
       if (webcamContext.webCam && datas.length > 0) {
         if (datas[datas.length - 1].poseData) {
           const currentData = datas[datas.length - 1].poseData;
+          console.log(currentData);
           if (currentData.keypoints) {
             const leftShoulder = currentData.keypoints.filter(
               x => x.part === 'leftShoulder',
@@ -93,23 +97,48 @@ export const PoseNetCamera = () => {
             const rightShoulder = currentData.keypoints.filter(
               x => x.part === 'rightShoulder',
             )[0];
+            const leftEye = currentData.keypoints.filter(
+              x => x.part === 'leftEye',
+            )[0];
+            const rightEye = currentData.keypoints.filter(
+              x => x.part === 'rightEye',
+            )[0];
             // console.log(currentData, leftShoulder, rightShoulder, Math.abs(leftShoulder.position.y - rightShoulder.position.y))
             if (
               Math.abs(leftShoulder.position.y - rightShoulder.position.y) >
-              threshold
+              thresholdShoulder
             ) {
-              setGoodBad({
-                msg: `Bad posture`,
+              setGoodBadShoulder({
+                msg: `Bad posture (shoulders)`,
                 value: Math.abs(
                   leftShoulder.position.y - rightShoulder.position.y,
                 ).toFixed(2),
                 status: 'bad',
               });
             } else {
-              setGoodBad({
-                msg: `Good posture`,
+              setGoodBadShoulder({
+                msg: `Good posture (shoulders)`,
                 value: Math.abs(
                   leftShoulder.position.y - rightShoulder.position.y,
+                ).toFixed(2),
+                status: 'good',
+              });
+            }
+            if (
+              Math.abs(leftEye.position.y - rightEye.position.y) > thresholdEye
+            ) {
+              setGoodBadEye({
+                msg: `Bad posture (neck)`,
+                value: Math.abs(
+                  leftEye.position.y - rightEye.position.y,
+                ).toFixed(2),
+                status: 'bad',
+              });
+            } else {
+              setGoodBadEye({
+                msg: `Good posture (neck)`,
+                value: Math.abs(
+                  leftEye.position.y - rightEye.position.y,
                 ).toFixed(2),
                 status: 'good',
               });
@@ -128,7 +157,7 @@ export const PoseNetCamera = () => {
       console.log('unMount');
       clearTimeout(timer);
     };
-  }, [chartData, threshold, webcamContext]);
+  }, [chartData, thresholdShoulder, thresholdEye, webcamContext]);
 
   return (
     <Grid container direction="row" justify="center" alignItems="start">
@@ -145,15 +174,30 @@ export const PoseNetCamera = () => {
       >
         <PostureStatus
           maxWidth={videoWidth}
-          msg={goodBad.msg}
-          value={goodBad.value}
-          status={goodBad.status}
+          msg={goodBadShoulder.msg}
+          value={goodBadShoulder.value}
+          status={goodBadShoulder.status}
+        />
+        <PostureStatus
+          maxWidth={videoWidth}
+          msg={goodBadEye.msg}
+          value={goodBadEye.value}
+          status={goodBadEye.status}
         />
         <ThresholdSlider
           maxWidth={videoWidth}
-          threshold={threshold}
-          setThreshold={setThreshold}
-        />
+          threshold={thresholdShoulder}
+          setThreshold={setThresholdShoulder}
+        >
+          Shoulders
+        </ThresholdSlider>
+        <ThresholdSlider
+          maxWidth={videoWidth}
+          threshold={thresholdEye}
+          setThreshold={setThresholdEye}
+        >
+          Neck
+        </ThresholdSlider>
         <Button
           variant="contained"
           onClick={() => {
