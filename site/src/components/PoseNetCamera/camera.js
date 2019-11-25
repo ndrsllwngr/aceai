@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import * as posenet from '@tensorflow-models/posenet';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
 
 import { LineChart } from '../LineChart';
 import { useWebcam } from '../ctx-webcam';
@@ -30,9 +31,14 @@ let _streamCopy = null;
 export const PoseNetCamera = () => {
   const [goodBad, setGoodBad] = useState(emptyState);
   const [chartData, setChartData] = useState([]);
+  const [calibrationData, setCalibrationData] = useState([]);
   const [threshold, setThreshold] = React.useState(15);
   const [loading, setLoading] = useState(false);
   const [webcamContext] = useWebcam();
+
+  useEffect(() => {
+    console.log(calibrationData);
+  }, [calibrationData]);
 
   useEffect(() => {
     if (webcamContext.webCam) {
@@ -148,6 +154,17 @@ export const PoseNetCamera = () => {
           threshold={threshold}
           setThreshold={setThreshold}
         />
+        <Button
+          variant="contained"
+          onClick={() => {
+            if (datas[datas.length - 1].poseData) {
+              const tmp = datas[datas.length - 1].poseData;
+              setCalibrationData(tmp);
+            }
+          }}
+        >
+          Calibrate
+        </Button>
         {webcamContext.webCam && !loading && <LineChart data={chartData} />}
       </Box>
     </Grid>
