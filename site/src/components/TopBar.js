@@ -9,7 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
-import { useWebcam } from './ctx-webcam';
+import { useApp } from './ctx-app';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -48,10 +48,10 @@ export function TopBar() {
   // const [state, setState] = React.useState({
   //   webCam: false
   // });
-  const [webcamContext, setWebcamContext] = useWebcam();
+  const [appContext, setAppContext] = useApp();
 
   const handleChange = name => event => {
-    setWebcamContext({ ...webcamContext, [name]: event.target.checked });
+    setAppContext({ ...appContext, [name]: event.target.checked });
   };
 
   return (
@@ -78,7 +78,44 @@ export function TopBar() {
               classes={{ label: classes.label }}
               control={
                 <Switch
-                  checked={webcamContext.webCam}
+                  checked={appContext.consoleLog}
+                  onChange={handleChange('consoleLog')}
+                  value="consoleLog"
+                  color="primary"
+                />
+              }
+              label="Console.log"
+            />
+            <FormControlLabel
+              classes={{ label: classes.label }}
+              control={
+                <Switch
+                  checked={appContext.charts}
+                  onChange={handleChange('charts')}
+                  value="charts"
+                  color="primary"
+                />
+              }
+              label="Charts"
+            />
+
+            <FormControlLabel
+              classes={{ label: classes.label }}
+              control={
+                <Switch
+                  checked={appContext.epochMode}
+                  onChange={handleChange('epochMode')}
+                  value="epochMode"
+                  color="primary"
+                />
+              }
+              label="Epoch mode"
+            />
+            <FormControlLabel
+              classes={{ label: classes.label }}
+              control={
+                <Switch
+                  checked={appContext.webCam}
                   onChange={handleChange('webCam')}
                   value="webCam"
                   color="primary"

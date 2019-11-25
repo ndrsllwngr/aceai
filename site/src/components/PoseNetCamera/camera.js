@@ -15,7 +15,7 @@ import Typography from '@material-ui/core/Typography';
 import { EpochFusion } from './epochFusion';
 import { EpochPart } from './epochPart';
 import { LineChart } from '../LineChart';
-import { useWebcam } from '../ctx-webcam';
+import { useApp } from '../ctx-app';
 import { ThresholdSlider } from '../ThresholdSlider';
 import { PostureStatus } from '../PostureStatus';
 import { VideoCanvas } from '../VideoCanvas';
@@ -49,15 +49,15 @@ let _streamCopy = null;
 export const PoseNetCamera = () => {
   const classes = useStyles();
 
-  const [webcamContext] = useWebcam();
+  const [appContext] = useApp();
   const [loading, setLoading] = useState(false);
 
   const [statusShoulder, setStatusShoulder] = useState(emptyState);
-  const [thresholdShoulder, setThresholdShoulder] = React.useState(15);
+  const [thresholdShoulder, setThresholdShoulder] = useState(15);
   const [chartDataShoulder, setChartDataShoulder] = useState([]);
 
   const [statusEye, setStatusEye] = useState(emptyState);
-  const [thresholdEye, setThresholdEye] = React.useState(7);
+  const [thresholdEye, setThresholdEye] = useState(7);
   const [chartDataEye, setChartDataEye] = useState([]);
 
   const [calibrationData, setCalibrationData] = useState([]);
@@ -67,7 +67,7 @@ export const PoseNetCamera = () => {
   }, [calibrationData]);
 
   useEffect(() => {
-    if (webcamContext.webCam) {
+    if (appContext.webCam) {
       // eslint-disable-next-line no-inner-declarations
       async function bind() {
         setLoading(true);
@@ -108,11 +108,11 @@ export const PoseNetCamera = () => {
       }
       bind2();
     }
-  }, [webcamContext]);
+  }, [appContext.webCam]);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      if (webcamContext.webCam && datas.length > 19) {
+      if (appContext.webCam && datas.length > 19) {
         if (datas[datas.length - 1].poseData) {
           const currentDataKeyPoints = datas
             .slice(datas.length - 20, datas.length)
@@ -133,10 +133,12 @@ export const PoseNetCamera = () => {
               rightEyeEpoch.extractCoordinates(currentDataKeyPoints[t]);
             }
           }
-          // leftShoulderEpoch.logData();
-          // rightShoulderEpoch.logData();
-          // leftEyeEpoch.logData();
-          // rightEyeEpoch.logData();
+          if (appContext.consoleLog) {
+            leftShoulderEpoch.logData();
+            rightShoulderEpoch.logData();
+            leftEyeEpoch.logData();
+            rightEyeEpoch.logData();
+          }
           const shoulderFusion = new EpochFusion(
             'shoulder',
             leftShoulderEpoch,
@@ -149,33 +151,37 @@ export const PoseNetCamera = () => {
             rightEyeEpoch,
             timeStamp,
           );
-          console.log({
-            name: shoulderFusion.name,
-            xAbs: shoulderFusion.absDifferenceLatestXCoor(),
-            yAbs: shoulderFusion.absDifferenceLatestYCoor(),
-          });
-          console.log({
-            name: eyeFusion.name,
-            xAbs: eyeFusion.absDifferenceLatestXCoor(),
-            yAbs: eyeFusion.absDifferenceLatestYCoor(),
-          });
+          if (appContext.consoleLog) {
+            shoulderFusion.logData();
+            eyeFusion.logData();
+          }
           // OLD: calculate y distance of ONLY latest frame
-          shoulderFusion.absDifferenceLatestYThreshold(
-            thresholdShoulder,
-            setStatusShoulder,
-          );
-          eyeFusion.absDifferenceLatestYThreshold(thresholdEye, setStatusEye);
+          if (appContext.epochMode) {
+            eyeFusion.absDifferenceEpochYThreshold(thresholdEye, setStatusEye);
+            shoulderFusion.absDifferenceEpochYThreshold(
+              thresholdShoulder,
+              setStatusShoulder,
+            );
+          } else {
+            eyeFusion.absDifferenceLatestYThreshold(thresholdEye, setStatusEye);
+            shoulderFusion.absDifferenceLatestYThreshold(
+              thresholdShoulder,
+              setStatusShoulder,
+            );
+          }
           // PRINT data
-          shoulderFusion.printAbsDifferenceLatestYCoor(
-            chartDataShoulder,
-            setChartDataShoulder,
-            timeStamp,
-          );
-          eyeFusion.printAbsDifferenceLatestYCoor(
-            chartDataEye,
-            setChartDataEye,
-            timeStamp,
-          );
+          if (appContext.charts) {
+            shoulderFusion.printAbsDifferenceLatestYCoor(
+              chartDataShoulder,
+              setChartDataShoulder,
+              timeStamp,
+            );
+            eyeFusion.printAbsDifferenceLatestYCoor(
+              chartDataEye,
+              setChartDataEye,
+              timeStamp,
+            );
+          }
           // TODO: veränderung zur calibration: abs. abstand zu calb zu mean
           // TODO: schiefhaltung: jetzt über zeit zu threashold mean
         }
@@ -186,11 +192,15 @@ export const PoseNetCamera = () => {
       clearTimeout(timer);
     };
   }, [
-    webcamContext,
     thresholdShoulder,
     thresholdEye,
     chartDataShoulder,
     chartDataEye,
+    appContext.webCam,
+    appContext.epochMode,
+    appContext.charts,
+    appContext.consoleLogs,
+    appContext.consoleLog,
   ]);
 
   return (
@@ -227,7 +237,7 @@ export const PoseNetCamera = () => {
             aria-controls="panel1a-content"
             id="panel1a-header"
           >
-            <Typography className={classes.heading}>EYE</Typography>
+            <Typography className={classes.heading}>EYES</Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails>
             <Box
@@ -248,7 +258,7 @@ export const PoseNetCamera = () => {
                 setThreshold={setThresholdEye}
                 part="eye"
               />
-              {webcamContext.webCam && !loading && (
+              {appContext.webCam && !loading && appContext.charts && (
                 <LineChart data={chartDataEye} part="eye" />
               )}
             </Box>
@@ -263,7 +273,7 @@ export const PoseNetCamera = () => {
             aria-controls="panel1a-content"
             id="panel1a-header"
           >
-            <Typography className={classes.heading}>SHOULDER</Typography>
+            <Typography className={classes.heading}>SHOULDERS</Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails>
             <Box
@@ -284,7 +294,7 @@ export const PoseNetCamera = () => {
                 setThreshold={setThresholdShoulder}
                 part="shoulder"
               />
-              {webcamContext.webCam && !loading && (
+              {appContext.webCam && !loading && appContext.charts && (
                 <LineChart data={chartDataShoulder} part="shoulder" />
               )}
             </Box>

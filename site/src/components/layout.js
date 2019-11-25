@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 // import { useStaticQuery, graphql } from "gatsby"
 import { TopBar } from './TopBar';
-import { WebcamProvider } from './ctx-webcam';
+import { AppProvider } from './ctx-app';
 
 // import Header from "./header"
 import './layout.css';
@@ -26,7 +26,7 @@ const Layout = ({ children }) => (
   // `)
 
   <>
-    <WebcamProvider>
+    <AppProvider>
       {/* <Header siteTitle={data.site.siteMetadata.title} /> */}
       <TopBar />
       <div
@@ -44,7 +44,7 @@ const Layout = ({ children }) => (
           <a href="https://www.gatsbyjs.org">Gatsby</a>
         </footer> */}
       </div>
-    </WebcamProvider>
+    </AppProvider>
   </>
 );
 Layout.propTypes = {
