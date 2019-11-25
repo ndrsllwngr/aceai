@@ -7,7 +7,7 @@ import { PaperSheet } from './PaperSheet';
 
 import 'chartjs-plugin-streaming';
 
-export const LineChart = ({ data }) => {
+export const LineChart = ({ data, part }) => {
   return (
     <PaperSheet>
       <Box
@@ -28,7 +28,7 @@ export const LineChart = ({ data }) => {
             color: '#546e7a',
           }}
         >
-          POSTURE CHART
+          POSTURE CHART ({part})
         </Typography>
         <Line
           type="line"
@@ -83,4 +83,5 @@ export const LineChart = ({ data }) => {
 
 LineChart.propTypes = {
   data: PropTypes.array.isRequired,
+  part: PropTypes.string.isRequired,
 };

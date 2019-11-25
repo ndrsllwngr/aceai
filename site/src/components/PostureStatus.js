@@ -57,6 +57,6 @@ export const PostureStatus = ({ maxWidth, msg, value, status }) => {
 PostureStatus.propTypes = {
   maxWidth: PropTypes.number.isRequired,
   msg: PropTypes.string.isRequired,
-  value: PropTypes.number.isRequired,
+  value: PropTypes.node.isRequired,
   status: PropTypes.string.isRequired,
 };

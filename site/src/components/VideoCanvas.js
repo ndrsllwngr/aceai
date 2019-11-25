@@ -12,7 +12,7 @@ export const VideoCanvas = ({ videoHeight, videoWidth, loading }) => {
       <Box height={videoHeight} width={videoWidth}>
         <video
           id="video"
-          playsinline
+          playsInline
           style={{ transform: 'scaleX(-1)', display: 'none' }}
         ></video>
         <Fade

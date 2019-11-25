@@ -1,11 +1,19 @@
 /* eslint-disable no-console */
-/* eslint-disable no-inner-declarations */
 import React, { useEffect, useState } from 'react';
 import * as posenet from '@tensorflow-models/posenet';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
+import { makeStyles } from '@material-ui/core/styles';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Typography from '@material-ui/core/Typography';
+// import get from 'lodash/get';
 
+import { EpochFusion } from './epochFusion';
+import { EpochPart } from './epochPart';
 import { LineChart } from '../LineChart';
 import { useWebcam } from '../ctx-webcam';
 import { ThresholdSlider } from '../ThresholdSlider';
@@ -19,6 +27,16 @@ import {
   isMobile,
 } from './utils';
 
+const useStyles = makeStyles(theme => ({
+  root: {
+    width: '100%',
+  },
+  heading: {
+    fontSize: theme.typography.pxToRem(15),
+    fontWeight: theme.typography.fontWeightRegular,
+  },
+}));
+
 const videoWidth = 600;
 const videoHeight = 500;
 
@@ -29,21 +47,28 @@ const emptyState = { msg: 'Loading...', value: 0.0, status: 'default' };
 let _streamCopy = null;
 
 export const PoseNetCamera = () => {
-  const [goodBadShoulder, setGoodBadShoulder] = useState(emptyState);
-  const [goodBadEye, setGoodBadEye] = useState(emptyState);
-  const [chartData, setChartData] = useState([]);
-  const [calibrationData, setCalibrationData] = useState([]);
-  const [thresholdShoulder, setThresholdShoulder] = React.useState(15);
-  const [thresholdEye, setThresholdEye] = React.useState(7);
-  const [loading, setLoading] = useState(false);
+  const classes = useStyles();
+
   const [webcamContext] = useWebcam();
+  const [loading, setLoading] = useState(false);
+
+  const [statusShoulder, setStatusShoulder] = useState(emptyState);
+  const [thresholdShoulder, setThresholdShoulder] = React.useState(15);
+  const [chartDataShoulder, setChartDataShoulder] = useState([]);
+
+  const [statusEye, setStatusEye] = useState(emptyState);
+  const [thresholdEye, setThresholdEye] = React.useState(7);
+  const [chartDataEye, setChartDataEye] = useState([]);
+
+  const [calibrationData, setCalibrationData] = useState([]);
 
   useEffect(() => {
-    console.log(calibrationData);
+    console.log({ calibrationData });
   }, [calibrationData]);
 
   useEffect(() => {
     if (webcamContext.webCam) {
+      // eslint-disable-next-line no-inner-declarations
       async function bind() {
         setLoading(true);
         const net = await posenet.load({
@@ -71,11 +96,13 @@ export const PoseNetCamera = () => {
       }
       bind();
     } else {
+      // eslint-disable-next-line no-inner-declarations
       async function bind2() {
         setLoading(false);
-        setGoodBadShoulder(emptyState);
-        setGoodBadEye(emptyState);
-        setChartData([]);
+        setStatusShoulder(emptyState);
+        setStatusEye(emptyState);
+        setChartDataShoulder([]);
+        setChartDataEye([]);
         stopStreamedVideo();
         clearCanvas();
       }
@@ -85,71 +112,72 @@ export const PoseNetCamera = () => {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      // console.log(datas)
-      if (webcamContext.webCam && datas.length > 0) {
+      if (webcamContext.webCam && datas.length > 19) {
         if (datas[datas.length - 1].poseData) {
-          const currentData = datas[datas.length - 1].poseData;
-          console.log(currentData);
-          if (currentData.keypoints) {
-            const leftShoulder = currentData.keypoints.filter(
-              x => x.part === 'leftShoulder',
-            )[0];
-            const rightShoulder = currentData.keypoints.filter(
-              x => x.part === 'rightShoulder',
-            )[0];
-            const leftEye = currentData.keypoints.filter(
-              x => x.part === 'leftEye',
-            )[0];
-            const rightEye = currentData.keypoints.filter(
-              x => x.part === 'rightEye',
-            )[0];
-            // console.log(currentData, leftShoulder, rightShoulder, Math.abs(leftShoulder.position.y - rightShoulder.position.y))
-            if (
-              Math.abs(leftShoulder.position.y - rightShoulder.position.y) >
-              thresholdShoulder
-            ) {
-              setGoodBadShoulder({
-                msg: `Bad posture (shoulders)`,
-                value: Math.abs(
-                  leftShoulder.position.y - rightShoulder.position.y,
-                ).toFixed(2),
-                status: 'bad',
-              });
-            } else {
-              setGoodBadShoulder({
-                msg: `Good posture (shoulders)`,
-                value: Math.abs(
-                  leftShoulder.position.y - rightShoulder.position.y,
-                ).toFixed(2),
-                status: 'good',
-              });
+          const currentDataKeyPoints = datas
+            .slice(datas.length - 20, datas.length)
+            .map(obj => obj.poseData.keypoints);
+
+          const timeStamp = Date.now();
+          const leftShoulderEpoch = new EpochPart('leftShoulder', timeStamp);
+          const rightShoulderEpoch = new EpochPart('rightShoulder', timeStamp);
+          const leftEyeEpoch = new EpochPart('leftEye', timeStamp);
+          const rightEyeEpoch = new EpochPart('rightEye', timeStamp);
+
+          // eslint-disable-next-line no-restricted-syntax
+          for (const t in currentDataKeyPoints) {
+            if (Object.prototype.hasOwnProperty.call(currentDataKeyPoints, t)) {
+              leftShoulderEpoch.extractCoordinates(currentDataKeyPoints[t]);
+              rightShoulderEpoch.extractCoordinates(currentDataKeyPoints[t]);
+              leftEyeEpoch.extractCoordinates(currentDataKeyPoints[t]);
+              rightEyeEpoch.extractCoordinates(currentDataKeyPoints[t]);
             }
-            if (
-              Math.abs(leftEye.position.y - rightEye.position.y) > thresholdEye
-            ) {
-              setGoodBadEye({
-                msg: `Bad posture (neck)`,
-                value: Math.abs(
-                  leftEye.position.y - rightEye.position.y,
-                ).toFixed(2),
-                status: 'bad',
-              });
-            } else {
-              setGoodBadEye({
-                msg: `Good posture (neck)`,
-                value: Math.abs(
-                  leftEye.position.y - rightEye.position.y,
-                ).toFixed(2),
-                status: 'good',
-              });
-            }
-            const copy = chartData;
-            copy.push({
-              x: Date.now(),
-              y: Math.abs(leftShoulder.position.y - rightShoulder.position.y),
-            });
-            setChartData(copy);
           }
+          // leftShoulderEpoch.logData();
+          // rightShoulderEpoch.logData();
+          // leftEyeEpoch.logData();
+          // rightEyeEpoch.logData();
+          const shoulderFusion = new EpochFusion(
+            'shoulder',
+            leftShoulderEpoch,
+            rightShoulderEpoch,
+            timeStamp,
+          );
+          const eyeFusion = new EpochFusion(
+            'eye',
+            leftEyeEpoch,
+            rightEyeEpoch,
+            timeStamp,
+          );
+          console.log({
+            name: shoulderFusion.name,
+            xAbs: shoulderFusion.absDifferenceLatestXCoor(),
+            yAbs: shoulderFusion.absDifferenceLatestYCoor(),
+          });
+          console.log({
+            name: eyeFusion.name,
+            xAbs: eyeFusion.absDifferenceLatestXCoor(),
+            yAbs: eyeFusion.absDifferenceLatestYCoor(),
+          });
+          // OLD: calculate y distance of ONLY latest frame
+          shoulderFusion.absDifferenceLatestYThreshold(
+            thresholdShoulder,
+            setStatusShoulder,
+          );
+          eyeFusion.absDifferenceLatestYThreshold(thresholdEye, setStatusEye);
+          // PRINT data
+          shoulderFusion.printAbsDifferenceLatestYCoor(
+            chartDataShoulder,
+            setChartDataShoulder,
+            timeStamp,
+          );
+          eyeFusion.printAbsDifferenceLatestYCoor(
+            chartDataEye,
+            setChartDataEye,
+            timeStamp,
+          );
+          // TODO: veränderung zur calibration: abs. abstand zu calb zu mean
+          // TODO: schiefhaltung: jetzt über zeit zu threashold mean
         }
       }
     }, 500);
@@ -157,10 +185,16 @@ export const PoseNetCamera = () => {
       console.log('unMount');
       clearTimeout(timer);
     };
-  }, [chartData, thresholdShoulder, thresholdEye, webcamContext]);
+  }, [
+    webcamContext,
+    thresholdShoulder,
+    thresholdEye,
+    chartDataShoulder,
+    chartDataEye,
+  ]);
 
   return (
-    <Grid container direction="row" justify="center" alignItems="start">
+    <Grid container direction="row" justify="center" alignItems="flex-start">
       <VideoCanvas
         videoHeight={videoHeight}
         videoWidth={videoWidth}
@@ -172,44 +206,90 @@ export const PoseNetCamera = () => {
         maxWidth={videoWidth}
         alignItems="top"
       >
-        <PostureStatus
-          maxWidth={videoWidth}
-          msg={goodBadShoulder.msg}
-          value={goodBadShoulder.value}
-          status={goodBadShoulder.status}
-        />
-        <PostureStatus
-          maxWidth={videoWidth}
-          msg={goodBadEye.msg}
-          value={goodBadEye.value}
-          status={goodBadEye.status}
-        />
-        <ThresholdSlider
-          maxWidth={videoWidth}
-          threshold={thresholdShoulder}
-          setThreshold={setThresholdShoulder}
-        >
-          Shoulders
-        </ThresholdSlider>
-        <ThresholdSlider
-          maxWidth={videoWidth}
-          threshold={thresholdEye}
-          setThreshold={setThresholdEye}
-        >
-          Neck
-        </ThresholdSlider>
         <Button
           variant="contained"
+          style={{ margin: '12px' }}
           onClick={() => {
-            if (datas[datas.length - 1].poseData) {
-              const tmp = datas[datas.length - 1].poseData;
-              setCalibrationData(tmp);
+            if (datas && datas.length > 0 && datas[datas.length - 1].poseData) {
+              const currentPoseData = datas[datas.length - 1].poseData;
+              setCalibrationData(currentPoseData);
             }
           }}
         >
           Calibrate
         </Button>
-        {webcamContext.webCam && !loading && <LineChart data={chartData} />}
+        <ExpansionPanel
+          TransitionProps={{ unmountOnExit: true }}
+          style={{ marginRight: '12px', marginLeft: '12px', width: '468px' }}
+        >
+          <ExpansionPanelSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1a-content"
+            id="panel1a-header"
+          >
+            <Typography className={classes.heading}>EYE</Typography>
+          </ExpansionPanelSummary>
+          <ExpansionPanelDetails>
+            <Box
+              display="flex"
+              flexDirection="column"
+              maxWidth={videoWidth}
+              alignItems="top"
+            >
+              <PostureStatus
+                maxWidth={videoWidth}
+                msg={statusEye.msg}
+                value={statusEye.value}
+                status={statusEye.status}
+              />
+              <ThresholdSlider
+                maxWidth={videoWidth}
+                threshold={thresholdEye}
+                setThreshold={setThresholdEye}
+                part="eye"
+              />
+              {webcamContext.webCam && !loading && (
+                <LineChart data={chartDataEye} part="eye" />
+              )}
+            </Box>
+          </ExpansionPanelDetails>
+        </ExpansionPanel>
+        <ExpansionPanel
+          TransitionProps={{ unmountOnExit: true }}
+          style={{ marginRight: '12px', marginLeft: '12px', width: '468px' }}
+        >
+          <ExpansionPanelSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1a-content"
+            id="panel1a-header"
+          >
+            <Typography className={classes.heading}>SHOULDER</Typography>
+          </ExpansionPanelSummary>
+          <ExpansionPanelDetails>
+            <Box
+              display="flex"
+              flexDirection="column"
+              maxWidth={videoWidth}
+              alignItems="top"
+            >
+              <PostureStatus
+                maxWidth={videoWidth}
+                msg={statusShoulder.msg}
+                value={statusShoulder.value}
+                status={statusShoulder.status}
+              />
+              <ThresholdSlider
+                maxWidth={videoWidth}
+                threshold={thresholdShoulder}
+                setThreshold={setThresholdShoulder}
+                part="shoulder"
+              />
+              {webcamContext.webCam && !loading && (
+                <LineChart data={chartDataShoulder} part="shoulder" />
+              )}
+            </Box>
+          </ExpansionPanelDetails>
+        </ExpansionPanel>
       </Box>
     </Grid>
   );
