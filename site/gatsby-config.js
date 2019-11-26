@@ -50,13 +50,13 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `ACEAI - Body posture`,
-        short_name: `ACEAI - BP`,
+        name: `BodyPose (ACEAI)`,
+        short_name: `BodyPose`,
         start_url: `/`,
         background_color: `#fff`,
         theme_color: `#fff`,
         display: `minimal-ui`,
-        icon: `src/images/mascot.png`, // This path is relative to the root of the site.
+        icon: `src/images/logo-icon.png`, // This path is relative to the root of the site.
       },
     },
     // this (optional) plugin enables Progressive Web App + Offline functionality
