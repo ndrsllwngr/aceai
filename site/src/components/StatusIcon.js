@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
+import { red } from '@material-ui/core/colors';
 import Avatar from '@material-ui/core/Avatar';
 import Check from '@material-ui/icons/Check';
 import Close from '@material-ui/icons/Close';
@@ -11,14 +12,16 @@ const useStyles = makeStyles({
     // margin: 10,
     width: '48px',
     height: '48px',
-    backgroundImage: 'linear-gradient(180deg, #1976d2 0%, #0d47a1 100%)',
+    background: '#fff',
+    color: 'black',
   },
   pinkAvatar: {
     // margin: 10,
     width: '48px',
     height: '48px',
     color: '#fff',
-    backgroundImage: 'linear-gradient(180deg, #ffa726 0%, #f57c00 100%)',
+    background: red.A400,
+
     // backgroundColor: pink[500],
   },
   greenAvatar: {
@@ -26,7 +29,7 @@ const useStyles = makeStyles({
     width: '48px',
     height: '48px',
     color: '#fff',
-    backgroundImage: 'linear-gradient(180deg, #66bb6a 0%, #43a047 100%)',
+    background: '#39927e',
     // backgroundColor: green[500],
   },
 });

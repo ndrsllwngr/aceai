@@ -8,7 +8,6 @@ import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import clsx from 'clsx';
 import FormGroup from '@material-ui/core/FormGroup';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -40,6 +39,8 @@ const useStyles = makeStyles(theme => ({
       duration: theme.transitions.duration.leavingScreen,
     }),
     backgroundColor: '#fff',
+    borderBottom: 'rgba(0, 0, 0, 0.12) solid 1px',
+    boxShadow: 'none',
   },
   appBarShift: {
     width: `calc(100% - ${drawerWidth}px)`,
@@ -51,7 +52,7 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     flexGrow: 1,
-    color: '#222',
+    color: '#5f6368',
   },
   hide: {
     display: 'none',
@@ -126,7 +127,6 @@ const Layout = ({ children }) => {
 
   return (
     <div className={classes.root}>
-      <CssBaseline />
       <AppBar
         position="fixed"
         className={clsx(classes.appBar, {
@@ -134,9 +134,34 @@ const Layout = ({ children }) => {
         })}
       >
         <Toolbar>
+          <Box width="40px" height="40px" marginBottom="3px">
+            <svg
+              viewBox="0 0 420 420"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M268.344 90.747c22.716 0 41.197 18.481 41.197 41.197 0 22.717-18.481 41.198-41.197 41.198-22.718 0-41.199-18.481-41.199-41.198 0-22.715 18.482-41.197 41.199-41.197zm0 18c-12.792 0-23.199 10.406-23.199 23.197 0 12.792 10.407 23.198 23.199 23.198 12.791 0 23.197-10.406 23.197-23.198.001-12.79-10.406-23.197-23.197-23.197zM118 376.077h27.405l.039.002a9 9 0 009-9V212.985l79.084-131.306 45.859-21.53a9 9 0 004.323-11.97c-2.112-4.501-7.476-6.437-11.972-4.322l-48.334 22.689a9.016 9.016 0 00-3.886 3.504l-81.785 135.79a9.001 9.001 0 00-1.291 4.644v147.594H118a9 9 0 00-9 9 8.999 8.999 0 009 8.999zm105.549-77.219a8.96 8.96 0 005.881 2.19 8.982 8.982 0 006.813-3.115l30.229-34.979a8.998 8.998 0 001.49-9.364l-29.486-70.332a8.999 8.999 0 00-3.265-3.98l-18.618-12.567a9 9 0 00-12.67 2.694l-28.762 46.072c-.04.063-.07.13-.108.194a9.133 9.133 0 00-.264.475 9.28 9.28 0 00-.161.334 8.643 8.643 0 00-.676 2.126 8.702 8.702 0 00-.077.506c-.015.121-.03.241-.04.363a9.114 9.114 0 00-.028.546c-.002.074-.011.146-.011.221V367.08a9 9 0 009 9l.039-.002h27.408a9 9 0 009-9 9 9 0 00-9-9h-18.446V222.82l22.457-35.973 8.661 5.847 26.291 62.711-26.582 30.759a9 9 0 00.925 12.694z"
+                fill="#39927e"
+              />
+            </svg>
+          </Box>
           <Typography variant="h6" noWrap className={classes.title}>
-            ACEAI - Body posture
+            BodyPose
+            <Typography
+              variant="overline"
+              display="inline-block"
+              style={{
+                fontSize: '11px',
+                letterSpacing: '0.33px',
+                color: '#546e7a',
+                marginLeft: '5px',
+              }}
+            >
+              alpha
+            </Typography>
           </Typography>
+
           <FormGroup row>
             <FormControlLabel
               classes={{ label: classes.label }}

@@ -51,7 +51,7 @@ const IndexPage = () => {
   return (
     <AppProvider>
       <Layout>
-        <SEO title="Body posture" />
+        <SEO title="Home" />
         <PoseNetCamera />
       </Layout>
     </AppProvider>

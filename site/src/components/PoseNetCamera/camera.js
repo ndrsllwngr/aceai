@@ -220,6 +220,7 @@ export const PoseNetCamera = () => {
         alignItems="top"
       >
         <Button
+          color="primary"
           variant="contained"
           style={{ margin: '12px' }}
           onClick={() => {
