@@ -3,9 +3,11 @@ import PropTypes from 'prop-types';
 
 const emptyState = {
   webCam: false,
-  epochMode: false,
   charts: false,
   consoleLog: false,
+  openDrawer: true,
+  epochMode: false,
+  epochCount: 50,
 };
 
 const AppContext = React.createContext();

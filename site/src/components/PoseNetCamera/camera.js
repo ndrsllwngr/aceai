@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import React, { useEffect, useState } from 'react';
 import * as posenet from '@tensorflow-models/posenet';
+import has from 'lodash/has';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -112,12 +113,13 @@ export const PoseNetCamera = () => {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      if (appContext.webCam && datas.length > 19) {
+      if (appContext.webCam && datas.length > appContext.epochCount - 1) {
         if (datas[datas.length - 1].poseData) {
           const currentDataKeyPoints = datas
-            .slice(datas.length - 20, datas.length)
-            .map(obj => obj.poseData.keypoints);
-
+            .slice(datas.length - appContext.epochCount, datas.length)
+            .map(
+              obj => has(obj, 'poseData.keypoints') && obj.poseData.keypoints,
+            );
           const timeStamp = Date.now();
           const leftShoulderEpoch = new EpochPart('leftShoulder', timeStamp);
           const rightShoulderEpoch = new EpochPart('rightShoulder', timeStamp);
@@ -201,6 +203,7 @@ export const PoseNetCamera = () => {
     appContext.charts,
     appContext.consoleLogs,
     appContext.consoleLog,
+    appContext.epochCount,
   ]);
 
   return (
