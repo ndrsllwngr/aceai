@@ -10,7 +10,9 @@ const useStyles = makeStyles(theme => ({
     padding: '24px',
     borderRadius: '4px',
     margin: '12px',
-    boxShadow: '0 0 0 1px rgba(63,63,68,0.05), 0 1px 3px 0 rgba(63,63,68,0.15)',
+    border: 'rgba(0, 0, 0, 0.12) solid 1px',
+    boxShadow: '0 0 0 1px rgba(63,63,68,0.00), 0 1px 3px 0 rgba(63,63,68,0.0)',
+    // boxShadow: '0 0 0 1px rgba(63,63,68,0.05), 0 1px 3px 0 rgba(63,63,68,0.15)',
     transition: 'box-shadow 0.3s ease-in-out',
     '&:hover': {
       boxShadow:

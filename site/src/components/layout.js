@@ -29,6 +29,36 @@ import './layout.css';
 
 const drawerWidth = 240;
 
+const showNotification = () => {
+  if (typeof Notification !== 'undefined') {
+    Notification.requestPermission(result => {
+      if (result === 'granted') {
+        navigator.serviceWorker.ready.then(registration => {
+          registration.showNotification('Update', {
+            body: 'BodyPose experimental feature notification',
+            icon: 'link-to-your-icon',
+            vibrate: [200, 100, 200, 100, 200, 100, 400],
+            tag: 'request',
+            actions: [
+              // you can customize these actions as you like
+              {
+                // eslint-disable-next-line no-console
+                action: () => console.log('update'), // you should define this
+                title: 'update',
+              },
+              {
+                // eslint-disable-next-line no-console
+                action: () => console.log('ignore'), // you should define this
+                title: 'ignore',
+              },
+            ],
+          });
+        });
+      }
+    });
+  }
+};
+
 const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
@@ -312,6 +342,41 @@ const Layout = ({ children }) => {
             </ListItem>
           </List>
         </FormGroup>
+        <Divider></Divider>
+        <List classes={{ root: classes.list }}>
+          <Box
+            display="flex"
+            alignItems="start"
+            flexDirection="column"
+            justifyContent="space-between"
+            paddingLeft="16px"
+            paddingRight="16px"
+            width="100%"
+          >
+            <Typography
+              variant="overline"
+              display="block"
+              style={{
+                fontSize: '11px',
+                lineHeight: '13px',
+                letterSpacing: '0.33px',
+                marginBottom: '8px',
+                color: '#546e7a',
+              }}
+            >
+              experimental
+            </Typography>
+          </Box>
+          <ListItem
+            key="testPush"
+            role={undefined}
+            dense
+            button
+            onClick={showNotification()}
+          >
+            <ListItemText primary="Test notification" />
+          </ListItem>
+        </List>
       </Drawer>
     </div>
   );

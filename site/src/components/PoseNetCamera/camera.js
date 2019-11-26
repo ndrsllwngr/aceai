@@ -531,6 +531,9 @@ export async function bindPage() {
   detectPoseInRealTime(video, net);
 }
 
-// TODO maybe fix later
-// navigator.getUserMedia = navigator.getUserMedia ||
-// navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+if (typeof window !== `undefined`) {
+  navigator.getUserMedia =
+    navigator.getUserMedia ||
+    navigator.webkitGetUserMedia ||
+    navigator.mozGetUserMedia;
+}
