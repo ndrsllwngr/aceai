@@ -29,36 +29,6 @@ import './layout.css';
 
 const drawerWidth = 240;
 
-const showNotification = () => {
-  if (typeof Notification !== 'undefined') {
-    Notification.requestPermission(result => {
-      if (result === 'granted') {
-        navigator.serviceWorker.ready.then(registration => {
-          registration.showNotification('Update', {
-            body: 'BodyPose experimental feature notification',
-            icon: 'link-to-your-icon',
-            vibrate: [200, 100, 200, 100, 200, 100, 400],
-            tag: 'request',
-            actions: [
-              // you can customize these actions as you like
-              {
-                // eslint-disable-next-line no-console
-                action: () => console.log('update'), // you should define this
-                title: 'update',
-              },
-              {
-                // eslint-disable-next-line no-console
-                action: () => console.log('ignore'), // you should define this
-                title: 'ignore',
-              },
-            ],
-          });
-        });
-      }
-    });
-  }
-};
-
 const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
@@ -143,9 +113,9 @@ const Layout = ({ children }) => {
     }
   };
 
-  // const handleDrawerOpen = () => {
-  //   setAppContext({ ...appContext, openDrawer: true });
-  // };
+  const handleDrawerOpen = () => {
+    setAppContext({ ...appContext, openDrawer: true });
+  };
 
   const handleDrawerClose = () => {
     setAppContext({ ...appContext, openDrawer: false });
@@ -153,6 +123,36 @@ const Layout = ({ children }) => {
 
   const handleSliderChange = (event, newValue) => {
     setAppContext({ ...appContext, epochCount: newValue });
+  };
+
+  const showNotification = () => {
+    if (typeof Notification !== 'undefined') {
+      Notification.requestPermission(result => {
+        if (result === 'granted') {
+          navigator.serviceWorker.ready.then(registration => {
+            registration.showNotification('Update', {
+              body: 'BodyPose experimental feature notification',
+              icon: 'link-to-your-icon',
+              vibrate: [200, 100, 200, 100, 200, 100, 400],
+              tag: 'request',
+              actions: [
+                // you can customize these actions as you like
+                {
+                  // eslint-disable-next-line no-console
+                  action: () => console.log('update'), // you should define this
+                  title: 'update',
+                },
+                {
+                  // eslint-disable-next-line no-console
+                  action: () => console.log('ignore'), // you should define this
+                  title: 'ignore',
+                },
+              ],
+            });
+          });
+        }
+      });
+    }
   };
 
   return (
@@ -210,7 +210,7 @@ const Layout = ({ children }) => {
               color="#222"
               aria-label="open drawer"
               edge="end"
-              // onClick={handleDrawerOpen}
+              onClick={handleDrawerOpen}
               className={clsx(appContext.openDrawer && classes.hide)}
             >
               <MenuIcon />
@@ -252,7 +252,7 @@ const Layout = ({ children }) => {
               role={undefined}
               dense
               button
-              onClick={handleToggle('consoleLog')}
+              onClick={() => handleToggle('consoleLog')}
             >
               <ListItemIcon>
                 <Checkbox
@@ -272,7 +272,7 @@ const Layout = ({ children }) => {
               role={undefined}
               dense
               button
-              onClick={handleToggle('charts')}
+              onClick={() => handleToggle('charts')}
             >
               <ListItemIcon>
                 <Checkbox
@@ -292,7 +292,7 @@ const Layout = ({ children }) => {
               role={undefined}
               dense
               button
-              onClick={handleToggle('epochMode')}
+              onClick={() => handleToggle('epochMode')}
             >
               <ListItemIcon>
                 <Checkbox
