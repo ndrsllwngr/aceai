@@ -5,7 +5,7 @@ const emptyState = {
   webCam: false,
   charts: false,
   consoleLog: false,
-  openDrawer: true,
+  openDrawer: false,
   epochMode: false,
   epochCount: 50,
 };

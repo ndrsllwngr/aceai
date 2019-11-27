@@ -143,9 +143,9 @@ const Layout = ({ children }) => {
     }
   };
 
-  const handleDrawerOpen = () => {
-    setAppContext({ ...appContext, openDrawer: true });
-  };
+  // const handleDrawerOpen = () => {
+  //   setAppContext({ ...appContext, openDrawer: true });
+  // };
 
   const handleDrawerClose = () => {
     setAppContext({ ...appContext, openDrawer: false });
@@ -210,7 +210,7 @@ const Layout = ({ children }) => {
               color="#222"
               aria-label="open drawer"
               edge="end"
-              onClick={handleDrawerOpen}
+              // onClick={handleDrawerOpen}
               className={clsx(appContext.openDrawer && classes.hide)}
             >
               <MenuIcon />
@@ -372,7 +372,7 @@ const Layout = ({ children }) => {
             role={undefined}
             dense
             button
-            onClick={showNotification()}
+            onClick={() => showNotification()}
           >
             <ListItemText primary="Test notification" />
           </ListItem>
