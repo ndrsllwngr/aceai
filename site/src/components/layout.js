@@ -252,7 +252,7 @@ const Layout = ({ children }) => {
               role={undefined}
               dense
               button
-              onClick={() => handleToggle('consoleLog')}
+              onClick={handleToggle('consoleLog')}
             >
               <ListItemIcon>
                 <Checkbox
@@ -272,7 +272,7 @@ const Layout = ({ children }) => {
               role={undefined}
               dense
               button
-              onClick={() => handleToggle('charts')}
+              onClick={handleToggle('charts')}
             >
               <ListItemIcon>
                 <Checkbox
@@ -292,7 +292,7 @@ const Layout = ({ children }) => {
               role={undefined}
               dense
               button
-              onClick={() => handleToggle('epochMode')}
+              onClick={handleToggle('epochMode')}
             >
               <ListItemIcon>
                 <Checkbox
@@ -372,7 +372,7 @@ const Layout = ({ children }) => {
             role={undefined}
             dense
             button
-            onClick={() => showNotification()}
+            onClick={showNotification}
           >
             <ListItemText primary="Test notification" />
           </ListItem>
