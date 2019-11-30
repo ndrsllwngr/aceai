@@ -12,11 +12,11 @@ import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Typography from '@material-ui/core/Typography';
 import { Subject } from 'rxjs';
-import get from 'lodash/get';
+// import get from 'lodash/get';
 
 import { EpochFusion } from './epochFusion';
 import { EpochPart } from './epochPart';
-import { LineChart } from '../LineChart';
+// import { LineChart } from '../LineChart';
 import { useApp } from '../ctx-app';
 import { ThresholdSlider } from '../ThresholdSlider';
 import { PostureStatus } from '../PostureStatus';
@@ -127,7 +127,7 @@ export const PoseNetCamera = () => {
         setStatusShoulder(emptyState);
         setStatusEye(emptyState);
         setChartDataShoulder([]);
-        // setChartDataEye([]);
+        setChartDataEye([]);
         stopStreamedVideo();
         clearCanvas();
       }
@@ -212,15 +212,16 @@ export const PoseNetCamera = () => {
               }
               // PRINT data
               if (appContext.charts) {
+                const chartTime = new Date();
                 shoulderFusion.printAbsDifferenceLatestYCoor(
                   chartDataShoulder,
                   setChartDataShoulder,
-                  timeStamp,
+                  chartTime,
                 );
                 eyeFusion.printAbsDifferenceLatestYCoor(
                   chartDataEye,
                   setChartDataEye,
-                  timeStamp,
+                  chartTime,
                 );
               }
               // TODO: veränderung zur calibration: abs. abstand zu calb zu mean
@@ -277,9 +278,7 @@ export const PoseNetCamera = () => {
         >
           Calibrate
         </Button>
-        <div style={{ width: '400px', height: '400px' }}>
-          <NewLineChart data={chartDataShoulder}></NewLineChart>
-        </div>
+
         <ExpansionPanel
           TransitionProps={{ unmountOnExit: true }}
           style={{ marginRight: '12px', marginLeft: '12px', width: '468px' }}
@@ -310,8 +309,13 @@ export const PoseNetCamera = () => {
                 setThreshold={setThresholdEye}
                 part="eye"
               />
-              {appContext.webCam && !loading && appContext.charts && (
+              {/* {appContext.webCam && !loading && appContext.charts && (
                 <LineChart data={get(chartDataEye, '[0].data')} part="eye" />
+              )} */}
+              {appContext.charts && (
+                <div style={{ width: '400px', height: '400px' }}>
+                  <NewLineChart data={chartDataEye}></NewLineChart>
+                </div>
               )}
             </Box>
           </ExpansionPanelDetails>
@@ -346,11 +350,16 @@ export const PoseNetCamera = () => {
                 setThreshold={setThresholdShoulder}
                 part="shoulder"
               />
-              {appContext.webCam && !loading && appContext.charts && (
+              {/* {appContext.webCam && !loading && appContext.charts && (
                 <LineChart
                   data={get(chartDataShoulder, '[0].data')}
                   part="shoulder"
                 />
+              )} */}
+              {appContext.charts && (
+                <div style={{ width: '400px', height: '400px' }}>
+                  <NewLineChart data={chartDataShoulder}></NewLineChart>
+                </div>
               )}
             </Box>
           </ExpansionPanelDetails>

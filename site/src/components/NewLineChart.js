@@ -11,8 +11,8 @@ export const NewLineChart = ({ data }) => {
   return (
     <ResponsiveLine
       data={data}
-      width="400"
-      height="400"
+      // width="400"
+      // height="400"
       margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
       // xScale={{ type: 'point' }}
       // yScale={{ type: 'linear', stacked: true, min: 'auto', max: 'auto' }}
@@ -26,13 +26,14 @@ export const NewLineChart = ({ data }) => {
       axisTop={null}
       axisRight={null}
       axisBottom={{
-        orient: 'bottom',
-        tickSize: 5,
-        tickPadding: 5,
-        tickRotation: 0,
+        // orient: 'bottom',
+        // tickSize: 5,
+        // tickPadding: 5,
+        // tickRotation: 0,
         legend: 'time',
         legendOffset: 36,
         legendPosition: 'middle',
+        tickValues: 'every 5 seconds',
         format: '%H:%M:%S',
       }}
       axisLeft={{

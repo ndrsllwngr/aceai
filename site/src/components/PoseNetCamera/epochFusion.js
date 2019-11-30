@@ -110,9 +110,8 @@ export class EpochFusion {
   //     ],
   //   },
   // ]
-  printAbsDifferenceLatestYCoor(state, callback, timeStamp, color = '#000000') {
+  printAbsDifferenceLatestYCoor(state, callback, chartTime, color = '#000000') {
     const copy = [...state];
-    const date = new Date();
     // eslint-disable-next-line no-console
     // console.log({ copy, state });
     let chartObj = find(copy, { id: this.name });
@@ -129,7 +128,7 @@ export class EpochFusion {
       dataArr.shift();
     }
     dataArr.push({
-      x: date,
+      x: chartTime,
       y: this.absDifferenceLatestYCoor().toFixed(2),
     });
     callback(copy);
