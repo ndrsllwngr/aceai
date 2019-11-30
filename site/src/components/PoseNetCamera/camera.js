@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import React, { useEffect, useState } from 'react';
 import * as posenet from '@tensorflow-models/posenet';
-import has from 'lodash/has';
+// import has from 'lodash/has';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -11,7 +11,8 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Typography from '@material-ui/core/Typography';
-// import get from 'lodash/get';
+import { Subject } from 'rxjs';
+import get from 'lodash/get';
 
 import { EpochFusion } from './epochFusion';
 import { EpochPart } from './epochPart';
@@ -20,6 +21,7 @@ import { useApp } from '../ctx-app';
 import { ThresholdSlider } from '../ThresholdSlider';
 import { PostureStatus } from '../PostureStatus';
 import { VideoCanvas } from '../VideoCanvas';
+import { NewLineChart } from '../NewLineChart';
 // PoseNet
 import {
   drawBoundingBox,
@@ -41,7 +43,11 @@ const useStyles = makeStyles(theme => ({
 const videoWidth = 600;
 const videoHeight = 500;
 
-const datas = [];
+// gets updated every second
+const history = [];
+const subject = new Subject();
+// const fusionShoulders = new Subject();
+// const fusionEyes = new Subject();
 
 const emptyState = { msg: 'Loading...', value: 0.0, status: 'default' };
 // eslint-disable-next-line no-underscore-dangle
@@ -62,6 +68,24 @@ export const PoseNetCamera = () => {
   const [chartDataEye, setChartDataEye] = useState([]);
 
   const [calibrationData, setCalibrationData] = useState([]);
+
+  useEffect(() => {
+    const subscription = subject.subscribe({
+      next: nextObj => {
+        if (appContext.consoleLog) {
+          console.log({
+            time: new Date(nextObj.time).toISOString(),
+            tick: history.length,
+            nextObj,
+          });
+        }
+      },
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [appContext.consoleLog]);
 
   useEffect(() => {
     console.log({ calibrationData });
@@ -103,7 +127,7 @@ export const PoseNetCamera = () => {
         setStatusShoulder(emptyState);
         setStatusEye(emptyState);
         setChartDataShoulder([]);
-        setChartDataEye([]);
+        // setChartDataEye([]);
         stopStreamedVideo();
         clearCanvas();
       }
@@ -112,98 +136,115 @@ export const PoseNetCamera = () => {
   }, [appContext.webCam]);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      if (appContext.webCam && datas.length > appContext.epochCount - 1) {
-        if (datas[datas.length - 1].poseData) {
-          const currentDataKeyPoints = datas
-            .slice(datas.length - appContext.epochCount, datas.length)
-            .map(
-              obj => has(obj, 'poseData.keypoints') && obj.poseData.keypoints,
-            );
-          const timeStamp = Date.now();
-          const leftShoulderEpoch = new EpochPart('leftShoulder', timeStamp);
-          const rightShoulderEpoch = new EpochPart('rightShoulder', timeStamp);
-          const leftEyeEpoch = new EpochPart('leftEye', timeStamp);
-          const rightEyeEpoch = new EpochPart('rightEye', timeStamp);
+    const subscription = subject.subscribe({
+      next: nextObj => {
+        try {
+          const timeStamp = nextObj.time;
+          const cloneHistory = [...history];
+          const tick = cloneHistory.length;
+          if (cloneHistory.length > appContext.epochCount - 1) {
+            if (cloneHistory[cloneHistory.length - 1].poseData) {
+              const slicedHistory = cloneHistory.slice(
+                cloneHistory.length - appContext.epochCount,
+                cloneHistory.length,
+              );
+              const leftShoulderEpoch = new EpochPart(
+                'leftShoulder',
+                timeStamp,
+                tick,
+              );
+              const rightShoulderEpoch = new EpochPart(
+                'rightShoulder',
+                timeStamp,
+                tick,
+              );
+              const leftEyeEpoch = new EpochPart('leftEye', timeStamp, tick);
+              const rightEyeEpoch = new EpochPart('rightEye', timeStamp, tick);
+              // eslint-disable-next-line no-plusplus
+              for (let i = 0; i < slicedHistory.length; i++) {
+                leftShoulderEpoch.extractCoordinates(slicedHistory[i]);
+                rightShoulderEpoch.extractCoordinates(slicedHistory[i]);
+                leftEyeEpoch.extractCoordinates(slicedHistory[i]);
+                rightEyeEpoch.extractCoordinates(slicedHistory[i]);
+              }
+              const shoulderFusion = new EpochFusion(
+                'shoulder',
+                leftShoulderEpoch,
+                rightShoulderEpoch,
+                timeStamp,
+                tick,
+              );
+              const eyeFusion = new EpochFusion(
+                'eye',
+                leftEyeEpoch,
+                rightEyeEpoch,
+                timeStamp,
+                tick,
+              );
 
-          // eslint-disable-next-line no-restricted-syntax
-          for (const t in currentDataKeyPoints) {
-            if (Object.prototype.hasOwnProperty.call(currentDataKeyPoints, t)) {
-              leftShoulderEpoch.extractCoordinates(currentDataKeyPoints[t]);
-              rightShoulderEpoch.extractCoordinates(currentDataKeyPoints[t]);
-              leftEyeEpoch.extractCoordinates(currentDataKeyPoints[t]);
-              rightEyeEpoch.extractCoordinates(currentDataKeyPoints[t]);
+              // OLD: calculate y distance of ONLY latest frame
+              if (appContext.epochMode) {
+                eyeFusion.absDifferenceEpochYThreshold(
+                  thresholdEye,
+                  setStatusEye,
+                );
+                shoulderFusion.absDifferenceEpochYThreshold(
+                  thresholdShoulder,
+                  setStatusShoulder,
+                );
+              } else {
+                eyeFusion.absDifferenceLatestYThreshold(
+                  thresholdEye,
+                  setStatusEye,
+                );
+                shoulderFusion.absDifferenceLatestYThreshold(
+                  thresholdShoulder,
+                  setStatusShoulder,
+                );
+              }
+              if (appContext.consoleLog) {
+                leftShoulderEpoch.logData();
+                rightShoulderEpoch.logData();
+                leftEyeEpoch.logData();
+                rightEyeEpoch.logData();
+                shoulderFusion.logData();
+                eyeFusion.logData();
+              }
+              // PRINT data
+              if (appContext.charts) {
+                shoulderFusion.printAbsDifferenceLatestYCoor(
+                  chartDataShoulder,
+                  setChartDataShoulder,
+                  timeStamp,
+                );
+                eyeFusion.printAbsDifferenceLatestYCoor(
+                  chartDataEye,
+                  setChartDataEye,
+                  timeStamp,
+                );
+              }
+              // TODO: veränderung zur calibration: abs. abstand zu calb zu mean
+              // TODO: schiefhaltung: jetzt über zeit zu threashold mean
             }
           }
-          if (appContext.consoleLog) {
-            leftShoulderEpoch.logData();
-            rightShoulderEpoch.logData();
-            leftEyeEpoch.logData();
-            rightEyeEpoch.logData();
-          }
-          const shoulderFusion = new EpochFusion(
-            'shoulder',
-            leftShoulderEpoch,
-            rightShoulderEpoch,
-            timeStamp,
-          );
-          const eyeFusion = new EpochFusion(
-            'eye',
-            leftEyeEpoch,
-            rightEyeEpoch,
-            timeStamp,
-          );
-          if (appContext.consoleLog) {
-            shoulderFusion.logData();
-            eyeFusion.logData();
-          }
-          // OLD: calculate y distance of ONLY latest frame
-          if (appContext.epochMode) {
-            eyeFusion.absDifferenceEpochYThreshold(thresholdEye, setStatusEye);
-            shoulderFusion.absDifferenceEpochYThreshold(
-              thresholdShoulder,
-              setStatusShoulder,
-            );
-          } else {
-            eyeFusion.absDifferenceLatestYThreshold(thresholdEye, setStatusEye);
-            shoulderFusion.absDifferenceLatestYThreshold(
-              thresholdShoulder,
-              setStatusShoulder,
-            );
-          }
-          // PRINT data
-          if (appContext.charts) {
-            shoulderFusion.printAbsDifferenceLatestYCoor(
-              chartDataShoulder,
-              setChartDataShoulder,
-              timeStamp,
-            );
-            eyeFusion.printAbsDifferenceLatestYCoor(
-              chartDataEye,
-              setChartDataEye,
-              timeStamp,
-            );
-          }
-          // TODO: veränderung zur calibration: abs. abstand zu calb zu mean
-          // TODO: schiefhaltung: jetzt über zeit zu threashold mean
+        } catch (e) {
+          console.log(e);
         }
-      }
-    }, 500);
+      },
+    });
+
     return () => {
-      console.log('unMount');
-      clearTimeout(timer);
+      subscription.unsubscribe();
     };
   }, [
-    thresholdShoulder,
-    thresholdEye,
-    chartDataShoulder,
-    chartDataEye,
-    appContext.webCam,
-    appContext.epochMode,
     appContext.charts,
-    appContext.consoleLogs,
     appContext.consoleLog,
     appContext.epochCount,
+    appContext.epochMode,
+    chartDataEye,
+    chartDataShoulder,
+    thresholdEye,
+    thresholdShoulder,
   ]);
 
   return (
@@ -224,14 +265,21 @@ export const PoseNetCamera = () => {
           variant="contained"
           style={{ margin: '12px' }}
           onClick={() => {
-            if (datas && datas.length > 0 && datas[datas.length - 1].poseData) {
-              const currentPoseData = datas[datas.length - 1].poseData;
+            if (
+              history &&
+              history.length > 0 &&
+              history[history.length - 1].poseData
+            ) {
+              const currentPoseData = history[history.length - 1].poseData;
               setCalibrationData(currentPoseData);
             }
           }}
         >
           Calibrate
         </Button>
+        <div style={{ width: '400px', height: '400px' }}>
+          <NewLineChart data={chartDataShoulder}></NewLineChart>
+        </div>
         <ExpansionPanel
           TransitionProps={{ unmountOnExit: true }}
           style={{ marginRight: '12px', marginLeft: '12px', width: '468px' }}
@@ -263,7 +311,7 @@ export const PoseNetCamera = () => {
                 part="eye"
               />
               {appContext.webCam && !loading && appContext.charts && (
-                <LineChart data={chartDataEye} part="eye" />
+                <LineChart data={get(chartDataEye, '[0].data')} part="eye" />
               )}
             </Box>
           </ExpansionPanelDetails>
@@ -299,7 +347,10 @@ export const PoseNetCamera = () => {
                 part="shoulder"
               />
               {appContext.webCam && !loading && appContext.charts && (
-                <LineChart data={chartDataShoulder} part="shoulder" />
+                <LineChart
+                  data={get(chartDataShoulder, '[0].data')}
+                  part="shoulder"
+                />
               )}
             </Box>
           </ExpansionPanelDetails>
@@ -487,8 +538,11 @@ function detectPoseInRealTime(video, _net) {
 
       // End monitoring code for frames per second
       // stats.end();
-
-      datas.push({ time: Date.now(), poseData: poses[0] });
+      if (poses[0] !== undefined) {
+        const newData = { time: Date.now(), poseData: poses[0] };
+        history.push(newData);
+        subject.next(newData);
+      }
       // console.log(datas)
       requestAnimationFrame(poseDetectionFrame);
     } catch (e) {
@@ -502,34 +556,34 @@ function detectPoseInRealTime(video, _net) {
  * Kicks off the demo by loading the posenet model, finding and loading
  * available camera devices, and setting off the detectPoseInRealTime function.
  */
-export async function bindPage() {
-  // toggleLoadingUI(true);
-  const net = await posenet.load({
-    architecture: guiState.input.architecture,
-    outputStride: guiState.input.outputStride,
-    inputResolution: guiState.input.inputResolution,
-    multiplier: guiState.input.multiplier,
-    quantBytes: guiState.input.quantBytes,
-  });
-  // toggleLoadingUI(false);
+// export async function bindPage() {
+//   // toggleLoadingUI(true);
+//   const net = await posenet.load({
+//     architecture: guiState.input.architecture,
+//     outputStride: guiState.input.outputStride,
+//     inputResolution: guiState.input.inputResolution,
+//     multiplier: guiState.input.multiplier,
+//     quantBytes: guiState.input.quantBytes,
+//   });
+//   // toggleLoadingUI(false);
 
-  let video;
+//   let video;
 
-  try {
-    video = await loadVideo();
-  } catch (e) {
-    const info = document.getElementById('info');
-    info.textContent =
-      'this browser does not support video capture,' +
-      'or this device does not have a camera';
-    info.style.display = 'block';
-    throw e;
-  }
+//   try {
+//     video = await loadVideo();
+//   } catch (e) {
+//     const info = document.getElementById('info');
+//     info.textContent =
+//       'this browser does not support video capture,' +
+//       'or this device does not have a camera';
+//     info.style.display = 'block';
+//     throw e;
+//   }
 
-  // setupGui([], net);
-  // setupFPS();
-  detectPoseInRealTime(video, net);
-}
+//   // setupGui([], net);
+//   // setupFPS();
+//   detectPoseInRealTime(video, net);
+// }
 
 if (typeof window !== `undefined`) {
   navigator.getUserMedia =

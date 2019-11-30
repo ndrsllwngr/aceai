@@ -15,9 +15,14 @@ export class EpochPart {
 
   yMean = undefined;
 
-  constructor(part, createdAt) {
+  createdAt = undefined;
+
+  tick = undefined;
+
+  constructor(part, createdAt, tick) {
     this.part = part;
     this.createdAt = createdAt;
+    this.tick = tick;
   }
 
   addX(val) {
@@ -28,9 +33,19 @@ export class EpochPart {
     this.y.push(val);
   }
 
+  clearEpochPart() {
+    this.x = [];
+    this.y = [];
+    this.xSum = undefined;
+    this.ySum = undefined;
+    this.xMean = undefined;
+    this.yMean = undefined;
+  }
+
   extractCoordinates(data) {
     // console.log('extractCoordinates', data);
-    const partData = data.filter(obj => obj.part === this.part)[0];
+    const keypoints = get(data, `poseData.keypoints`);
+    const partData = keypoints.filter(obj => obj.part === this.part)[0];
     this.addX(get(partData, `position.x`));
     this.addY(get(partData, `position.y`));
   }
@@ -71,7 +86,8 @@ export class EpochPart {
     // eslint-disable-next-line no-console
     console.log({
       part: this.part,
-      createdAt: this.createdAt,
+      createdAt: new Date(this.createdAt).toISOString(),
+      tick: this.tick,
       x: this.x,
       y: this.y,
       xSum: this.xSum,

@@ -1,4 +1,9 @@
 // import get from 'lodash/get';
+import find from 'lodash/find';
+// import * as time from 'd3-time';
+// import { timeFormat } from 'd3-time-format';
+// import set from 'lodash/set';
+// import remove from 'lodash/remove';
 
 export class EpochFusion {
   name = undefined;
@@ -17,11 +22,16 @@ export class EpochFusion {
 
   yEpochAbsDiff = undefined;
 
-  constructor(name, part1, part2, createdAt) {
+  createdAt = undefined;
+
+  tick = undefined;
+
+  constructor(name, part1, part2, createdAt, tick) {
     this.name = name;
     this.part1 = part1;
     this.part2 = part2;
     this.createdAt = createdAt;
+    this.tick = tick;
   }
 
   absDifferenceLatestXCoor() {
@@ -86,19 +96,43 @@ export class EpochFusion {
     }
   }
 
-  // TODO fix plotting performance
-  printAbsDifferenceLatestYCoor(state, callback, timeStamp) {
+  // data looks like
+  // [
+  //   {
+  //     "id": "japan",
+  //     "color": "hsl(22, 70%, 50%)",
+  //     "data": [
+  //       {
+  //         "x": "plane",
+  //         "y": 212
+  //       },
+  //       ...
+  //     ],
+  //   },
+  // ]
+  printAbsDifferenceLatestYCoor(state, callback, timeStamp, color = '#000000') {
     const copy = [...state];
-    copy.push({
-      x: timeStamp,
+    const date = new Date();
+    // eslint-disable-next-line no-console
+    // console.log({ copy, state });
+    let chartObj = find(copy, { id: this.name });
+    if (chartObj === undefined) {
+      chartObj = {
+        id: `${this.name}`,
+        color,
+        data: [],
+      };
+      copy.push(chartObj);
+    }
+    const dataArr = chartObj.data;
+    if (dataArr.length >= 20) {
+      dataArr.shift();
+    }
+    dataArr.push({
+      x: date,
       y: this.absDifferenceLatestYCoor().toFixed(2),
     });
-    if (copy.length > 19) {
-      const copySliced = copy.slice(copy.length - 20, copy.length);
-      callback(copySliced);
-    } else {
-      callback(copy);
-    }
+    callback(copy);
   }
 
   logData() {
@@ -107,7 +141,8 @@ export class EpochFusion {
     // eslint-disable-next-line no-console
     console.log({
       name: this.name,
-      createdAt: this.createdAt,
+      createdAt: new Date(this.createdAt).toISOString(),
+      tick: this.tick,
       xLatestAbsDiff: this.xLatestAbsDiff,
       yLatestAbsDiff: this.yLatestAbsDiff,
     });
