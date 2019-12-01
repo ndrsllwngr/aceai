@@ -13,15 +13,23 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Typography from '@material-ui/core/Typography';
 import { Subject } from 'rxjs';
 // import get from 'lodash/get';
+import {
+  XYPlot,
+  XAxis,
+  YAxis,
+  HorizontalGridLines,
+  VerticalGridLines,
+  LineSeries,
+  AreaSeries,
+} from 'react-vis';
 
 import { EpochFusion } from './epochFusion';
 import { EpochPart } from './epochPart';
-// import { LineChart } from '../LineChart';
 import { useApp } from '../ctx-app';
 import { ThresholdSlider } from '../ThresholdSlider';
 import { PostureStatus } from '../PostureStatus';
 import { VideoCanvas } from '../VideoCanvas';
-import { NewLineChart } from '../NewLineChart';
+
 // PoseNet
 import {
   drawBoundingBox,
@@ -29,6 +37,8 @@ import {
   drawSkeleton,
   isMobile,
 } from './utils';
+
+import '../../../node_modules/react-vis/dist/style.css';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -212,16 +222,16 @@ export const PoseNetCamera = () => {
               }
               // PRINT data
               if (appContext.charts) {
-                const chartTime = new Date();
+                // const chartTime = new Date(timeStamp);
                 shoulderFusion.printAbsDifferenceLatestYCoor(
                   chartDataShoulder,
                   setChartDataShoulder,
-                  chartTime,
+                  timeStamp,
                 );
                 eyeFusion.printAbsDifferenceLatestYCoor(
                   chartDataEye,
                   setChartDataEye,
-                  chartTime,
+                  timeStamp,
                 );
               }
               // TODO: veränderung zur calibration: abs. abstand zu calb zu mean
@@ -278,7 +288,6 @@ export const PoseNetCamera = () => {
         >
           Calibrate
         </Button>
-
         <ExpansionPanel
           TransitionProps={{ unmountOnExit: true }}
           style={{ marginRight: '12px', marginLeft: '12px', width: '468px' }}
@@ -309,14 +318,42 @@ export const PoseNetCamera = () => {
                 setThreshold={setThresholdEye}
                 part="eye"
               />
-              {/* {appContext.webCam && !loading && appContext.charts && (
-                <LineChart data={get(chartDataEye, '[0].data')} part="eye" />
-              )} */}
-              {appContext.charts && (
-                <div style={{ width: '400px', height: '400px' }}>
-                  <NewLineChart data={chartDataEye}></NewLineChart>
-                </div>
-              )}
+              <div style={{ width: '400px', height: '400px' }}>
+                <XYPlot
+                  width={300}
+                  height={300}
+                  yDomain={[0, 100]}
+                  margin={{ bottom: 100 }}
+                >
+                  <HorizontalGridLines />
+                  <VerticalGridLines />
+                  <XAxis
+                    attr="x"
+                    attrAxis="y"
+                    orientation="bottom"
+                    // eslint-disable-next-line react/jsx-no-bind
+                    tickFormat={function tickFormat(d) {
+                      return new Date(d).toLocaleTimeString();
+                    }}
+                    tickLabelAngle="-60"
+                  />
+                  <YAxis />
+                  <AreaSeries
+                    data={chartDataEye}
+                    opacity={0.25}
+                    stroke="transparent"
+                    style={{}}
+                  />
+                  <LineSeries
+                    curve={null}
+                    data={chartDataEye}
+                    opacity={1}
+                    stroke="#12939a"
+                    strokeStyle="solid"
+                    style={{}}
+                  />
+                </XYPlot>
+              </div>
             </Box>
           </ExpansionPanelDetails>
         </ExpansionPanel>
@@ -350,17 +387,42 @@ export const PoseNetCamera = () => {
                 setThreshold={setThresholdShoulder}
                 part="shoulder"
               />
-              {/* {appContext.webCam && !loading && appContext.charts && (
-                <LineChart
-                  data={get(chartDataShoulder, '[0].data')}
-                  part="shoulder"
-                />
-              )} */}
-              {appContext.charts && (
-                <div style={{ width: '400px', height: '400px' }}>
-                  <NewLineChart data={chartDataShoulder}></NewLineChart>
-                </div>
-              )}
+              <div style={{ width: '400px', height: '400px' }}>
+                <XYPlot
+                  width={300}
+                  height={300}
+                  yDomain={[0, 100]}
+                  margin={{ bottom: 100 }}
+                >
+                  <HorizontalGridLines />
+                  <VerticalGridLines />
+                  <XAxis
+                    attr="x"
+                    attrAxis="y"
+                    orientation="bottom"
+                    // eslint-disable-next-line react/jsx-no-bind
+                    tickFormat={function tickFormat(d) {
+                      return new Date(d).toLocaleTimeString();
+                    }}
+                    tickLabelAngle="-60"
+                  />
+                  <YAxis />
+                  <AreaSeries
+                    data={chartDataShoulder}
+                    opacity={0.25}
+                    stroke="transparent"
+                    style={{}}
+                  />
+                  <LineSeries
+                    curve={null}
+                    data={chartDataShoulder}
+                    opacity={1}
+                    stroke="#12939a"
+                    strokeStyle="solid"
+                    style={{}}
+                  />
+                </XYPlot>
+              </div>
             </Box>
           </ExpansionPanelDetails>
         </ExpansionPanel>

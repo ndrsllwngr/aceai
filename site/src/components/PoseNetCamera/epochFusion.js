@@ -1,5 +1,5 @@
 // import get from 'lodash/get';
-import find from 'lodash/find';
+// import find from 'lodash/find';
 // import * as time from 'd3-time';
 // import { timeFormat } from 'd3-time-format';
 // import set from 'lodash/set';
@@ -97,41 +97,22 @@ export class EpochFusion {
   }
 
   // data looks like
-  // [
-  //   {
-  //     "id": "japan",
-  //     "color": "hsl(22, 70%, 50%)",
-  //     "data": [
-  //       {
-  //         "x": "plane",
-  //         "y": 212
-  //       },
-  //       ...
-  //     ],
-  //   },
-  // ]
-  printAbsDifferenceLatestYCoor(state, callback, chartTime, color = '#000000') {
-    const copy = [...state];
+  // const data = [
+  //   {x: 0, y: 8},
+  //        ...
+  //   {x: 9, y: 0}
+  // ];
+  printAbsDifferenceLatestYCoor(state, callback, chartTime) {
+    const copyArr = [...state];
     // eslint-disable-next-line no-console
-    // console.log({ copy, state });
-    let chartObj = find(copy, { id: this.name });
-    if (chartObj === undefined) {
-      chartObj = {
-        id: `${this.name}`,
-        color,
-        data: [],
-      };
-      copy.push(chartObj);
+    if (copyArr.length >= 50) {
+      copyArr.shift();
     }
-    const dataArr = chartObj.data;
-    if (dataArr.length >= 20) {
-      dataArr.shift();
-    }
-    dataArr.push({
+    copyArr.push({
       x: chartTime,
       y: this.absDifferenceLatestYCoor().toFixed(2),
     });
-    callback(copy);
+    callback(copyArr);
   }
 
   logData() {
