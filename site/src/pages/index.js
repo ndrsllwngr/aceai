@@ -6,12 +6,14 @@ import { AppProvider } from '../components/ctx-app';
 
 const IndexPage = () => {
   return (
+    // <React.StrictMode>
     <AppProvider>
       <Layout>
         <SEO title="Home" />
         <PoseNetCamera />
       </Layout>
     </AppProvider>
+    // </React.StrictMode>
   );
 };
 

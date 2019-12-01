@@ -98,13 +98,18 @@ export const PoseNetCamera = () => {
   }, [appContext.consoleLog]);
 
   useEffect(() => {
-    console.log({ calibrationData });
+    if (calibrationData.length > 0) {
+      console.log({ calibrationData });
+    }
   }, [calibrationData]);
 
   useEffect(() => {
     if (appContext.webCam) {
       // eslint-disable-next-line no-inner-declarations
       async function bind() {
+        if (appContext.webCam === false) {
+          return;
+        }
         setLoading(true);
         const net = await posenet.load({
           architecture: guiState.input.architecture,
@@ -139,7 +144,7 @@ export const PoseNetCamera = () => {
         setChartDataShoulder([]);
         setChartDataEye([]);
         stopStreamedVideo();
-        clearCanvas();
+        // clearCanvas();
       }
       bind2();
     }
@@ -335,7 +340,7 @@ export const PoseNetCamera = () => {
                     tickFormat={function tickFormat(d) {
                       return new Date(d).toLocaleTimeString();
                     }}
-                    tickLabelAngle="-60"
+                    tickLabelAngle={-60}
                   />
                   <YAxis />
                   <AreaSeries
@@ -404,7 +409,7 @@ export const PoseNetCamera = () => {
                     tickFormat={function tickFormat(d) {
                       return new Date(d).toLocaleTimeString();
                     }}
-                    tickLabelAngle="-60"
+                    tickLabelAngle={-60}
                   />
                   <YAxis />
                   <AreaSeries
@@ -477,18 +482,20 @@ function stopStreamedVideo() {
     try {
       _streamCopy.stop(); // if this method doesn't exist, the catch will be executed.
     } catch (e) {
-      _streamCopy.getVideoTracks()[0].stop(); // then stop the first video track of the stream
+      if (_streamCopy && _streamCopy.getVideoTracks() !== null) {
+        _streamCopy.getVideoTracks()[0].stop(); // then stop the first video track of the stream
+      }
     }
   } catch (e) {
     console.log(e);
   }
 }
 
-function clearCanvas() {
-  const canvas = document.getElementById('output');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, videoWidth, videoHeight);
-}
+// function clearCanvas() {
+//   const canvas = document.getElementById('output');
+//   const ctx = canvas.getContext('2d');
+//   ctx.clearRect(0, 0, videoWidth, videoHeight);
+// }
 
 const defaultQuantBytes = 4;
 

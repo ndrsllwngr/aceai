@@ -180,7 +180,7 @@ const Layout = ({ children }) => {
             BodyPose
             <Typography
               variant="overline"
-              display="inline-block"
+              display="inline"
               style={{
                 fontSize: '11px',
                 letterSpacing: '0.33px',
@@ -207,7 +207,7 @@ const Layout = ({ children }) => {
             />
 
             <IconButton
-              color="#222"
+              color="default"
               aria-label="open drawer"
               edge="end"
               onClick={handleDrawerOpen}
