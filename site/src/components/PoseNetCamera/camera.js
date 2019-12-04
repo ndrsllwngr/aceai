@@ -25,10 +25,12 @@ import {
 
 import { EpochFusion } from './epochFusion';
 import { EpochPart } from './epochPart';
+import { TickObject } from './tickObject';
 import { useApp } from '../ctx-app';
 import { ThresholdSlider } from '../ThresholdSlider';
 import { PostureStatus } from '../PostureStatus';
 import { VideoCanvas } from '../VideoCanvas';
+import { extractPointObj } from './tickUtil';
 
 // PoseNet
 import {
@@ -239,6 +241,58 @@ export const PoseNetCamera = () => {
                   timeStamp,
                 );
               }
+              // TODO: veränderung zur calibration: abs. abstand zu calb zu mean
+              // TODO: schiefhaltung: jetzt über zeit zu threashold mean
+            }
+          }
+        } catch (e) {
+          console.log(e);
+        }
+      },
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [
+    appContext.charts,
+    appContext.consoleLog,
+    appContext.epochCount,
+    appContext.epochMode,
+    chartDataEye,
+    chartDataShoulder,
+    thresholdEye,
+    thresholdShoulder,
+  ]);
+
+  useEffect(() => {
+    const subscription = subject.subscribe({
+      next: nextObj => {
+        try {
+          const timeStamp = nextObj.time;
+          const cloneHistory = [...history];
+          const tick = cloneHistory.length;
+          if (cloneHistory.length > 0) {
+            if (cloneHistory[cloneHistory.length - 1].poseData) {
+              const lastHistoryDataObject =
+                cloneHistory[cloneHistory.length - 1];
+
+              const tickObjectShoulder = new TickObject(
+                'shoulder',
+                timeStamp,
+                tick,
+                extractPointObj('leftShoulder', lastHistoryDataObject),
+                extractPointObj('rightShoulder', lastHistoryDataObject),
+              );
+              const tickObjectEye = new TickObject(
+                'eye',
+                timeStamp,
+                tick,
+                extractPointObj('leftEye', lastHistoryDataObject),
+                extractPointObj('rightEye', lastHistoryDataObject),
+              );
+              tickObjectShoulder.logData();
+              tickObjectEye.logData();
               // TODO: veränderung zur calibration: abs. abstand zu calb zu mean
               // TODO: schiefhaltung: jetzt über zeit zu threashold mean
             }

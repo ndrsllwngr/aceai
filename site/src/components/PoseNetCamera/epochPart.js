@@ -25,6 +25,10 @@ export class EpochPart {
     this.tick = tick;
   }
 
+  getPointObj() {
+    return { x: this.x[this.x.length - 1], y: this.y[this.y.length - 1] };
+  }
+
   addX(val) {
     this.x.push(val);
   }
