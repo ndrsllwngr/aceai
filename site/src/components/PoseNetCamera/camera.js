@@ -23,8 +23,8 @@ import {
   AreaSeries,
 } from 'react-vis';
 
-import { EpochFusion } from './epochFusion';
-import { EpochPart } from './epochPart';
+// import { EpochFusion } from './epochFusion';
+// import { EpochPart } from './epochPart';
 import { TickObject } from './tickObject';
 import { useApp } from '../ctx-app';
 import { ThresholdSlider } from '../ThresholdSlider';
@@ -58,8 +58,10 @@ const videoHeight = 500;
 // gets updated every second
 const history = [];
 const subject = new Subject();
-// const fusionShoulders = new Subject();
-// const fusionEyes = new Subject();
+const historyShoulder = [];
+const subjectShoulder = new Subject();
+const historyEye = [];
+const subjectEye = new Subject();
 
 const emptyState = { msg: 'Loading...', value: 0.0, status: 'default' };
 // eslint-disable-next-line no-underscore-dangle
@@ -81,30 +83,7 @@ export const PoseNetCamera = () => {
 
   const [calibrationData, setCalibrationData] = useState([]);
 
-  useEffect(() => {
-    const subscription = subject.subscribe({
-      next: nextObj => {
-        if (appContext.consoleLog) {
-          console.log({
-            time: new Date(nextObj.time).toISOString(),
-            tick: history.length,
-            nextObj,
-          });
-        }
-      },
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [appContext.consoleLog]);
-
-  useEffect(() => {
-    if (calibrationData.length > 0) {
-      console.log({ calibrationData });
-    }
-  }, [calibrationData]);
-
+  // POWER POSENET
   useEffect(() => {
     if (appContext.webCam) {
       // eslint-disable-next-line no-inner-declarations
@@ -153,100 +132,21 @@ export const PoseNetCamera = () => {
   }, [appContext.webCam]);
 
   useEffect(() => {
+    if (calibrationData.length > 0) {
+      console.log({ calibrationData });
+    }
+  }, [calibrationData]);
+
+  // LOG POSENET DATA
+  useEffect(() => {
     const subscription = subject.subscribe({
       next: nextObj => {
-        try {
-          const timeStamp = nextObj.time;
-          const cloneHistory = [...history];
-          const tick = cloneHistory.length;
-          if (cloneHistory.length > appContext.epochCount - 1) {
-            if (cloneHistory[cloneHistory.length - 1].poseData) {
-              const slicedHistory = cloneHistory.slice(
-                cloneHistory.length - appContext.epochCount,
-                cloneHistory.length,
-              );
-              const leftShoulderEpoch = new EpochPart(
-                'leftShoulder',
-                timeStamp,
-                tick,
-              );
-              const rightShoulderEpoch = new EpochPart(
-                'rightShoulder',
-                timeStamp,
-                tick,
-              );
-              const leftEyeEpoch = new EpochPart('leftEye', timeStamp, tick);
-              const rightEyeEpoch = new EpochPart('rightEye', timeStamp, tick);
-              // eslint-disable-next-line no-plusplus
-              for (let i = 0; i < slicedHistory.length; i++) {
-                leftShoulderEpoch.extractCoordinates(slicedHistory[i]);
-                rightShoulderEpoch.extractCoordinates(slicedHistory[i]);
-                leftEyeEpoch.extractCoordinates(slicedHistory[i]);
-                rightEyeEpoch.extractCoordinates(slicedHistory[i]);
-              }
-              const shoulderFusion = new EpochFusion(
-                'shoulder',
-                leftShoulderEpoch,
-                rightShoulderEpoch,
-                timeStamp,
-                tick,
-              );
-              const eyeFusion = new EpochFusion(
-                'eye',
-                leftEyeEpoch,
-                rightEyeEpoch,
-                timeStamp,
-                tick,
-              );
-
-              // OLD: calculate y distance of ONLY latest frame
-              if (appContext.epochMode) {
-                eyeFusion.absDifferenceEpochYThreshold(
-                  thresholdEye,
-                  setStatusEye,
-                );
-                shoulderFusion.absDifferenceEpochYThreshold(
-                  thresholdShoulder,
-                  setStatusShoulder,
-                );
-              } else {
-                eyeFusion.absDifferenceLatestYThreshold(
-                  thresholdEye,
-                  setStatusEye,
-                );
-                shoulderFusion.absDifferenceLatestYThreshold(
-                  thresholdShoulder,
-                  setStatusShoulder,
-                );
-              }
-              if (appContext.consoleLog) {
-                leftShoulderEpoch.logData();
-                rightShoulderEpoch.logData();
-                leftEyeEpoch.logData();
-                rightEyeEpoch.logData();
-                shoulderFusion.logData();
-                eyeFusion.logData();
-              }
-              // PRINT data
-              if (appContext.charts) {
-                // const chartTime = new Date(timeStamp);
-                shoulderFusion.printAbsDifferenceLatestYCoor(
-                  chartDataShoulder,
-                  setChartDataShoulder,
-                  timeStamp,
-                );
-                eyeFusion.printAbsDifferenceLatestYCoor(
-                  chartDataEye,
-                  setChartDataEye,
-                  timeStamp,
-                );
-              }
-              // TODO: veränderung zur calibration: abs. abstand zu calb zu mean
-              // TODO: schiefhaltung: jetzt über zeit zu threashold mean
-            }
-          }
-        } catch (e) {
-          console.log(e);
+        if (appContext.consoleLog) {
+          console.log({
+            time: new Date(nextObj.time).toISOString(),
+            tick: history.length,
+            nextObj,
+          });
         }
       },
     });
@@ -254,17 +154,14 @@ export const PoseNetCamera = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [
-    appContext.charts,
-    appContext.consoleLog,
-    appContext.epochCount,
-    appContext.epochMode,
-    chartDataEye,
-    chartDataShoulder,
-    thresholdEye,
-    thresholdShoulder,
-  ]);
+  }, [appContext.consoleLog]);
 
+  // TODO: Change STATUS output to angle, switch threshold to angle?
+  // TODO: Add calibration functionality (button, calc D_c to mean of Y_(L-r))
+  // TODO: Over time? Time counter!
+  // TODO: Revamp UI
+
+  // CALCULATE TICK OBJECTS
   useEffect(() => {
     const subscription = subject.subscribe({
       next: nextObj => {
@@ -291,10 +188,15 @@ export const PoseNetCamera = () => {
                 extractPointObj('leftEye', lastHistoryDataObject),
                 extractPointObj('rightEye', lastHistoryDataObject),
               );
-              tickObjectShoulder.logData();
-              tickObjectEye.logData();
-              // TODO: veränderung zur calibration: abs. abstand zu calb zu mean
-              // TODO: schiefhaltung: jetzt über zeit zu threashold mean
+              historyShoulder.push(tickObjectShoulder);
+              subjectShoulder.next(tickObjectShoulder);
+              historyEye.push(tickObjectEye);
+              subjectEye.next(tickObjectEye);
+
+              if (appContext.consoleLog) {
+                tickObjectShoulder.logData();
+                tickObjectEye.logData();
+              }
             }
           }
         } catch (e) {
@@ -306,16 +208,85 @@ export const PoseNetCamera = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [
-    appContext.charts,
-    appContext.consoleLog,
-    appContext.epochCount,
-    appContext.epochMode,
-    chartDataEye,
-    chartDataShoulder,
-    thresholdEye,
-    thresholdShoulder,
-  ]);
+  }, [appContext.consoleLog]);
+
+  // UPDATE STATUS, CHART of shoulder
+  useEffect(() => {
+    const subscription = subjectShoulder.subscribe({
+      next: nextObj => {
+        if (Math.abs(nextObj.differenceY) > thresholdShoulder) {
+          setStatusShoulder({
+            msg: `Bad (${nextObj.name})`,
+            value: nextObj.differenceY.toFixed(2),
+            status: 'bad',
+          });
+        } else {
+          setStatusShoulder({
+            msg: `Good (${nextObj.name})`,
+            value: nextObj.differenceY.toFixed(2),
+            status: 'good',
+          });
+        }
+        // PRINT data
+        if (appContext.charts) {
+          const copyArr = [...chartDataShoulder];
+          // Chart window
+          // eslint-disable-next-line no-console
+          if (copyArr.length >= 50) {
+            copyArr.shift();
+          }
+          copyArr.push({
+            x: nextObj.createdAt,
+            y: nextObj.differenceY,
+          });
+          setChartDataShoulder(copyArr);
+        }
+      },
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [appContext.charts, chartDataShoulder, thresholdShoulder]);
+
+  // UPDATE STATUS, CHART of eye
+  useEffect(() => {
+    const subscription = subjectEye.subscribe({
+      next: nextObj => {
+        if (Math.abs(nextObj.differenceY) > thresholdEye) {
+          setStatusEye({
+            msg: `Bad (${nextObj.name})`,
+            value: nextObj.differenceY.toFixed(2),
+            status: 'bad',
+          });
+        } else {
+          setStatusEye({
+            msg: `Good (${nextObj.name})`,
+            value: nextObj.differenceY.toFixed(2),
+            status: 'good',
+          });
+        }
+        // PRINT data
+        if (appContext.charts) {
+          const copyArr = [...chartDataEye];
+          // Chart window
+          // eslint-disable-next-line no-console
+          if (copyArr.length >= 50) {
+            copyArr.shift();
+          }
+          copyArr.push({
+            x: nextObj.createdAt,
+            y: nextObj.differenceY,
+          });
+          setChartDataEye(copyArr);
+        }
+      },
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [appContext.charts, chartDataEye, thresholdEye]);
 
   return (
     <Grid container direction="row" justify="center" alignItems="flex-start">
@@ -381,7 +352,7 @@ export const PoseNetCamera = () => {
                 <XYPlot
                   width={300}
                   height={300}
-                  yDomain={[0, 100]}
+                  yDomain={[-50, 50]}
                   margin={{ bottom: 100 }}
                 >
                   <HorizontalGridLines />
@@ -450,7 +421,7 @@ export const PoseNetCamera = () => {
                 <XYPlot
                   width={300}
                   height={300}
-                  yDomain={[0, 100]}
+                  yDomain={[-150, 150]}
                   margin={{ bottom: 100 }}
                 >
                   <HorizontalGridLines />
@@ -723,3 +694,116 @@ if (typeof window !== `undefined`) {
     navigator.webkitGetUserMedia ||
     navigator.mozGetUserMedia;
 }
+
+// useEffect(() => {
+//   const subscription = subject.subscribe({
+//     next: nextObj => {
+//       try {
+//         const timeStamp = nextObj.time;
+//         const cloneHistory = [...history];
+//         const tick = cloneHistory.length;
+//         if (cloneHistory.length > appContext.epochCount - 1) {
+//           if (cloneHistory[cloneHistory.length - 1].poseData) {
+//             const slicedHistory = cloneHistory.slice(
+//               cloneHistory.length - appContext.epochCount,
+//               cloneHistory.length,
+//             );
+//             const leftShoulderEpoch = new EpochPart(
+//               'leftShoulder',
+//               timeStamp,
+//               tick,
+//             );
+//             const rightShoulderEpoch = new EpochPart(
+//               'rightShoulder',
+//               timeStamp,
+//               tick,
+//             );
+//             const leftEyeEpoch = new EpochPart('leftEye', timeStamp, tick);
+//             const rightEyeEpoch = new EpochPart('rightEye', timeStamp, tick);
+//             // eslint-disable-next-line no-plusplus
+//             for (let i = 0; i < slicedHistory.length; i++) {
+//               leftShoulderEpoch.extractCoordinates(slicedHistory[i]);
+//               rightShoulderEpoch.extractCoordinates(slicedHistory[i]);
+//               leftEyeEpoch.extractCoordinates(slicedHistory[i]);
+//               rightEyeEpoch.extractCoordinates(slicedHistory[i]);
+//             }
+//             const shoulderFusion = new EpochFusion(
+//               'shoulder',
+//               leftShoulderEpoch,
+//               rightShoulderEpoch,
+//               timeStamp,
+//               tick,
+//             );
+//             const eyeFusion = new EpochFusion(
+//               'eye',
+//               leftEyeEpoch,
+//               rightEyeEpoch,
+//               timeStamp,
+//               tick,
+//             );
+
+//             // OLD: calculate y distance of ONLY latest frame
+//             if (appContext.epochMode) {
+//               eyeFusion.absDifferenceEpochYThreshold(
+//                 thresholdEye,
+//                 setStatusEye,
+//               );
+//               shoulderFusion.absDifferenceEpochYThreshold(
+//                 thresholdShoulder,
+//                 setStatusShoulder,
+//               );
+//             } else {
+//               eyeFusion.absDifferenceLatestYThreshold(
+//                 thresholdEye,
+//                 setStatusEye,
+//               );
+//               shoulderFusion.absDifferenceLatestYThreshold(
+//                 thresholdShoulder,
+//                 setStatusShoulder,
+//               );
+//             }
+//             if (appContext.consoleLog) {
+//               leftShoulderEpoch.logData();
+//               rightShoulderEpoch.logData();
+//               leftEyeEpoch.logData();
+//               rightEyeEpoch.logData();
+//               shoulderFusion.logData();
+//               eyeFusion.logData();
+//             }
+//             // PRINT data
+//             // if (appContext.charts) {
+//             //   // const chartTime = new Date(timeStamp);
+//             //   shoulderFusion.printAbsDifferenceLatestYCoor(
+//             //     chartDataShoulder,
+//             //     setChartDataShoulder,
+//             //     timeStamp,
+//             //   );
+//             //   eyeFusion.printAbsDifferenceLatestYCoor(
+//             //     chartDataEye,
+//             //     setChartDataEye,
+//             //     timeStamp,
+//             //   );
+//             // }
+//             // TODO: veränderung zur calibration: abs. abstand zu calb zu mean
+//             // TODO: schiefhaltung: jetzt über zeit zu threashold mean
+//           }
+//         }
+//       } catch (e) {
+//         console.log(e);
+//       }
+//     },
+//   });
+
+//   return () => {
+//     subscription.unsubscribe();
+//   };
+// }, [
+//   appContext.charts,
+//   appContext.consoleLog,
+//   appContext.epochCount,
+//   appContext.epochMode,
+//   chartDataEye,
+//   chartDataShoulder,
+//   thresholdEye,
+//   thresholdShoulder,
+// ]);

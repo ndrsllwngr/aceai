@@ -126,14 +126,17 @@ export class TickObject {
     // this.absDifferenceLatestXCoor();
     // this.absDifferenceLatestYCoor();
     // eslint-disable-next-line no-console
-    console.log(
-      this.tick,
-      this.name,
-      this.angleOfVector,
-      this.lengthOfVector,
-      this.differenceX,
-      this.differenceY,
-    );
+    console.log({
+      tick: this.tick,
+      name: this.name,
+      angleOfVector: this.angleOfVector,
+      lengthOfVector: this.lengthOfVector,
+      differenceX: this.differenceX,
+      differenceY: this.differenceY,
+      rightPoint: this.rightPoint,
+      leftPoint: this.leftPoint,
+      createdAt: this.createdAt,
+    });
     // console.log({
     //   name: this.name,
     //   createdAt: new Date(this.createdAt).toISOString(),
