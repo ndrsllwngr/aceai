@@ -71,57 +71,6 @@ export class TickObject {
     return this.rightPoint.y - this.leftPoint.y;
   }
 
-  absDifferenceLatestYThreshold(threshold, callback) {
-    if (this.absDifferenceLatestYCoor() > threshold) {
-      callback({
-        msg: `Bad (${this.name})`,
-        value: this.yLatestAbsDiff.toFixed(2),
-        status: 'bad',
-      });
-    } else {
-      callback({
-        msg: `Good (${this.name})`,
-        value: this.yLatestAbsDiff.toFixed(2),
-        status: 'good',
-      });
-    }
-  }
-
-  absDifferenceEpochYThreshold(threshold, callback) {
-    if (this.absDifferenceEpochYCoor() > threshold) {
-      callback({
-        msg: `Bad (${this.name}) EPOCH MODE`,
-        value: this.yEpochAbsDiff.toFixed(2),
-        status: 'bad',
-      });
-    } else {
-      callback({
-        msg: `Good (${this.name}) EPOCH MODE`,
-        value: this.yEpochAbsDiff.toFixed(2),
-        status: 'good',
-      });
-    }
-  }
-
-  // data looks like
-  // const data = [
-  //   {x: 0, y: 8},
-  //        ...
-  //   {x: 9, y: 0}
-  // ];
-  printAbsDifferenceLatestYCoor(state, callback, chartTime) {
-    const copyArr = [...state];
-    // eslint-disable-next-line no-console
-    if (copyArr.length >= 50) {
-      copyArr.shift();
-    }
-    copyArr.push({
-      x: chartTime,
-      y: this.absDifferenceLatestYCoor().toFixed(2),
-    });
-    callback(copyArr);
-  }
-
   logData() {
     // this.absDifferenceLatestXCoor();
     // this.absDifferenceLatestYCoor();

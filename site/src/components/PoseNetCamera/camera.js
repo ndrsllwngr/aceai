@@ -12,6 +12,7 @@ import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Typography from '@material-ui/core/Typography';
 import { Subject } from 'rxjs';
+import { Timer } from 'easytimer.js';
 // import get from 'lodash/get';
 import {
   XYPlot,
@@ -30,7 +31,7 @@ import { useApp } from '../ctx-app';
 import { ThresholdSlider } from '../ThresholdSlider';
 import { PostureStatus } from '../PostureStatus';
 import { VideoCanvas } from '../VideoCanvas';
-import { extractPointObj } from './tickUtil';
+import { extractPointObj, calcMeanForTimeWindow } from './tickUtil';
 
 // PoseNet
 import {
@@ -54,6 +55,13 @@ const useStyles = makeStyles(theme => ({
 
 const videoWidth = 600;
 const videoHeight = 500;
+
+// const timerSitting = new Timer();
+// const timerPause = new Timer();
+const timerGoodPosture = new Timer();
+const timerBadPosture = new Timer();
+const timerShoulderMeanBadPosture = new Timer();
+const timerEyeMeanBadPosture = new Timer();
 
 // gets updated every second
 const history = [];
@@ -197,6 +205,50 @@ export const PoseNetCamera = () => {
                 tickObjectShoulder.logData();
                 tickObjectEye.logData();
               }
+              // CALCULATE POSTURE IF GOOD OR BAD VIA MEAN AND TIME
+
+              const cloneHistoryShoulder = [...historyShoulder];
+              const cloneHistoryEye = [...historyEye];
+              const meanShoulder = calcMeanForTimeWindow(
+                cloneHistoryShoulder,
+                3000,
+                timeStamp,
+              );
+              const meanEye = calcMeanForTimeWindow(
+                cloneHistoryEye,
+                3000,
+                timeStamp,
+              );
+              if (
+                timerShoulderMeanBadPosture.getTotalTimeValues().seconds > 5
+              ) {
+                timerBadPosture.start();
+                timerGoodPosture.pause();
+                console.log('bad posture shoulder (> 5 seconds)');
+              }
+              if (timerEyeMeanBadPosture.getTotalTimeValues().seconds > 5) {
+                timerBadPosture.start();
+                timerGoodPosture.pause();
+                console.log('bad posture eye (> 5 seconds)');
+              }
+              if (
+                !timerShoulderMeanBadPosture.getTotalTimeValues().seconds > 5 &&
+                !timerEyeMeanBadPosture.getTotalTimeValues().seconds > 5
+              ) {
+                timerBadPosture.pause();
+                timerGoodPosture.start();
+              }
+              if (meanShoulder > thresholdShoulder) {
+                timerShoulderMeanBadPosture.start();
+              } else {
+                timerShoulderMeanBadPosture.reset();
+              }
+              if (meanEye > thresholdEye) {
+                timerEyeMeanBadPosture.start();
+              } else {
+                timerEyeMeanBadPosture.reset();
+              }
+              // TODO display times, log overall time, reset timers on unmount
             }
           }
         } catch (e) {
@@ -208,22 +260,22 @@ export const PoseNetCamera = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [appContext.consoleLog]);
+  }, [appContext.consoleLog, thresholdEye, thresholdShoulder]);
 
   // UPDATE STATUS, CHART of shoulder
   useEffect(() => {
     const subscription = subjectShoulder.subscribe({
       next: nextObj => {
-        if (Math.abs(nextObj.differenceY) > thresholdShoulder) {
+        if (Math.abs(nextObj.angleOfVector) > thresholdShoulder) {
           setStatusShoulder({
             msg: `Bad (${nextObj.name})`,
-            value: nextObj.differenceY.toFixed(2),
+            value: nextObj.angleOfVector.toFixed(2),
             status: 'bad',
           });
         } else {
           setStatusShoulder({
             msg: `Good (${nextObj.name})`,
-            value: nextObj.differenceY.toFixed(2),
+            value: nextObj.angleOfVector.toFixed(2),
             status: 'good',
           });
         }
@@ -237,7 +289,7 @@ export const PoseNetCamera = () => {
           }
           copyArr.push({
             x: nextObj.createdAt,
-            y: nextObj.differenceY,
+            y: nextObj.angleOfVector,
           });
           setChartDataShoulder(copyArr);
         }
@@ -253,16 +305,16 @@ export const PoseNetCamera = () => {
   useEffect(() => {
     const subscription = subjectEye.subscribe({
       next: nextObj => {
-        if (Math.abs(nextObj.differenceY) > thresholdEye) {
+        if (Math.abs(nextObj.angleOfVector) > thresholdEye) {
           setStatusEye({
             msg: `Bad (${nextObj.name})`,
-            value: nextObj.differenceY.toFixed(2),
+            value: nextObj.angleOfVector.toFixed(2),
             status: 'bad',
           });
         } else {
           setStatusEye({
             msg: `Good (${nextObj.name})`,
-            value: nextObj.differenceY.toFixed(2),
+            value: nextObj.angleOfVector.toFixed(2),
             status: 'good',
           });
         }
@@ -276,7 +328,7 @@ export const PoseNetCamera = () => {
           }
           copyArr.push({
             x: nextObj.createdAt,
-            y: nextObj.differenceY,
+            y: nextObj.angleOfVector,
           });
           setChartDataEye(copyArr);
         }

@@ -8,6 +8,7 @@ const emptyState = {
   openDrawer: true,
   epochMode: false,
   epochCount: 50,
+  timeWindowMeanInMilliseconds: 20000,
 };
 
 const AppContext = React.createContext();
