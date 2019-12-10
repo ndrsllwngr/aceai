@@ -56,7 +56,7 @@ const useStyles = makeStyles(theme => ({
 const videoWidth = 600;
 const videoHeight = 500;
 
-// const timerSitting = new Timer();
+const timerSitting = new Timer();
 // const timerPause = new Timer();
 const timerGoodPosture = new Timer();
 const timerBadPosture = new Timer();
@@ -80,6 +80,12 @@ export const PoseNetCamera = () => {
 
   const [appContext] = useApp();
   const [loading, setLoading] = useState(false);
+  const [headPostureOverTimeIsBad, setHeadPostureOverTimeIsBad] = useState(
+    false,
+  );
+  const [bodyPostureOverTimeIsBad, setBodyPostureOverTimeIsBad] = useState(
+    false,
+  );
 
   const [statusShoulder, setStatusShoulder] = useState(emptyState);
   const [thresholdShoulder, setThresholdShoulder] = useState(15);
@@ -124,9 +130,11 @@ export const PoseNetCamera = () => {
         detectPoseInRealTime(video, net);
       }
       bind();
+      timerSitting.start();
     } else {
       // eslint-disable-next-line no-inner-declarations
       async function bind2() {
+        // timerSitting.pause();
         setLoading(false);
         setStatusShoulder(emptyState);
         setStatusEye(emptyState);
@@ -222,20 +230,36 @@ export const PoseNetCamera = () => {
               if (
                 timerShoulderMeanBadPosture.getTotalTimeValues().seconds > 5
               ) {
+                // GENERAL
                 timerBadPosture.start();
-                timerGoodPosture.pause();
-                console.log('bad posture shoulder (> 5 seconds)');
+                if (timerGoodPosture.isRunning()) {
+                  timerGoodPosture.pause();
+                }
+                setBodyPostureOverTimeIsBad(true);
+                // console.log('bad posture shoulder (> 5 seconds)');
+              } else {
+                setBodyPostureOverTimeIsBad(false);
               }
               if (timerEyeMeanBadPosture.getTotalTimeValues().seconds > 5) {
+                // GENERAL
                 timerBadPosture.start();
-                timerGoodPosture.pause();
-                console.log('bad posture eye (> 5 seconds)');
+                if (timerGoodPosture.isRunning()) {
+                  timerGoodPosture.pause();
+                }
+                // console.log('bad posture eye (> 5 seconds)');
+                setHeadPostureOverTimeIsBad(true);
+              } else {
+                setHeadPostureOverTimeIsBad(false);
               }
               if (
-                !timerShoulderMeanBadPosture.getTotalTimeValues().seconds > 5 &&
-                !timerEyeMeanBadPosture.getTotalTimeValues().seconds > 5
+                !(
+                  timerShoulderMeanBadPosture.getTotalTimeValues().seconds > 5
+                ) &&
+                !(timerEyeMeanBadPosture.getTotalTimeValues().seconds > 5)
               ) {
-                timerBadPosture.pause();
+                if (timerBadPosture.isRunning()) {
+                  timerBadPosture.pause();
+                }
                 timerGoodPosture.start();
               }
               if (meanShoulder > thresholdShoulder) {
@@ -342,6 +366,30 @@ export const PoseNetCamera = () => {
 
   return (
     <Grid container direction="row" justify="center" alignItems="flex-start">
+      <Box
+        display="flex"
+        flexDirection="column"
+        maxWidth={videoWidth}
+        alignItems="top"
+      >
+        <span>timer: {timerSitting.getTimeValues().toString()}</span>
+        <span>timerBad: {timerBadPosture.getTimeValues().toString()}</span>
+        <span>timerGood: {timerGoodPosture.getTimeValues().toString()}</span>
+        <span>
+          timerEyeMeanBadPosture:{' '}
+          {timerEyeMeanBadPosture.getTimeValues().toString()}
+        </span>
+        <span>
+          timerShoulderMeanBadPosture:{' '}
+          {timerShoulderMeanBadPosture.getTimeValues().toString()}
+        </span>
+        <span>
+          headPostureOverTimeIsBad: {headPostureOverTimeIsBad ? 'bad' : 'good'}
+        </span>
+        <span>
+          bodyPostureOverTimeIsBad: {bodyPostureOverTimeIsBad ? 'bad' : 'good'}
+        </span>
+      </Box>
       <VideoCanvas
         videoHeight={videoHeight}
         videoWidth={videoWidth}
