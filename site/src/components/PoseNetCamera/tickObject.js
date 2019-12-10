@@ -1,10 +1,3 @@
-// import get from 'lodash/get';
-// import find from 'lodash/find';
-// import * as time from 'd3-time';
-// import { timeFormat } from 'd3-time-format';
-// import set from 'lodash/set';
-// import remove from 'lodash/remove';
-
 export class TickObject {
   name = undefined;
 
@@ -30,7 +23,9 @@ export class TickObject {
 
   differenceY = undefined;
 
-  constructor(name, createdAt, tick, leftPoint, rightPoint) {
+  deviationToCalibratedDifferenceX = undefined;
+
+  constructor(name, createdAt, tick, leftPoint, rightPoint, calibrationData) {
     this.name = name;
     this.createdAt = createdAt;
     this.tick = tick;
@@ -40,6 +35,11 @@ export class TickObject {
     this.lengthOfVector = this.calcLenghtOfVector();
     this.differenceX = this.calcDifferenceX();
     this.differenceY = this.calcDifferenceY();
+    if (calibrationData) {
+      this.deviationToCalibratedDifferenceX = this.calcDeviationToCalibratedDifferenceX(
+        calibrationData,
+      );
+    }
   }
 
   calcAngleOfVector() {
@@ -71,6 +71,11 @@ export class TickObject {
     return this.rightPoint.y - this.leftPoint.y;
   }
 
+  // can be used as testimony for a change in sitting distance
+  calcDeviationToCalibratedDifferenceX(calibrationData) {
+    return this.differenceX - calibrationData.differenceX;
+  }
+
   logData() {
     // this.absDifferenceLatestXCoor();
     // this.absDifferenceLatestYCoor();
@@ -85,14 +90,7 @@ export class TickObject {
       rightPoint: this.rightPoint,
       leftPoint: this.leftPoint,
       createdAt: this.createdAt,
+      deviationToCalibratedDifferenceX: this.deviationToCalibratedDifferenceX,
     });
-    // console.log({
-    //   name: this.name,
-    //   createdAt: new Date(this.createdAt).toISOString(),
-    //   tick: this.tick,
-    //   point1: this.point1,
-    //   point2: this.point2,
-    //   angle: this.angle,
-    // });
   }
 }

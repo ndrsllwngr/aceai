@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import React, { useEffect, useState } from 'react';
 import * as posenet from '@tensorflow-models/posenet';
-// import has from 'lodash/has';
+import get from 'lodash/get';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -95,7 +95,8 @@ export const PoseNetCamera = () => {
   const [thresholdEye, setThresholdEye] = useState(7);
   const [chartDataEye, setChartDataEye] = useState([]);
 
-  const [calibrationData, setCalibrationData] = useState([]);
+  const [calibrationDataRaw, setCalibrationDataRaw] = useState(undefined);
+  const [calibrationData, setCalibrationData] = useState(undefined);
 
   // POWER POSENET
   useEffect(() => {
@@ -148,10 +149,27 @@ export const PoseNetCamera = () => {
   }, [appContext.webCam]);
 
   useEffect(() => {
-    if (calibrationData.length > 0) {
-      console.log({ calibrationData });
+    if (calibrationDataRaw) {
+      const { time, tick } = calibrationDataRaw;
+      const tickObjectShoulder = new TickObject(
+        'shoulder',
+        time,
+        tick,
+        extractPointObj('leftShoulder', calibrationDataRaw),
+        extractPointObj('rightShoulder', calibrationDataRaw),
+      );
+      const tickObjectEye = new TickObject(
+        'eye',
+        time,
+        tick,
+        extractPointObj('leftEye', calibrationDataRaw),
+        extractPointObj('rightEye', calibrationDataRaw),
+      );
+      setCalibrationData({ eye: tickObjectEye, shoulder: tickObjectShoulder });
+      tickObjectShoulder.logData();
+      tickObjectEye.logData();
     }
-  }, [calibrationData]);
+  }, [calibrationDataRaw]);
 
   // LOG POSENET DATA
   useEffect(() => {
@@ -196,6 +214,7 @@ export const PoseNetCamera = () => {
                 tick,
                 extractPointObj('leftShoulder', lastHistoryDataObject),
                 extractPointObj('rightShoulder', lastHistoryDataObject),
+                get(calibrationData, 'shoulder'),
               );
               const tickObjectEye = new TickObject(
                 'eye',
@@ -203,6 +222,7 @@ export const PoseNetCamera = () => {
                 tick,
                 extractPointObj('leftEye', lastHistoryDataObject),
                 extractPointObj('rightEye', lastHistoryDataObject),
+                get(calibrationData, 'eye'),
               );
               historyShoulder.push(tickObjectShoulder);
               subjectShoulder.next(tickObjectShoulder);
@@ -227,6 +247,8 @@ export const PoseNetCamera = () => {
                 3000,
                 timeStamp,
               );
+
+              // TIMER
               if (
                 timerShoulderMeanBadPosture.getTotalTimeValues().seconds > 5
               ) {
@@ -272,7 +294,7 @@ export const PoseNetCamera = () => {
               } else {
                 timerEyeMeanBadPosture.reset();
               }
-              // TODO display times, log overall time, reset timers on unmount
+              // TODO reset timers on unmount
             }
           }
         } catch (e) {
@@ -284,7 +306,7 @@ export const PoseNetCamera = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [appContext.consoleLog, thresholdEye, thresholdShoulder]);
+  }, [appContext.consoleLog, calibrationData, thresholdEye, thresholdShoulder]);
 
   // UPDATE STATUS, CHART of shoulder
   useEffect(() => {
@@ -406,13 +428,11 @@ export const PoseNetCamera = () => {
           variant="contained"
           style={{ margin: '12px' }}
           onClick={() => {
-            if (
-              history &&
-              history.length > 0 &&
-              history[history.length - 1].poseData
-            ) {
-              const currentPoseData = history[history.length - 1].poseData;
-              setCalibrationData(currentPoseData);
+            if (history.length > 0) {
+              const cloneHistory = [...history];
+              const tick = cloneHistory.length;
+              const currentPoseData = cloneHistory[cloneHistory.length - 1];
+              setCalibrationDataRaw({ tick, ...currentPoseData });
             }
           }}
         >
