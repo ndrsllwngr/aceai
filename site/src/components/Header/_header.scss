@@ -1,0 +1,13 @@
+.appearance-status {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+}
+
+.header__h3 {
+    @include carbon--type-style('code-02');
+    color: #ffffff;
+
+}

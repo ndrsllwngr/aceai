@@ -1,0 +1,16 @@
+$feature-flags: (
+  ui-shell: true,
+  grid-columns-16: true,
+);
+@import 'carbon-components/scss/globals/scss/vendor/@carbon/type/scss/_font-family.scss';
+@import 'carbon-components/scss/globals/scss/vendor/@carbon/layout/scss/_breakpoint.scss';
+@import 'carbon-components/scss/globals/scss/_typography.scss';
+@import 'carbon-components/scss/globals/scss/_vars.scss';
+@import 'carbon-components/scss/globals/scss/styles.scss';
+@import '../components/Dashboard/_dashboard.scss';
+@import '../components/Header/_header.scss';
+@import '../components/LandingPage/_landing-page.scss';
+
+.bx--content {
+  padding: 0;
+}
