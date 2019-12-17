@@ -13,7 +13,6 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Typography from '@material-ui/core/Typography';
 import { Subject } from 'rxjs';
 import { Timer } from 'easytimer.js';
-// import get from 'lodash/get';
 import {
   XYPlot,
   XAxis,
@@ -23,6 +22,8 @@ import {
   LineSeries,
   AreaSeries,
 } from 'react-vis';
+import { VideoCanvas } from '../VideoCanvas';
+// import get from 'lodash/get';
 
 // import { EpochFusion } from './epochFusion';
 // import { EpochPart } from './epochPart';
@@ -30,8 +31,11 @@ import { TickObject } from './tickObject';
 import { useApp } from '../ctx-app';
 import { ThresholdSlider } from '../ThresholdSlider';
 import { PostureStatus } from '../PostureStatus';
-import { VideoCanvas } from '../VideoCanvas';
-import { extractPointObj, calcMeanForTimeWindow } from './tickUtil';
+import {
+  extractPointObj,
+  calcMeanForTimeWindow,
+  calcMedianForTimeWindow,
+} from './tickUtil';
 
 // PoseNet
 import {
@@ -146,7 +150,7 @@ export const PoseNetCamera = () => {
       }
       bind2();
     }
-  }, [appContext.webCam]);
+  }, [appContext, appContext.webCam, setLoading]);
 
   useEffect(() => {
     if (calibrationDataRaw) {
@@ -237,16 +241,32 @@ export const PoseNetCamera = () => {
 
               const cloneHistoryShoulder = [...historyShoulder];
               const cloneHistoryEye = [...historyEye];
-              const meanShoulder = calcMeanForTimeWindow(
-                cloneHistoryShoulder,
-                3000,
-                timeStamp,
-              );
-              const meanEye = calcMeanForTimeWindow(
-                cloneHistoryEye,
-                3000,
-                timeStamp,
-              );
+              let meanOrMedianShoulder;
+              let meanOrMedianEye;
+
+              if (appContext.median) {
+                meanOrMedianShoulder = calcMedianForTimeWindow(
+                  cloneHistoryShoulder,
+                  3000,
+                  timeStamp,
+                );
+                meanOrMedianEye = calcMedianForTimeWindow(
+                  cloneHistoryEye,
+                  3000,
+                  timeStamp,
+                );
+              } else {
+                meanOrMedianShoulder = calcMeanForTimeWindow(
+                  cloneHistoryShoulder,
+                  3000,
+                  timeStamp,
+                );
+                meanOrMedianEye = calcMeanForTimeWindow(
+                  cloneHistoryEye,
+                  3000,
+                  timeStamp,
+                );
+              }
 
               // TIMER
               if (
@@ -284,12 +304,12 @@ export const PoseNetCamera = () => {
                 }
                 timerGoodPosture.start();
               }
-              if (meanShoulder > thresholdShoulder) {
+              if (meanOrMedianShoulder > thresholdShoulder) {
                 timerShoulderMeanBadPosture.start();
               } else {
                 timerShoulderMeanBadPosture.reset();
               }
-              if (meanEye > thresholdEye) {
+              if (meanOrMedianEye > thresholdEye) {
                 timerEyeMeanBadPosture.start();
               } else {
                 timerEyeMeanBadPosture.reset();
@@ -306,7 +326,13 @@ export const PoseNetCamera = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [appContext.consoleLog, calibrationData, thresholdEye, thresholdShoulder]);
+  }, [
+    appContext.consoleLog,
+    appContext.median,
+    calibrationData,
+    thresholdEye,
+    thresholdShoulder,
+  ]);
 
   // UPDATE STATUS, CHART of shoulder
   useEffect(() => {

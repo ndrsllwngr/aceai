@@ -34,3 +34,46 @@ export function calcMeanForTimeWindow(
       .reduce((pv, cv) => pv + cv, 0) / timeWindowData.length
   );
 }
+
+export function calcMedianForTimeWindow(
+  tickArray,
+  timeWindowInMs,
+  tickTimeStamp,
+) {
+  let timeWindowData = [];
+
+  const momentInPast = new Date(tickTimeStamp - timeWindowInMs);
+  // eslint-disable-next-line no-plusplus
+  for (let i = tickArray.length - 1; i >= 0; i--) {
+    const object = tickArray[i];
+    const momentOfObject = new Date(object.createdAt);
+    if (momentOfObject < momentInPast) {
+      timeWindowData = tickArray.slice(i + 1);
+      break;
+    }
+  }
+  const revisedData = timeWindowData.map(obj => Math.abs(obj.angleOfVector));
+  let result = 0;
+  if (revisedData.length === 0) {
+    // eslint-disable-next-line no-console
+    console.log(result);
+    return result;
+  }
+
+  // eslint-disable-next-line func-names
+  revisedData.sort(function(a, b) {
+    return a - b;
+  });
+
+  const half = Math.floor(revisedData.length / 2);
+  if (revisedData.length % 2) {
+    result = revisedData[half];
+    // eslint-disable-next-line no-console
+    console.log(result);
+    return result;
+  }
+  result = (revisedData[half - 1] + revisedData[half]) / 2.0;
+  // eslint-disable-next-line no-console
+  console.log(result);
+  return result;
+}

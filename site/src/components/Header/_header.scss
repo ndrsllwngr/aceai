@@ -3,7 +3,9 @@
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    min-width: 7rem;
+
 }
 
 .header__h3 {

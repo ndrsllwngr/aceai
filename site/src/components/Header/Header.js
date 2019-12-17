@@ -11,8 +11,10 @@ import {
 // import { Button } from 'carbon-components-react';
 // import get from 'lodash/get';
 import Notification20 from '@carbon/icons-react/lib/notification/20';
-import PlayFilledAlt20 from '@carbon/icons-react/lib/play--filled--alt/20';
-import StopFilledAlt20 from '@carbon/icons-react/lib/stop--filled--alt/20';
+import Power20 from '@carbon/icons-react/lib/power/20';
+import Stop20 from '@carbon/icons-react/lib/stop/20';
+// import PlayFilledAlt20 from '@carbon/icons-react/lib/play--filled--alt/20';
+// import StopFilledAlt20 from '@carbon/icons-react/lib/stop--filled--alt/20';
 // import UserAvatar20 from '@carbon/icons-react/lib/user--avatar/20';
 // import AppSwitcher20 from '@carbon/icons-react/lib/app-switcher/20';
 import { Link } from 'gatsby';
@@ -65,11 +67,7 @@ export const Header = () => {
           aria-label="control"
           onClick={handleChange('webCam')}
         >
-          {appContext.webCam ? (
-            <StopFilledAlt20></StopFilledAlt20>
-          ) : (
-            <PlayFilledAlt20></PlayFilledAlt20>
-          )}
+          {appContext.webCam ? <Stop20></Stop20> : <Power20></Power20>}
         </HeaderGlobalAction>
         <HeaderGlobalAction aria-label="Notifications">
           <Notification20 />
