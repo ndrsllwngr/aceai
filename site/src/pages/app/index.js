@@ -10,13 +10,23 @@ import { AppProvider } from '../../components/ctx-app';
 const App = () => {
   return (
     <AppProvider>
-      <Header />
-      <Content>
-        <Router>
-          <Dashboard path="/app/dashboard" />
-          <LandingPage path="/app" />
-        </Router>
-      </Content>
+      <Header>
+        <Content
+          id="main-content"
+          style={{ backgroundColor: '#f4f4f4', minHeight: '100%' }}
+        >
+          <div className="bx--grid">
+            <div className="bx--row">
+              <section className="bx--offset-lg-2 bx--col-lg-13">
+                <Router>
+                  <Dashboard path="/app/dashboard" />
+                  <LandingPage path="/app" />
+                </Router>
+              </section>
+            </div>
+          </div>
+        </Content>
+      </Header>
     </AppProvider>
   );
 };

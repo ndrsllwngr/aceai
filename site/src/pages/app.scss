@@ -8,6 +8,7 @@ $feature-flags: (
 @import 'carbon-components/scss/globals/scss/_vars.scss';
 @import 'carbon-components/scss/globals/scss/styles.scss';
 @import '../components/Dashboard/_dashboard.scss';
+@import '../components/PoseNetCamera/_camera.scss';
 @import '../components/Header/_header.scss';
 @import '../components/LandingPage/_landing-page.scss';
 

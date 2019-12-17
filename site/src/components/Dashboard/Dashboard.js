@@ -1,18 +1,17 @@
 import React from 'react';
-import { Button, ToastNotification } from 'carbon-components-react';
+// import { ToastNotification } from 'carbon-components-react';
 import SEO from '../seo';
 import { PoseNetCamera } from '../PoseNetCamera/camera';
-import { useApp } from '../ctx-app';
+// import { useApp } from '../ctx-app';
 
 export const Dashboard = () => {
-  const [appContext] = useApp();
+  // const [appContext] = useApp();
 
   return (
     <>
       <SEO title="Dashboard" />
-      <Button>Button</Button>
       <PoseNetCamera />
-      {appContext.webCam ? (
+      {/* {appContext.webCam ? (
         <ToastNotification
           caption={`Time stamp [${new Date().toLocaleTimeString()}]`}
           hideCloseButton={false}
@@ -46,7 +45,7 @@ export const Dashboard = () => {
           subtitle="Real-time pose estimation shut down."
           timeout={0}
         />
-      )}
+      )} */}
     </>
   );
 };

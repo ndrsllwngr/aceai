@@ -4,7 +4,7 @@ import * as posenet from '@tensorflow-models/posenet';
 import get from 'lodash/get';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
+import { Button } from 'carbon-components-react';
 import { makeStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
@@ -13,16 +13,8 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Typography from '@material-ui/core/Typography';
 import { Subject } from 'rxjs';
 import { Timer } from 'easytimer.js';
-import {
-  XYPlot,
-  XAxis,
-  YAxis,
-  HorizontalGridLines,
-  VerticalGridLines,
-  LineSeries,
-  AreaSeries,
-} from 'react-vis';
 import { VideoCanvas } from '../VideoCanvas';
+import { Graph } from './graph';
 // import get from 'lodash/get';
 
 // import { EpochFusion } from './epochFusion';
@@ -143,8 +135,8 @@ export const PoseNetCamera = () => {
         setLoading(false);
         setStatusShoulder(emptyState);
         setStatusEye(emptyState);
-        setChartDataShoulder([]);
-        setChartDataEye([]);
+        // setChartDataShoulder([]);
+        // setChartDataEye([]);
         stopStreamedVideo();
         // clearCanvas();
       }
@@ -413,31 +405,13 @@ export const PoseNetCamera = () => {
   }, [appContext.charts, chartDataEye, thresholdEye]);
 
   return (
-    <Grid container direction="row" justify="center" alignItems="flex-start">
-      <Box
-        display="flex"
-        flexDirection="column"
-        maxWidth={videoWidth}
-        alignItems="top"
-      >
-        <span>timer: {timerSitting.getTimeValues().toString()}</span>
-        <span>timerBad: {timerBadPosture.getTimeValues().toString()}</span>
-        <span>timerGood: {timerGoodPosture.getTimeValues().toString()}</span>
-        <span>
-          timerEyeMeanBadPosture:{' '}
-          {timerEyeMeanBadPosture.getTimeValues().toString()}
-        </span>
-        <span>
-          timerShoulderMeanBadPosture:{' '}
-          {timerShoulderMeanBadPosture.getTimeValues().toString()}
-        </span>
-        <span>
-          headPostureOverTimeIsBad: {headPostureOverTimeIsBad ? 'bad' : 'good'}
-        </span>
-        <span>
-          bodyPostureOverTimeIsBad: {bodyPostureOverTimeIsBad ? 'bad' : 'good'}
-        </span>
-      </Box>
+    <Grid
+      container
+      direction="row"
+      justify="center"
+      alignItems="flex-start"
+      minHeight="100%"
+    >
       <VideoCanvas
         videoHeight={videoHeight}
         videoWidth={videoWidth}
@@ -450,8 +424,6 @@ export const PoseNetCamera = () => {
         alignItems="top"
       >
         <Button
-          color="primary"
-          variant="contained"
           style={{ margin: '12px' }}
           onClick={() => {
             if (history.length > 0) {
@@ -494,42 +466,6 @@ export const PoseNetCamera = () => {
                 setThreshold={setThresholdEye}
                 part="eye"
               />
-              <div style={{ width: '400px', height: '400px' }}>
-                <XYPlot
-                  width={300}
-                  height={300}
-                  yDomain={[-50, 50]}
-                  margin={{ bottom: 100 }}
-                >
-                  <HorizontalGridLines />
-                  <VerticalGridLines />
-                  <XAxis
-                    attr="x"
-                    attrAxis="y"
-                    orientation="bottom"
-                    // eslint-disable-next-line react/jsx-no-bind
-                    tickFormat={function tickFormat(d) {
-                      return new Date(d).toLocaleTimeString();
-                    }}
-                    tickLabelAngle={-60}
-                  />
-                  <YAxis />
-                  <AreaSeries
-                    data={chartDataEye}
-                    opacity={0.25}
-                    stroke="transparent"
-                    style={{}}
-                  />
-                  <LineSeries
-                    curve={null}
-                    data={chartDataEye}
-                    opacity={1}
-                    stroke="#12939a"
-                    strokeStyle="solid"
-                    style={{}}
-                  />
-                </XYPlot>
-              </div>
             </Box>
           </ExpansionPanelDetails>
         </ExpansionPanel>
@@ -563,45 +499,159 @@ export const PoseNetCamera = () => {
                 setThreshold={setThresholdShoulder}
                 part="shoulder"
               />
-              <div style={{ width: '400px', height: '400px' }}>
-                <XYPlot
-                  width={300}
-                  height={300}
-                  yDomain={[-150, 150]}
-                  margin={{ bottom: 100 }}
-                >
-                  <HorizontalGridLines />
-                  <VerticalGridLines />
-                  <XAxis
-                    attr="x"
-                    attrAxis="y"
-                    orientation="bottom"
-                    // eslint-disable-next-line react/jsx-no-bind
-                    tickFormat={function tickFormat(d) {
-                      return new Date(d).toLocaleTimeString();
-                    }}
-                    tickLabelAngle={-60}
-                  />
-                  <YAxis />
-                  <AreaSeries
-                    data={chartDataShoulder}
-                    opacity={0.25}
-                    stroke="transparent"
-                    style={{}}
-                  />
-                  <LineSeries
-                    curve={null}
-                    data={chartDataShoulder}
-                    opacity={1}
-                    stroke="#12939a"
-                    strokeStyle="solid"
-                    style={{}}
-                  />
-                </XYPlot>
-              </div>
             </Box>
           </ExpansionPanelDetails>
         </ExpansionPanel>
+      </Box>
+      <Box
+        display="flex"
+        width="100%"
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        style={{ backgroundColor: '#ffffff' }}
+        margin="1rem"
+        height="3rem"
+      >
+        <Box
+          display="flex"
+          width="30%"
+          justifyContent="center"
+          alignItems="center"
+          flexDirection="column"
+        >
+          <span className="camera-time-value">
+            {timerSitting.getTimeValues().toString()}
+          </span>
+          <span className="camera-time-label">Session (total)</span>
+        </Box>
+        <Box
+          display="flex"
+          width="30%"
+          justifyContent="center"
+          alignItems="center"
+          flexDirection="column"
+        >
+          <span className="camera-time-value">
+            {timerGoodPosture.getTimeValues().toString()}
+          </span>
+          <span className="camera-time-label">Good posture (total)</span>
+        </Box>
+        <Box
+          display="flex"
+          width="30%"
+          justifyContent="center"
+          alignItems="center"
+          flexDirection="column"
+        >
+          <span className="camera-time-value">
+            {timerBadPosture.getTimeValues().toString()}
+          </span>
+          <span className="camera-time-label">Bad posture (total)</span>
+        </Box>
+      </Box>
+      <Box
+        display="flex"
+        width="100%"
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        style={{ backgroundColor: '#ffffff' }}
+        margin="1rem"
+        height="3rem"
+      >
+        <Box
+          display="flex"
+          width="25%"
+          justifyContent="center"
+          alignItems="center"
+          flexDirection="column"
+        >
+          <span className="camera-time-value">
+            {timerEyeMeanBadPosture.getTimeValues().toString()}
+          </span>
+          <span className="camera-time-label">Head bad posture (period)</span>
+        </Box>
+        <Box
+          display="flex"
+          width="25%"
+          justifyContent="center"
+          alignItems="center"
+          flexDirection="column"
+        >
+          <span className="camera-time-value">
+            {headPostureOverTimeIsBad ? 'BAD' : 'GOOD'}
+          </span>
+          <span className="camera-time-label">Head status</span>
+        </Box>
+        <Box
+          display="flex"
+          width="25%"
+          justifyContent="center"
+          alignItems="center"
+          flexDirection="column"
+        >
+          <span className="camera-time-value">
+            {timerShoulderMeanBadPosture.getTimeValues().toString()}
+          </span>
+          <span className="camera-time-label">Body bad posture (period)</span>
+        </Box>
+        <Box
+          display="flex"
+          width="25%"
+          justifyContent="center"
+          alignItems="center"
+          flexDirection="column"
+        >
+          <span className="camera-time-value">
+            {bodyPostureOverTimeIsBad ? 'BAD' : 'GOOD'}
+          </span>
+          <span className="camera-time-label">Body status</span>
+        </Box>
+      </Box>
+      <Box
+        display="flex"
+        width="100%"
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        style={{ backgroundColor: '#ffffff' }}
+        margin="1rem"
+      >
+        <Box
+          display="flex"
+          width="50%"
+          justifyContent="center"
+          alignItems="center"
+          flexDirection="column"
+          minHeight="400px"
+          position="relative"
+        >
+          <Graph
+            data={chartDataEye}
+            width={800}
+            height={400}
+            yDomain={[-50, 50]}
+            loading={loading}
+          />
+        </Box>
+        <Box
+          display="flex"
+          width="50%"
+          justifyContent="center"
+          alignItems="center"
+          flexDirection="column"
+          minHeight="400px"
+          position="relative"
+        >
+          <Graph
+            data={chartDataShoulder}
+            width={800}
+            height={400}
+            yDomain={[-80, 80]}
+            loading={loading}
+          />
+        </Box>
       </Box>
     </Grid>
   );

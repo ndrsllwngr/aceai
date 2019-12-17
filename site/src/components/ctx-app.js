@@ -6,7 +6,7 @@ const emptyState = {
   videoHeight: 500,
   loading: false,
   webCam: false,
-  charts: false,
+  charts: true,
   consoleLog: false,
   openDrawer: true,
   epochMode: false,
