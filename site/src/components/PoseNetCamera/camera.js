@@ -1,16 +1,20 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 import React, { useEffect, useState } from 'react';
 import * as posenet from '@tensorflow-models/posenet';
 import get from 'lodash/get';
-import Box from '@material-ui/core/Box';
+// import { Card } from '@material-ui/core';
+// eslint-disable-next-line import/no-named-default
+import { default as MBox } from '@material-ui/core/Box';
+import { Box } from 'rebass';
 import Grid from '@material-ui/core/Grid';
-import { Button } from 'carbon-components-react';
-import { makeStyles } from '@material-ui/core/styles';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import Typography from '@material-ui/core/Typography';
+import { Button, Tag } from 'carbon-components-react';
+// import { makeStyles } from '@material-ui/core/styles';
+// import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+// import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+// import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+// import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+// import Typography from '@material-ui/core/Typography';
 import { Subject } from 'rxjs';
 import { Timer } from 'easytimer.js';
 import { VideoCanvas } from '../VideoCanvas';
@@ -21,8 +25,8 @@ import { Graph } from './graph';
 // import { EpochPart } from './epochPart';
 import { TickObject } from './tickObject';
 import { useApp } from '../ctx-app';
-import { ThresholdSlider } from '../ThresholdSlider';
-import { PostureStatus } from '../PostureStatus';
+// import { ThresholdSlider } from '../ThresholdSlider';
+// import { PostureStatus } from '../PostureStatus';
 import {
   extractPointObj,
   calcMeanForTimeWindow,
@@ -39,18 +43,18 @@ import {
 
 import '../../../node_modules/react-vis/dist/style.css';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    width: '100%',
-  },
-  heading: {
-    fontSize: theme.typography.pxToRem(15),
-    fontWeight: theme.typography.fontWeightRegular,
-  },
-}));
+// const useStyles = makeStyles(theme => ({
+//   root: {
+//     width: '100%',
+//   },
+//   heading: {
+//     fontSize: theme.typography.pxToRem(15),
+//     fontWeight: theme.typography.fontWeightRegular,
+//   },
+// }));
 
-const videoWidth = 600;
-const videoHeight = 500;
+const videoWidth = 343;
+const videoHeight = 242;
 
 const timerSitting = new Timer();
 // const timerPause = new Timer();
@@ -72,7 +76,7 @@ const emptyState = { msg: 'Loading...', value: 0.0, status: 'default' };
 let _streamCopy = null;
 
 export const PoseNetCamera = () => {
-  const classes = useStyles();
+  // const classes = useStyles();
 
   const [appContext] = useApp();
   const [loading, setLoading] = useState(false);
@@ -88,6 +92,7 @@ export const PoseNetCamera = () => {
   const [chartDataShoulder, setChartDataShoulder] = useState([]);
 
   const [statusEye, setStatusEye] = useState(emptyState);
+
   const [thresholdEye, setThresholdEye] = useState(7);
   const [chartDataEye, setChartDataEye] = useState([]);
 
@@ -142,7 +147,13 @@ export const PoseNetCamera = () => {
       }
       bind2();
     }
-  }, [appContext, appContext.webCam, setLoading]);
+  }, [
+    appContext,
+    appContext.webCam,
+    setLoading,
+    setStatusEye,
+    setStatusShoulder,
+  ]);
 
   useEffect(() => {
     if (calibrationDataRaw) {
@@ -363,7 +374,12 @@ export const PoseNetCamera = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [appContext.charts, chartDataShoulder, thresholdShoulder]);
+  }, [
+    appContext.charts,
+    chartDataShoulder,
+    setStatusShoulder,
+    thresholdShoulder,
+  ]);
 
   // UPDATE STATUS, CHART of eye
   useEffect(() => {
@@ -402,107 +418,220 @@ export const PoseNetCamera = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [appContext.charts, chartDataEye, thresholdEye]);
+  }, [appContext.charts, chartDataEye, setStatusEye, thresholdEye]);
 
   return (
-    <Grid
-      container
-      direction="row"
-      justify="center"
-      alignItems="flex-start"
-      minHeight="100%"
-    >
-      <VideoCanvas
-        videoHeight={videoHeight}
-        videoWidth={videoWidth}
-        loading={loading}
-      />
-      <Box
-        display="flex"
-        flexDirection="column"
-        maxWidth={videoWidth}
-        alignItems="top"
+    <>
+      <Grid
+        container
+        direction="row"
+        justify="center"
+        alignItems="flex-start"
+        minHeight="100%"
+        style={{ paddingTop: '1rem', justifyContent: 'space-between' }}
       >
-        <Button
-          style={{ margin: '12px' }}
-          onClick={() => {
-            if (history.length > 0) {
-              const cloneHistory = [...history];
-              const tick = cloneHistory.length;
-              const currentPoseData = cloneHistory[cloneHistory.length - 1];
-              setCalibrationDataRaw({ tick, ...currentPoseData });
-            }
-          }}
+        <Box
+          width="375px"
+          height="300px"
+          display="flex"
+          backgroundColor="#ffffff"
+          padding="1rem"
+          flexDirection="column"
         >
-          Calibrate
-        </Button>
-        <ExpansionPanel
-          TransitionProps={{ unmountOnExit: true }}
-          style={{ marginRight: '12px', marginLeft: '12px', width: '468px' }}
-        >
-          <ExpansionPanelSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1a-content"
-            id="panel1a-header"
+          <Box
+            display="flex"
+            flexDirection="row"
+            alignItems="center"
+            height="2rem"
           >
-            <Typography className={classes.heading}>EYES</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails>
-            <Box
-              display="flex"
-              flexDirection="column"
-              maxWidth={videoWidth}
-              alignItems="top"
-            >
-              <PostureStatus
-                maxWidth={videoWidth}
-                msg={statusEye.msg}
-                value={statusEye.value}
-                status={statusEye.status}
-              />
-              <ThresholdSlider
-                maxWidth={videoWidth}
-                threshold={thresholdEye}
-                setThreshold={setThresholdEye}
-                part="eye"
-              />
-            </Box>
-          </ExpansionPanelDetails>
-        </ExpansionPanel>
-        <ExpansionPanel
-          TransitionProps={{ unmountOnExit: true }}
-          style={{ marginRight: '12px', marginLeft: '12px', width: '468px' }}
+            Camera
+          </Box>
+          <VideoCanvas
+            videoHeight={videoHeight}
+            videoWidth={videoWidth}
+            loading={loading}
+          />
+        </Box>
+
+        <Box
+          width="375px"
+          height="300px"
+          backgroundColor="#ffffff"
+          padding="1rem"
+          flexDirection="column"
         >
-          <ExpansionPanelSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1a-content"
-            id="panel1a-header"
+          <Box
+            display="flex"
+            flexDirection="row"
+            alignItems="center"
+            height="2rem"
           >
-            <Typography className={classes.heading}>SHOULDERS</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails>
-            <Box
-              display="flex"
-              flexDirection="column"
-              maxWidth={videoWidth}
-              alignItems="top"
+            Side view
+            <Tag
+              className="some-class"
+              title="Clear Selection"
+              type="red"
+              disabled
             >
-              <PostureStatus
-                maxWidth={videoWidth}
-                msg={statusShoulder.msg}
-                value={statusShoulder.value}
-                status={statusShoulder.status}
+              DISTANCE
+            </Tag>
+            <Tag
+              className="some-class"
+              title="Clear Selection"
+              type="red"
+              disabled
+            >
+              HEIGHT
+            </Tag>
+          </Box>
+          <Box
+            height={videoHeight}
+            width={videoWidth}
+            style={{ backgroundColor: '#f2f2f2' }}
+            padding="1rem"
+          >
+            <svg
+              width="724"
+              height="724"
+              viewBox="0 0 724 724"
+              style={{ maxHeight: '100%', maxWidth: '100%' }}
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M241.346 330.942H178.337C111.984 330.942 58 387.048 58 456.011V702.772C58 714.497 67.1437 724 78.4253 724H341.26C352.542 724 361.685 714.497 361.685 702.772V456.011C361.685 387.048 307.701 330.942 241.346 330.942ZM320.835 681.544H98.8506V456.011C98.8506 410.458 134.509 373.398 178.337 373.398H241.346C285.177 373.398 320.833 410.458 320.833 456.011V681.544H320.835Z"
+                fill="#c4c4c4"
               />
-              <ThresholdSlider
-                maxWidth={videoWidth}
-                threshold={thresholdShoulder}
-                setThreshold={setThresholdShoulder}
-                part="shoulder"
+              <path
+                d="M209.844 316.985C277.22 316.985 332.034 260.016 332.034 189.994C332.034 119.972 277.218 63 209.844 63C142.47 63 87.6528 119.969 87.6528 189.992C87.6528 260.014 142.467 316.985 209.844 316.985ZM209.844 105.456C254.695 105.456 291.184 143.379 291.184 189.992C291.184 236.604 254.695 274.527 209.844 274.527C164.992 274.527 128.503 236.606 128.503 189.992C128.503 143.377 164.992 105.456 209.844 105.456Z"
+                fill="#c4c4c4"
               />
-            </Box>
-          </ExpansionPanelDetails>
-        </ExpansionPanel>
-      </Box>
+              <path
+                d="M609.923 308.592L609.922 724H578.171V542.775L511 542.782V149H574.506V199.904C585.715 202.652 594.045 212.751 594.045 224.823V308.592H609.923Z"
+                fill="#c4c4c4"
+              />
+            </svg>
+          </Box>
+        </Box>
+
+        <Box
+          width="375px"
+          height="300px"
+          backgroundColor="#ffffff"
+          padding="1rem"
+          flexDirection="column"
+        >
+          <Box
+            display="flex"
+            flexDirection="row"
+            // justifyContent="space-between"
+            alignItems="center"
+          >
+            Frontal view
+            {bodyPostureOverTimeIsBad ? (
+              <Tag className="some-class" title="Clear Selection" type="red">
+                BODY
+              </Tag>
+            ) : (
+              <Tag className="some-class" title="Clear Selection" type="green">
+                BODY
+              </Tag>
+            )}
+            {headPostureOverTimeIsBad ? (
+              <Tag className="some-class" title="Clear Selection" type="red">
+                HEAD
+              </Tag>
+            ) : (
+              <Tag className="some-class" title="Clear Selection" type="green">
+                HEAD
+              </Tag>
+            )}
+          </Box>
+          <Box
+            height={videoHeight}
+            width={videoWidth}
+            style={{ backgroundColor: '#f2f2f2' }}
+            padding="1rem"
+          >
+            {Math.abs(statusEye.value) < thresholdEye && (
+              <svg
+                width="724"
+                height="724"
+                viewBox="0 0 724 724"
+                style={{ maxHeight: '100%', maxWidth: '100%' }}
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M362 0C242.045 0 144.8 121.56 144.8 271.5C144.8 421.44 242.045 543 362 543C481.955 543 579.2 421.44 579.2 271.5C579.2 121.56 481.955 0 362 0ZM362 506.8C262.197 506.8 181 401.24 181 271.5C181 141.76 262.197 36.2 362 36.2C461.803 36.2 543 141.76 543 271.5C543 401.24 461.803 506.8 362 506.8Z"
+                  fill="#c4c4c4"
+                />
+                <path
+                  d="M520.109 511.554C510.396 521.003 500.055 529.497 489.254 537.147C523.74 553.171 553.992 566.493 579.826 577.776C675.696 619.611 687.799 627.889 687.799 651.6C687.799 667.999 671.653 687.8 651.599 687.8H72.4C52.3458 687.8 36.2 667.999 36.2 651.6C36.2 627.889 48.303 619.611 144.161 577.776C170.007 566.493 200.258 553.173 234.733 537.147C223.934 529.497 213.593 521.001 203.878 511.554C53.1659 580.528 0 589.77 0 651.6C0 687.8 32.4117 724 72.4 724H651.6C691.588 724 724 687.8 724 651.6C724 589.77 670.834 580.528 520.109 511.554Z"
+                  fill="#c4c4c4"
+                />
+              </svg>
+            )}
+            {Math.abs(statusEye.value) > thresholdEye && statusEye.value < 0 && (
+              <svg
+                width="724"
+                height="724"
+                viewBox="0 0 724 724"
+                style={{ maxHeight: '100%', maxWidth: '100%' }}
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g clipPath="url(#clip0)">
+                  <path
+                    d="M176.706 41.1602C279.095 -21.3358 425.432 31.7586 503.55 159.741C581.668 287.724 561.996 442.147 459.607 504.643C357.218 567.139 210.882 514.045 132.764 386.062C54.6455 258.079 74.3178 103.656 176.706 41.1602ZM440.747 473.744C525.935 421.747 540.245 289.342 472.651 178.601C405.057 67.8604 280.754 20.0621 195.566 72.0591C110.379 124.056 96.0684 256.461 163.662 367.202C231.256 477.943 355.559 525.741 440.747 473.744Z"
+                    fill="#c4c4c4"
+                  />
+                  <path
+                    d="M203.891 511.554C213.604 521.003 223.945 529.497 234.746 537.147C200.26 553.171 170.008 566.493 144.174 577.776C48.3044 619.611 36.2014 627.889 36.2014 651.6C36.2014 667.999 52.3472 687.8 72.4014 687.8H651.6C671.654 687.8 687.8 667.999 687.8 651.6C687.8 627.889 675.697 619.611 579.839 577.776C553.993 566.493 523.742 553.173 489.267 537.147C500.066 529.497 510.407 521.001 520.122 511.554C670.834 580.528 724 589.77 724 651.6C724 687.8 691.588 724 651.6 724H72.4C32.4117 724 0 687.8 0 651.6C0 589.77 53.1659 580.528 203.891 511.554Z"
+                    fill="#c4c4c4"
+                  />
+                </g>
+                <defs>
+                  <clipPath id="clip0">
+                    <rect
+                      width="724"
+                      height="724"
+                      transform="matrix(-1 0 0 1 724 0)"
+                      fill="white"
+                    />
+                  </clipPath>
+                </defs>
+              </svg>
+            )}
+            {Math.abs(statusEye.value) > thresholdEye && statusEye.value > 0 && (
+              <svg
+                width="724"
+                height="724"
+                viewBox="0 0 724 724"
+                style={{ maxHeight: '100%', maxWidth: '100%' }}
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g clipPath="url(#clip0)">
+                  <path
+                    d="M547.294 41.1602C444.905 -21.3358 298.568 31.7586 220.45 159.741C142.332 287.724 162.004 442.147 264.393 504.643C366.782 567.139 513.118 514.045 591.237 386.062C669.355 258.079 649.682 103.656 547.294 41.1602ZM283.253 473.744C198.065 421.747 183.755 289.342 251.349 178.601C318.943 67.8604 443.246 20.0621 528.434 72.0591C613.622 124.056 627.932 256.461 560.338 367.202C492.744 477.943 368.441 525.741 283.253 473.744Z"
+                    fill="#c4c4c4"
+                  />
+                  <path
+                    d="M520.109 511.554C510.396 521.003 500.055 529.497 489.254 537.147C523.74 553.171 553.992 566.493 579.826 577.776C675.696 619.611 687.799 627.889 687.799 651.6C687.799 667.999 671.653 687.8 651.599 687.8H72.4C52.3458 687.8 36.2 667.999 36.2 651.6C36.2 627.889 48.303 619.611 144.161 577.776C170.007 566.493 200.258 553.173 234.733 537.147C223.934 529.497 213.593 521.001 203.878 511.554C53.1659 580.528 0 589.77 0 651.6C0 687.8 32.4117 724 72.4 724H651.6C691.588 724 724 687.8 724 651.6C724 589.77 670.834 580.528 520.109 511.554Z"
+                    fill="#c4c4c4"
+                  />
+                </g>
+                <defs>
+                  <clipPath id="clip0">
+                    <rect width="724" height="724" fill="white" />
+                  </clipPath>
+                </defs>
+              </svg>
+            )}
+          </Box>
+        </Box>
+      </Grid>
       <Box
         display="flex"
         width="100%"
@@ -510,7 +639,7 @@ export const PoseNetCamera = () => {
         justifyContent="space-between"
         alignItems="center"
         style={{ backgroundColor: '#ffffff' }}
-        margin="1rem"
+        marginTop="1rem"
         height="3rem"
       >
         <Box
@@ -550,110 +679,280 @@ export const PoseNetCamera = () => {
           <span className="camera-time-label">Bad posture (total)</span>
         </Box>
       </Box>
-      <Box
-        display="flex"
-        width="100%"
-        flexDirection="row"
-        justifyContent="space-between"
-        alignItems="center"
-        style={{ backgroundColor: '#ffffff' }}
-        margin="1rem"
-        height="3rem"
+      <Grid
+        container
+        direction="row"
+        justify="center"
+        alignItems="flex-start"
+        minHeight="100%"
+        style={{ paddingTop: '1rem', justifyContent: 'space-between' }}
       >
         <Box
+          width="375px"
+          height="300px"
           display="flex"
-          width="25%"
-          justifyContent="center"
-          alignItems="center"
+          backgroundColor="#ffffff"
+          padding="1rem"
           flexDirection="column"
         >
-          <span className="camera-time-value">
-            {timerEyeMeanBadPosture.getTimeValues().toString()}
-          </span>
-          <span className="camera-time-label">Head bad posture (period)</span>
+          <Box
+            display="flex"
+            flexDirection="row"
+            alignItems="center"
+            height="2rem"
+          >
+            Calibration
+            <Tag
+              className="some-class"
+              title="Clear Selection"
+              type="green"
+              disabled
+            >
+              SIDE VIEW
+            </Tag>
+          </Box>
+          <Box
+            width="100%"
+            display="flex"
+            flexDirection="row"
+            justifyContent="flex-end"
+          >
+            <Button
+              onClick={() => {
+                if (history.length > 0) {
+                  const cloneHistory = [...history];
+                  const tick = cloneHistory.length;
+                  const currentPoseData = cloneHistory[cloneHistory.length - 1];
+                  setCalibrationDataRaw({ tick, ...currentPoseData });
+                }
+              }}
+            >
+              Calibrate
+            </Button>
+          </Box>
         </Box>
         <Box
+          width="375px"
+          height="300px"
           display="flex"
-          width="25%"
-          justifyContent="center"
-          alignItems="center"
+          backgroundColor="#ffffff"
+          padding="1rem"
           flexDirection="column"
         >
-          <span className="camera-time-value">
-            {headPostureOverTimeIsBad ? 'BAD' : 'GOOD'}
-          </span>
-          <span className="camera-time-label">Head status</span>
+          <Box
+            display="flex"
+            flexDirection="row"
+            alignItems="center"
+            height="2rem"
+          >
+            Head angle
+            <Tag
+              className="some-class"
+              title="Clear Selection"
+              type="green"
+              disabled
+            >
+              FRONTAL VIEW
+            </Tag>
+          </Box>
+          <MBox
+            display="flex"
+            width={videoWidth}
+            height={videoHeight}
+            justifyContent="center"
+            alignItems="center"
+            flexDirection="column"
+            minHeight="400px"
+            position="relative"
+            backgroundColor="#f2f2f2"
+          >
+            <Graph
+              data={chartDataEye}
+              width={videoWidth}
+              height={videoHeight}
+              yDomain={[-50, 50]}
+              loading={loading}
+            />
+          </MBox>
         </Box>
         <Box
+          width="375px"
+          height="300px"
           display="flex"
-          width="25%"
-          justifyContent="center"
-          alignItems="center"
+          backgroundColor="#ffffff"
+          padding="1rem"
           flexDirection="column"
         >
-          <span className="camera-time-value">
-            {timerShoulderMeanBadPosture.getTimeValues().toString()}
-          </span>
-          <span className="camera-time-label">Body bad posture (period)</span>
+          <Box
+            display="flex"
+            flexDirection="row"
+            alignItems="center"
+            height="2rem"
+          >
+            Body angle
+            <Tag
+              className="some-class"
+              title="Clear Selection"
+              type="green"
+              disabled
+            >
+              FRONTAL VIEW
+            </Tag>
+          </Box>
+          <MBox
+            display="flex"
+            width={videoWidth}
+            height={videoHeight}
+            justifyContent="center"
+            alignItems="center"
+            flexDirection="column"
+            minHeight="400px"
+            position="relative"
+            backgroundColor="#f2f2f2"
+          >
+            <Graph
+              data={chartDataShoulder}
+              width={videoWidth}
+              height={videoHeight}
+              yDomain={[-50, 50]}
+              loading={loading}
+            />
+          </MBox>
         </Box>
-        <Box
+        {/* <Box
           display="flex"
-          width="25%"
-          justifyContent="center"
-          alignItems="center"
           flexDirection="column"
-        >
-          <span className="camera-time-value">
-            {bodyPostureOverTimeIsBad ? 'BAD' : 'GOOD'}
-          </span>
-          <span className="camera-time-label">Body status</span>
-        </Box>
-      </Box>
-      <Box
-        display="flex"
-        width="100%"
-        flexDirection="row"
-        justifyContent="space-between"
-        alignItems="center"
-        style={{ backgroundColor: '#ffffff' }}
-        margin="1rem"
-      >
-        <Box
+          maxWidth={videoWidth}
+          alignItems="top"
+        > */}
+        {/* <ExpansionPanel
+            TransitionProps={{ unmountOnExit: true }}
+            style={{ marginRight: '12px', marginLeft: '12px', width: '468px' }}
+          >
+            <ExpansionPanelSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
+            >
+              <Typography className={classes.heading}>EYES</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails>
+              <Box
+                display="flex"
+                flexDirection="column"
+                maxWidth={videoWidth}
+                alignItems="top"
+              >
+                <PostureStatus
+                  maxWidth={videoWidth}
+                  msg={statusEye.msg}
+                  value={statusEye.value}
+                  status={statusEye.status}
+                />
+                <ThresholdSlider
+                  maxWidth={videoWidth}
+                  threshold={thresholdEye}
+                  setThreshold={setThresholdEye}
+                  part="eye"
+                />
+              </Box>
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
+          <ExpansionPanel
+            TransitionProps={{ unmountOnExit: true }}
+            style={{ marginRight: '12px', marginLeft: '12px', width: '468px' }}
+          >
+            <ExpansionPanelSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
+            >
+              <Typography className={classes.heading}>SHOULDERS</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails>
+              <Box
+                display="flex"
+                flexDirection="column"
+                maxWidth={videoWidth}
+                alignItems="top"
+              >
+                <PostureStatus
+                  maxWidth={videoWidth}
+                  msg={statusShoulder.msg}
+                  value={statusShoulder.value}
+                  status={statusShoulder.status}
+                />
+                <ThresholdSlider
+                  maxWidth={videoWidth}
+                  threshold={thresholdShoulder}
+                  setThreshold={setThresholdShoulder}
+                  part="shoulder"
+                />
+              </Box>
+            </ExpansionPanelDetails>
+          </ExpansionPanel> */}
+        {/* </Box> */}
+        {/* <Box
           display="flex"
-          width="50%"
-          justifyContent="center"
+          width="100%"
+          flexDirection="row"
+          justifyContent="space-between"
           alignItems="center"
-          flexDirection="column"
-          minHeight="400px"
-          position="relative"
+          style={{ backgroundColor: '#ffffff' }}
+          margin="1rem"
+          height="3rem"
         >
-          <Graph
-            data={chartDataEye}
-            width={800}
-            height={400}
-            yDomain={[-50, 50]}
-            loading={loading}
-          />
-        </Box>
-        <Box
-          display="flex"
-          width="50%"
-          justifyContent="center"
-          alignItems="center"
-          flexDirection="column"
-          minHeight="400px"
-          position="relative"
-        >
-          <Graph
-            data={chartDataShoulder}
-            width={800}
-            height={400}
-            yDomain={[-80, 80]}
-            loading={loading}
-          />
-        </Box>
-      </Box>
-    </Grid>
+          <Box
+            display="flex"
+            width="50%"
+            justifyContent="center"
+            alignItems="center"
+            flexDirection="column"
+          >
+            <span className="camera-time-value">
+              {timerEyeMeanBadPosture.getTimeValues().toString()}
+            </span>
+            <span className="camera-time-label">Head bad posture (period)</span>
+          </Box> */}
+        {/* <Box
+            display="flex"
+            width="25%"
+            justifyContent="center"
+            alignItems="center"
+            flexDirection="column"
+          >
+            <span className="camera-time-value">
+              {headPostureOverTimeIsBad ? 'BAD' : 'GOOD'}
+            </span>
+            <span className="camera-time-label">Head status</span>
+          </Box> */}
+        {/* <Box
+            display="flex"
+            width="50%"
+            justifyContent="center"
+            alignItems="center"
+            flexDirection="column"
+          >
+            <span className="camera-time-value">
+              {timerShoulderMeanBadPosture.getTimeValues().toString()}
+            </span>
+            <span className="camera-time-label">Body bad posture (period)</span>
+          </Box> */}
+        {/* <Box
+            display="flex"
+            width="25%"
+            justifyContent="center"
+            alignItems="center"
+            flexDirection="column"
+          >
+            <span className="camera-time-value">
+              {bodyPostureOverTimeIsBad ? 'BAD' : 'GOOD'}
+            </span>
+            <span className="camera-time-label">Body status</span>
+          </Box> */}
+        {/* </Box> */}
+      </Grid>
+    </>
   );
 };
 

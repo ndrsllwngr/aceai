@@ -12,8 +12,8 @@ import {
   SideNav,
   SideNavItems,
   SideNavLink,
-  SideNavMenu,
-  SideNavMenuItem,
+  // SideNavMenu,
+  // SideNavMenuItem,
 } from 'carbon-components-react/lib/components/UIShell';
 // import { Button } from 'carbon-components-react';
 // import get from 'lodash/get';
@@ -69,11 +69,11 @@ export const Header = ({ children }) => {
                 [BodyPose]
               </HeaderName>
               <HeaderGlobalBar>
-                <div className="appearance-status" aria-label="status">
+                {/* <div className="appearance-status" aria-label="status">
                   <h3 className="header__h3">
                     Status: {appContext.webCam ? 'Running' : 'Paused'}
                   </h3>
-                </div>
+                </div> */}
                 <HeaderGlobalAction
                   aria-label="control"
                   onClick={handleChange('webCam')}
@@ -103,7 +103,6 @@ export const Header = ({ children }) => {
                     to="/app"
                     href="/app"
                     renderIcon={Fade16}
-                    // href="javascript:void(0)"
                   >
                     Landingpage
                   </SideNavLink>
@@ -112,11 +111,10 @@ export const Header = ({ children }) => {
                     to="/app/dashboard"
                     href="/app/dashboard"
                     renderIcon={Fade16}
-                    // href="javascript:void(0)"
                   >
                     Dashboard
                   </SideNavLink>
-                  <SideNavMenu renderIcon={Fade16} title="Settings">
+                  {/* <SideNavMenu renderIcon={Fade16} title="Settings">
                     <SideNavMenuItem>Link</SideNavMenuItem>
                     <SideNavMenuItem
                     // aria-current="page"
@@ -125,7 +123,7 @@ export const Header = ({ children }) => {
                       Link
                     </SideNavMenuItem>
                     <SideNavMenuItem>Link</SideNavMenuItem>
-                  </SideNavMenu>
+                  </SideNavMenu> */}
                 </SideNavItems>
               </SideNav>
             </CarbonHeader>

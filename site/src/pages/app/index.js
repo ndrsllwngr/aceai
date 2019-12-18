@@ -13,11 +13,14 @@ const App = () => {
       <Header>
         <Content
           id="main-content"
-          style={{ backgroundColor: '#f4f4f4', minHeight: '100%' }}
+          style={{
+            backgroundColor: '#f4f4f4',
+            minHeight: '100vh',
+          }}
         >
           <div className="bx--grid">
             <div className="bx--row">
-              <section className="bx--offset-lg-2 bx--col-lg-13">
+              <section className="bx--offset-lg-3 bx--col-lg-13">
                 <Router>
                   <Dashboard path="/app/dashboard" />
                   <LandingPage path="/app" />

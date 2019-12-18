@@ -4,10 +4,13 @@ import React from 'react';
 import {
   // Breadcrumb,
   // BreadcrumbItem,
-  Button,
+  // Button,
   Tabs,
   Tab,
 } from 'carbon-components-react';
+import Development32 from '@carbon/icons-react/lib/development/32';
+import PersonFavorite32 from '@carbon/icons-react/lib/person--favorite/32';
+import Chip32 from '@carbon/icons-react/lib/chip/32';
 import SEO from '../seo';
 
 export const LandingPage = () => {
@@ -34,8 +37,8 @@ export const LandingPage = () => {
                 <a href="/app">Getting started</a>
               </BreadcrumbItem>
             </Breadcrumb> */}
-            <h1 className="landing-page__heading">
-              Design &amp; build with Carbon
+            <h1 className="landing-page__heading" style={{ marginTop: '2rem' }}>
+              Learn about BodyPose &amp; improve your posture
             </h1>
           </div>
         </div>
@@ -47,16 +50,17 @@ export const LandingPage = () => {
                   <div className="bx--row landing-page__tab-content">
                     <div className="bx--col-md-4 bx--col-lg-7">
                       <h2 className="landing-page__subheading">
-                        What is Carbon?
+                        What is BodyPose?
                       </h2>
                       <p className="landing-page__p">
-                        Carbon is IBM’s open-source design system for digital
-                        products and experiences. With the IBM Design Language
-                        as its foundation, the system consists of working code,
-                        design tools and resources, human interface guidelines,
-                        and a vibrant community of contributors.
+                        BodyPose is a web-app, which supports you maintaining a
+                        healthy body posture. While working on computer screens,
+                        we tend to relax our bodies and follow bad posture
+                        habits subconsciously. BodyPose reminds you friendly on
+                        how to realign your body and keeps you motivated working
+                        on your alignment.
                       </p>
-                      <Button>Learn more</Button>
+                      {/* <Button>Learn more</Button> */}
                     </div>
                     <div className="bx--col-md-4 bx--offset-lg-1 bx--col-lg-8 custom-flex-end">
                       <svg
@@ -108,7 +112,7 @@ export const LandingPage = () => {
                   </div>
                 </div>
               </Tab>
-              <Tab {...props.tab} label="Design">
+              <Tab {...props.tab} label="Manual">
                 <div className="bx--grid bx--grid--no-gutter bx--grid--full-width fix-padding">
                   <div className="bx--row landing-page__tab-content">
                     <div className="bx--col-lg-16">
@@ -118,7 +122,7 @@ export const LandingPage = () => {
                   </div>
                 </div>
               </Tab>
-              <Tab {...props.tab} label="Develop">
+              <Tab {...props.tab} label="Research">
                 <div className="bx--grid bx--grid--no-gutter bx--grid--full-width fix-padding">
                   <div className="bx--row landing-page__tab-content">
                     <div className="bx--col-lg-16">
@@ -131,15 +135,54 @@ export const LandingPage = () => {
             </Tabs>
           </div>
         </div>
-        <div className="bx--row landing-page__r3">
-          <div className="bx--col-md-4 bx--col-lg-4">
-            <h3 className="landing-page__label">The Principles</h3>
-          </div>
-          <div className="bx--col-md-4 bx--col-lg-4">Carbon is Open</div>
-          <div className="bx--col-md-4 bx--col-lg-4">Carbon is Modular</div>
-          <div className="bx--col-md-4 bx--col-lg-4">Carbon is Consistent</div>
-        </div>
+        <InfoSection heading="The Principles" className="landing-page__r3">
+          <InfoCard
+            heading="BodyPose is Approved"
+            body="It is based on the latest findings of scientific research. Furthermore we work with an expert in the medical field of orthopaedics in order to provide you only the best advice for your body."
+            icon={<PersonFavorite32 />}
+          />
+          <InfoCard
+            heading="BodyPose is Simple"
+            body="All you need is a PC and a webcam. It is set up within seconds, no further gadgets are needed."
+            icon={<Development32 />}
+          />
+          <InfoCard
+            heading="BodyPose is Precise"
+            body="We work with Tensorflow's PoseNet Model in order to give you the most precise state of the art feedback for your body posture. It analyzes your alignment and a rule-based system evaluates the quality of your body pose."
+            icon={<Chip32 />}
+          />
+        </InfoSection>
       </div>
     </>
   );
 };
+
+const InfoSection = props => (
+  <section className={`bx--row ${props.className} info-section`}>
+    <div className="bx--col-md-8 bx--col-lg-4 bx--col-xlg-3">
+      <h3 className="info-section__heading">{props.heading}</h3>
+    </div>
+    {props.children}
+  </section>
+);
+
+const InfoCard = props => {
+  const splitHeading = createArrayFromPhrase(props.heading);
+  return (
+    <article className="info-card bx--col-md-4 bx--col-lg-4 bx--col-xlg-3 bx--offset-xlg-1">
+      <h4 className="info-card__heading">
+        {`${splitHeading[0]} `}
+        <strong>{splitHeading[1]}</strong>
+      </h4>
+      <p className="info-card__body">{props.body}</p>
+      {props.icon}
+    </article>
+  );
+};
+
+// Take in a phrase and separate the third word in an array
+function createArrayFromPhrase(phrase) {
+  const splitPhrase = phrase.split(' ');
+  const thirdWord = splitPhrase.pop();
+  return [splitPhrase.join(' '), thirdWord];
+}

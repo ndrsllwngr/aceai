@@ -2,8 +2,8 @@ import React, { useContext, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 const emptyState = {
-  videoWidth: 600,
-  videoHeight: 500,
+  videoWidth: 343,
+  videoHeight: 242,
   loading: false,
   webCam: false,
   charts: true,
