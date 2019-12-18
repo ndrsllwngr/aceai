@@ -2,12 +2,16 @@ import React, { useContext, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 const emptyState = {
+  videoWidth: 343,
+  videoHeight: 242,
+  loading: false,
   webCam: false,
-  charts: false,
+  charts: true,
   consoleLog: false,
   openDrawer: true,
   epochMode: false,
   epochCount: 50,
+  median: true,
   timeWindowMeanInMilliseconds: 20000,
 };
 

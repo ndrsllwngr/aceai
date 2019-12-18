@@ -25,7 +25,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Slider from '@material-ui/core/Slider';
 import { useApp } from './ctx-app';
 
-import './layout.css';
+// import './layout.css';
 
 const drawerWidth = 240;
 

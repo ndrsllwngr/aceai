@@ -1,0 +1,123 @@
+@import './_overrrides.scss';
+@import './_mixins.scss';
+
+.landing-page__illo {
+    max-width: 100%;
+}
+
+.landing-page__banner {
+    padding-top: $spacing-05;
+    padding-bottom: $spacing-07 * 4;
+}
+
+.landing-page__banner {
+    padding-top: $spacing-05;
+    padding-bottom: $spacing-07 * 4;
+    @include landing-page-background;
+}
+
+.landing-page__heading {
+    @include carbon--type-style('productive-heading-05');
+}
+
+.landing-page__r2 {
+    margin-top: rem(-40px);
+    background-color: #ffffff;
+}
+
+.landing-page__tab-content {
+    padding-top: $layout-05;
+    padding-bottom: $layout-05;
+}
+
+.landing-page__subheading {
+    @include carbon--type-style('productive-heading-03');
+    @include carbon--font-weight('semibold');
+}
+
+.landing-page__p {
+    @include carbon--type-style('productive-heading-03');
+    margin-top: $spacing-06;
+    margin-bottom: $spacing-08;
+
+    @include carbon--breakpoint-between((320px + 1), md) {
+        max-width: 75%;
+    }
+}
+
+.landing-page__r3 {
+    padding-top: $spacing-09;
+    padding-bottom: $spacing-09;
+    @include landing-page-background;
+}
+
+.landing-page__label {
+    @include carbon--type-style('heading-01');
+}
+
+.fix-padding {
+    @include carbon--breakpoint-up(md) {
+        padding-right: 1rem;
+        padding-left: 1rem;
+    }
+}
+
+.custom-flex-end {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: -4rem;
+}
+
+.info-section__heading {
+    @include carbon--type-style('heading-01');
+}
+
+.info-card {
+    margin-top: $spacing-09;
+    display: flex;
+    flex-direction: column;
+
+    svg {
+        margin-top: $spacing-09;
+    }
+
+    // top border in only small breakpoints to prevent overrides
+    @include carbon--breakpoint-down(md) {
+        &:not(:nth-child(2)) {
+            border-top: 1px solid $ui-03;
+            padding-top: $spacing-09;
+        }
+    }
+
+    // left border in just the 2nd column items
+    @include carbon--breakpoint(md) {
+        &:nth-child(odd) {
+            border-left: 1px solid $ui-03;
+        }
+    }
+
+    // left border in all items
+    @include carbon--breakpoint(lg) {
+        margin-top: 0;
+        border-left: 1px solid $ui-03;
+
+        svg {
+            margin-top: $layout-06;
+        }
+    }
+}
+
+.info-card__heading {
+    @include carbon--type-style('productive-heading-03');
+}
+
+.info-card__body {
+    margin-top: $spacing-06;
+    flex-grow: 1; // fill space so icons are bottom aligned
+    @include type-style('body-long-01');
+
+    // prevent large line lengths between small and medium viewports
+    @include carbon--breakpoint-between(321px, md) {
+        max-width: 75%;
+    }
+}
