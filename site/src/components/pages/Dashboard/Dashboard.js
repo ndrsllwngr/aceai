@@ -13,6 +13,36 @@ import { PoseNetCamera } from '../../PoseNetCamera/camera';
 import { useUi } from '../../_context-ui';
 // import { useApp } from '../../_context-app';
 
+const showNotification = () => {
+  if (typeof Notification !== 'undefined') {
+    Notification.requestPermission(result => {
+      if (result === 'granted') {
+        navigator.serviceWorker.ready.then(registration => {
+          registration.showNotification('Update', {
+            body: 'BodyPose experimental feature notification',
+            icon: 'link-to-your-icon',
+            vibrate: [200, 100, 200, 100, 200, 100, 400],
+            tag: 'request',
+            actions: [
+              // you can customize these actions as you like
+              {
+                // eslint-disable-next-line no-console
+                action: () => console.log('update'), // you should define this
+                title: 'update',
+              },
+              {
+                // eslint-disable-next-line no-console
+                action: () => console.log('ignore'), // you should define this
+                title: 'ignore',
+              },
+            ],
+          });
+        });
+      }
+    });
+  }
+};
+
 export const Dashboard = () => {
   // const [appContext] = useApp();
   const [uiContext, setUiContext] = useUi();
@@ -26,6 +56,9 @@ export const Dashboard = () => {
         message: 'test',
         intent: Intent.PRIMARY,
       });
+    }
+    if (uiContext.showNotificationBrowser) {
+      showNotification();
     }
   };
   return (

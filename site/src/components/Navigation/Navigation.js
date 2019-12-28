@@ -5,6 +5,52 @@ import { Alignment, Button, Navbar, Toaster } from '@blueprintjs/core';
 import { useUi } from '../_context-ui';
 import { useApp } from '../_context-app';
 
+// function askNotificationPermission() {
+//   // function to actually ask the permissions
+//   function handlePermission(permission) {
+//     // Whatever the user answers, we make sure Chrome stores the information
+//     if (!('permission' in Notification)) {
+//       Notification.permission = permission;
+//     }
+
+//     // set the button to shown or hidden, depending on what the user answers
+//     // if (
+//     //   Notification.permission === 'denied' ||
+//     //   Notification.permission === 'default'
+//     // ) {
+//     //   notificationBtn.style.display = 'block';
+//     // } else {
+//     //   notificationBtn.style.display = 'none';
+//     // }
+//   }
+
+//   // Let's check if the browser supports notifications
+//   // eslint-disable-next-line no-unsafe-negation
+//   if (!'Notification' in window) {
+//     // eslint-disable-next-line no-console
+//     console.log('This browser does not support notifications.');
+//   } else if (checkNotificationPromise()) {
+//     Notification.requestPermission().then(permission => {
+//       handlePermission(permission);
+//     });
+//   } else {
+//     // eslint-disable-next-line func-names
+//     Notification.requestPermission(function(permission) {
+//       handlePermission(permission);
+//     });
+//   }
+// }
+
+// function checkNotificationPromise() {
+//   try {
+//     Notification.requestPermission().then();
+//   } catch (e) {
+//     return false;
+//   }
+
+//   return true;
+// }
+
 export const Navigation = () => {
   const [uiContext, setUiContext] = useUi();
   const [appContext, setAppContext] = useApp();
@@ -57,7 +103,9 @@ export const Navigation = () => {
           <Button
             className="bp3-minimal"
             icon={
-              uiContext.showNotificationBrowser ? 'notifications' : 'offline'
+              uiContext.showNotificationBrowser
+                ? 'notifications-updated'
+                : 'notifications'
             }
             onClick={handleUiContextChange(
               'showNotificationBrowser',
