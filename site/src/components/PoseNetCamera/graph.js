@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from 'rebass';
 import {
   XYPlot,
   XAxis,
@@ -10,13 +9,9 @@ import {
   LineSeries,
   AreaSeries,
 } from 'react-vis';
-import { Button } from 'carbon-components-react';
-
-import View20 from '@carbon/icons-react/lib/view/20';
-import ViewOff20 from '@carbon/icons-react/lib/view--off/20';
 
 export const Graph = ({ data, width, height, yDomain, loading }) => {
-  const [showGraph, setShowGraph] = useState(false);
+  const [showGraph] = useState(true);
   return (
     <>
       {showGraph === true &&
@@ -58,27 +53,6 @@ export const Graph = ({ data, width, height, yDomain, loading }) => {
             />
           </XYPlot>
         ))}
-      <Box
-        style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-        }}
-      >
-        <Button onClick={() => setShowGraph(!showGraph)}>
-          {showGraph ? (
-            <>
-              <ViewOff20 className="graph-icon"></ViewOff20>
-              Hide graph
-            </>
-          ) : (
-            <>
-              <View20 className="graph-icon"></View20>
-              Show graph
-            </>
-          )}
-        </Button>
-      </Box>
     </>
   );
 };
