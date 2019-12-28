@@ -1,14 +1,19 @@
 import React from 'react';
 import { Match } from '@reach/router';
 import { Link } from 'gatsby';
-import { Alignment, Button, Navbar } from '@blueprintjs/core';
+import { Alignment, Button, Navbar, Toaster } from '@blueprintjs/core';
+import { useUi } from '../_context-ui';
 import { useApp } from '../_context-app';
 
 export const Navigation = () => {
+  const [uiContext, setUiContext] = useUi();
   const [appContext, setAppContext] = useApp();
 
   const handleChange = () => {
     setAppContext({ ...appContext, webCam: !appContext.webCam });
+  };
+  const handleUiContextChange = (property, value) => () => {
+    setUiContext({ ...uiContext, [property]: value });
   };
   return (
     <>
@@ -49,10 +54,29 @@ export const Navigation = () => {
             icon={appContext.webCam ? 'stop' : 'power'}
             onClick={handleChange}
           />
-          <Button className="bp3-minimal" icon="notifications" />
-          <Button className="bp3-minimal" icon="cog" />
+          <Button
+            className="bp3-minimal"
+            icon={
+              uiContext.showNotificationBrowser ? 'notifications' : 'offline'
+            }
+            onClick={handleUiContextChange(
+              'showNotificationBrowser',
+              !uiContext.showNotificationBrowser,
+            )}
+          />
+          <Button
+            className="bp3-minimal"
+            icon="cog"
+            onClick={handleUiContextChange('drawerIsOpen', true)}
+          />
         </Navbar.Group>
       </Navbar>
+      <Toaster
+        autoFocus={false}
+        canEscapeKeyClear
+        position="bottom-right"
+        ref={uiContext.toasterRef}
+      />
     </>
   );
 };
