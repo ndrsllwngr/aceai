@@ -1,6 +1,6 @@
 import React from 'react';
-import SEO from '../seo';
-import { PoseNetCamera } from '../PoseNetCamera/camera';
+import SEO from '../../seo';
+import { PoseNetCamera } from '../../PoseNetCamera/camera';
 // import { useApp } from '../ctx-app';
 
 export const Dashboard = () => {

@@ -7,9 +7,9 @@ import Col from 'react-bootstrap/Col';
 import { Box } from 'rebass';
 import { Icon, Intent, Tab, Tabs } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
-import SEO from '../seo';
+import SEO from '../../seo';
 
-export const LandingPage = () => {
+export const Manual = () => {
   return (
     <>
       <SEO title="Home" />

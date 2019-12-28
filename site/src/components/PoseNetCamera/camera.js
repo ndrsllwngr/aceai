@@ -11,17 +11,16 @@ import { Button, Tag } from '@blueprintjs/core';
 import { Subject } from 'rxjs';
 import { Timer } from 'easytimer.js';
 // COMPONENTS
-import { Graph } from './graph';
+import { Graph } from '../graph';
 import { VideoCanvas } from '../VideoCanvas';
-import { TickObject } from './tickObject';
-import { useApp } from '../ctx-app';
-import { TimerComponent } from './timer';
-import { Widget } from './widget';
-import {
+import TickObject, {
   extractPointObj,
   calcMeanForTimeWindow,
   calcMedianForTimeWindow,
-} from './tickUtil';
+} from '../TickObject';
+import { useApp } from '../_context-app';
+import { TimerComponent } from '../timer';
+import { Widget } from '../widget';
 // PoseNet
 import {
   drawBoundingBox,
