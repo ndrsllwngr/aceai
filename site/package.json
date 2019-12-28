@@ -38,7 +38,8 @@
     "react-vis": "1.11.7",
     "rebass": "4.0.7",
     "rxjs": "6.5.4",
-    "styled-components": "4.4.1"
+    "styled-components": "4.4.1",
+    "uuid": "3.3.3"
   },
   "devDependencies": {
     "eslint": "6.8.0",

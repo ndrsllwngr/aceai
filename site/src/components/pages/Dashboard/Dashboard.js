@@ -7,35 +7,38 @@ import {
   Position,
   Classes,
 } from '@blueprintjs/core';
-
+import uuidv4 from 'uuid/v4';
 import SEO from '../../seo';
 import { PoseNetCamera } from '../../PoseNetCamera/camera';
 import { useUi } from '../../_context-ui';
 // import { useApp } from '../../_context-app';
 
-const showNotification = () => {
+// https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration/showNotification
+const showNotification = (title = 'Title', body = 'Body', tag = uuidv4()) => {
   if (typeof Notification !== 'undefined') {
     Notification.requestPermission(result => {
       if (result === 'granted') {
         navigator.serviceWorker.ready.then(registration => {
-          registration.showNotification('Update', {
-            body: 'BodyPose experimental feature notification',
-            icon: 'link-to-your-icon',
+          registration.showNotification(title, {
+            body,
+            tag,
+            renotify: true,
             vibrate: [200, 100, 200, 100, 200, 100, 400],
-            tag: 'request',
-            actions: [
-              // you can customize these actions as you like
-              {
-                // eslint-disable-next-line no-console
-                action: () => console.log('update'), // you should define this
-                title: 'update',
-              },
-              {
-                // eslint-disable-next-line no-console
-                action: () => console.log('ignore'), // you should define this
-                title: 'ignore',
-              },
-            ],
+            icon: '../../../images/tab-illo.png',
+            // icon: 'link-to-your-icon',
+            // actions: [
+            //   // you can customize these actions as you like
+            //   {
+            //     // eslint-disable-next-line no-console
+            //     action: () => console.log('update'), // you should define this
+            //     title: 'update',
+            //   },
+            //   {
+            //     // eslint-disable-next-line no-console
+            //     action: () => console.log('ignore'), // you should define this
+            //     title: 'ignore',
+            //   },
+            // ],
           });
         });
       }
