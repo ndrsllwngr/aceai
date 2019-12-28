@@ -25,10 +25,16 @@ const InnerApp = () => {
   return (
     <>
       <Navigation />
-      <Router>
-        <Dashboard path="/app/dashboard" />
-        <Manual path="/app" />
-      </Router>
+      <div
+        style={{
+          paddingTop: '50px',
+        }}
+      >
+        <Router>
+          <Dashboard path="/app/dashboard" />
+          <Manual path="/app" />
+        </Router>
+      </div>
       <Drawer />
       <Toaster
         autoFocus={false}

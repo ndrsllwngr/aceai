@@ -7,7 +7,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { Box } from 'rebass';
-import { Button, Tag } from '@blueprintjs/core';
+import { Button, Tag, Portal } from '@blueprintjs/core';
 import { Subject } from 'rxjs';
 import { Timer } from 'easytimer.js';
 // COMPONENTS
@@ -408,17 +408,15 @@ export const PoseNetCamera = () => {
 
   return (
     <>
+      <Portal>
+        <VideoCanvas
+          videoHeight={videoHeight}
+          videoWidth={videoWidth}
+          loading={loading}
+        />
+      </Portal>
       <Container>
-        <Row>
-          <Col>
-            <Widget title="Camera" caption="including PoseNet data">
-              <VideoCanvas
-                videoHeight={videoHeight}
-                videoWidth={videoWidth}
-                loading={loading}
-              />
-            </Widget>
-          </Col>
+        <Row style={{ marginTop: '1rem' }}>
           <Col>
             <Widget
               title="Distance to screen and sitting height"

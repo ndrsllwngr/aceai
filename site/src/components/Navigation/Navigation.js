@@ -17,7 +17,7 @@ export const Navigation = () => {
   };
   return (
     <>
-      <Navbar>
+      <Navbar style={{ position: 'fixed' }}>
         <Navbar.Group align={Alignment.LEFT}>
           <Navbar.Heading>
             <strong>[ACEAI]</strong> BodyPose
@@ -55,6 +55,14 @@ export const Navigation = () => {
             className="bp3-minimal"
             icon={appContext.webCam ? 'stop' : 'power'}
             onClick={handleChange}
+          />
+          <Button
+            className="bp3-minimal"
+            icon={uiContext.videoCanvasIsOpen ? 'eye-on' : 'eye-open'}
+            onClick={handleUiContextChange(
+              'videoCanvasIsOpen',
+              !uiContext.videoCanvasIsOpen,
+            )}
           />
           <Button
             className="bp3-minimal"

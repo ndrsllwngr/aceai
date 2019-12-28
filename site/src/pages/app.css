@@ -2,3 +2,12 @@
 @import "~normalize.css";
 @import "~@blueprintjs/core/lib/css/blueprint.css";
 @import "~@blueprintjs/icons/lib/css/blueprint-icons.css";
+
+html {
+    height: 100%;
+}
+
+body {
+    min-height: 100%;
+    background-color: #edf2f8;
+}
