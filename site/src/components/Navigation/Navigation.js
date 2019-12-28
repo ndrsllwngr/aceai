@@ -19,7 +19,9 @@ export const Navigation = () => {
     <>
       <Navbar>
         <Navbar.Group align={Alignment.LEFT}>
-          <Navbar.Heading>BodyPose</Navbar.Heading>
+          <Navbar.Heading>
+            <strong>[ACEAI]</strong> BodyPose
+          </Navbar.Heading>
         </Navbar.Group>
         <Navbar.Group align={Alignment.RIGHT}>
           <Match path="/app">
