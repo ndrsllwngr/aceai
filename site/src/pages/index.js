@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import './app.scss';
 import { navigate } from '@reach/router';
 
 const IndexPage = () => {

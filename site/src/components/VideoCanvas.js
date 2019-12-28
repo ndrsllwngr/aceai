@@ -1,10 +1,8 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React from 'react';
 import PropTypes from 'prop-types';
-import Box from '@material-ui/core/Box';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Fade from '@material-ui/core/Fade';
-// import { PaperSheet } from './PaperSheet';
+import { Box } from 'rebass';
+import { Spinner } from '@blueprintjs/core';
 
 export const VideoCanvas = ({ videoHeight, videoWidth, loading }) => {
   return (
@@ -17,13 +15,7 @@ export const VideoCanvas = ({ videoHeight, videoWidth, loading }) => {
           playsInline
           style={{ transform: 'scaleX(-1)', display: 'none' }}
         ></video>
-        <Fade
-          in={loading}
-          style={{
-            transitionDelay: loading ? '100ms' : '0ms',
-          }}
-          unmountOnExit
-        >
+        {loading && (
           <Box position="fixed">
             <Box
               display="flex"
@@ -33,10 +25,10 @@ export const VideoCanvas = ({ videoHeight, videoWidth, loading }) => {
               height={videoHeight}
               width={videoWidth}
             >
-              <CircularProgress color="primary" />
+              <Spinner intent="none" size={50} />
             </Box>
           </Box>
-        </Fade>
+        )}
         <canvas id="output" />
       </Box>
     </div>

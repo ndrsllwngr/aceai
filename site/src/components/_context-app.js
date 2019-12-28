@@ -1,7 +1,7 @@
 import React, { useContext, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
-const emptyState = {
+export const initialState = {
   videoWidth: 343,
   videoHeight: 242,
   loading: false,
@@ -11,14 +11,16 @@ const emptyState = {
   openDrawer: true,
   epochMode: false,
   epochCount: 50,
-  median: true,
+  thresholdFrontViewBody: 15,
+  thresholdFrontViewHead: 7,
+  measure: 'median',
   timeWindowMeanInMilliseconds: 20000,
 };
 
 const AppContext = React.createContext();
 
 export function AppProvider({ children }) {
-  const [appContext, setAppContext] = useState(emptyState);
+  const [appContext, setAppContext] = useState(initialState);
   const value = useMemo(() => [appContext, setAppContext], [appContext]);
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
