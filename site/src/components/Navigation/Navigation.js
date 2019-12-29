@@ -32,11 +32,11 @@ export const Navigation = () => {
           </Navbar.Heading>
         </Navbar.Group>
         <Navbar.Group align={Alignment.RIGHT}>
-          <Match path="/app">
+          <Match path="/">
             {({ match }) => (
-              <Link to="/app" style={{ textDecoration: 'none' }}>
+              <Link to="/" style={{ textDecoration: 'none' }}>
                 <Button
-                  to="/app"
+                  to="/"
                   active={match}
                   className="bp3-minimal"
                   icon="manual"
@@ -45,11 +45,11 @@ export const Navigation = () => {
               </Link>
             )}
           </Match>
-          <Match path="/app/dashboard">
+          <Match path="/dashboard">
             {({ match }) => (
-              <Link to="/app/dashboard" style={{ textDecoration: 'none' }}>
+              <Link to="/dashboard" style={{ textDecoration: 'none' }}>
                 <Button
-                  to="/app/dashboard"
+                  to="/dashboard"
                   active={match}
                   className="bp3-minimal"
                   icon="dashboard"
