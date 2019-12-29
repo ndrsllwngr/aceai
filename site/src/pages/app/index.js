@@ -25,11 +25,7 @@ const InnerApp = () => {
   return (
     <>
       <Navigation />
-      <div
-        style={{
-          paddingTop: '50px',
-        }}
-      >
+      <div className="pt-32 sm:pt-16">
         <Router>
           <Dashboard path="/app/dashboard" />
           <Manual path="/app" />

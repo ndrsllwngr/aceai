@@ -1,9 +1,6 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import { Box } from 'rebass';
 import { Icon, Intent, Tab, Tabs } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
@@ -13,16 +10,16 @@ export const Manual = () => {
   return (
     <>
       <SEO title="Home" />
-      <Container>
-        <Row>
-          <Col>
+      <div>
+        <div>
+          <div>
             <h1 className="bp3-heading" style={{ marginTop: '2rem' }}>
               Learn about BodyPose &amp; improve your posture
             </h1>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
+          </div>
+        </div>
+        <div>
+          <div>
             <Tabs id="tabs" animate renderActiveTabPanelOnly large>
               <Tab
                 id="about"
@@ -62,9 +59,9 @@ export const Manual = () => {
                 }
               />
             </Tabs>
-          </Col>
-        </Row>
-        <Row>
+          </div>
+        </div>
+        <div>
           <InfoSection heading="The Principles">
             <InfoCard
               heading="BodyPose is Approved"
@@ -82,8 +79,8 @@ export const Manual = () => {
               icon={<Icon intent={Intent.NONE} icon={IconNames.CALCULATOR} />}
             />
           </InfoSection>
-        </Row>
-      </Container>
+        </div>
+      </div>
     </>
   );
 };

@@ -3,9 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import get from 'lodash/get';
 import * as posenet from '@tensorflow-models/posenet';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import { Box } from 'rebass';
 import { Button, Tag, Portal } from '@blueprintjs/core';
 import { Subject } from 'rxjs';
@@ -415,9 +412,9 @@ export const PoseNetCamera = () => {
           loading={loading}
         />
       </Portal>
-      <Container>
-        <Row style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-          <Col>
+      <div className="container mx-auto">
+        <div className="flex flex-row flex-wrap sm:flex-wrap mx-1 sm:mx-0">
+          <div className="w-full sm:w-full md:w-1/2 mt-1">
             <Widget
               title="Distance to screen and sitting height"
               caption="based on calibration data"
@@ -459,8 +456,8 @@ export const PoseNetCamera = () => {
                 </svg>
               </Box>
             </Widget>
-          </Col>
-          <Col>
+          </div>
+          <div className="w-full sm:w-full md:w-1/2 mt-1">
             <Widget
               title="Tilt angle of head and shoulders"
               tags={
@@ -571,10 +568,10 @@ export const PoseNetCamera = () => {
                   )}
               </Box>
             </Widget>
-          </Col>
-        </Row>
-        <Row style={{ marginBottom: '1rem' }}>
-          <Col>
+          </div>
+        </div>
+        <div style={{ marginBottom: '1rem' }}>
+          <div>
             <Widget title="Timers">
               <TimerComponent title="Session (total)" timer={timerSitting} />
               <TimerComponent
@@ -586,8 +583,8 @@ export const PoseNetCamera = () => {
                 timer={timerBadPosture}
               />
             </Widget>
-          </Col>
-          <Col>
+          </div>
+          <div>
             <Widget title="History of head tilt angle" caption="in real-time">
               <Box
                 // height={videoHeight}
@@ -604,8 +601,8 @@ export const PoseNetCamera = () => {
                 />
               </Box>
             </Widget>
-          </Col>
-          <Col>
+          </div>
+          <div>
             <Widget
               title="History of shoulder tilt angle"
               caption="in real-time"
@@ -630,10 +627,10 @@ export const PoseNetCamera = () => {
                 />
               </Box>
             </Widget>
-          </Col>
-        </Row>
-        <Row style={{ marginBottom: '1rem' }}>
-          <Col>
+          </div>
+        </div>
+        <div style={{ marginBottom: '1rem' }}>
+          <div>
             <Widget title="Calibration" caption="to track distance and height">
               <Box
                 width="100%"
@@ -656,9 +653,9 @@ export const PoseNetCamera = () => {
                 </Button>
               </Box>
             </Widget>
-          </Col>
-        </Row>
-      </Container>
+          </div>
+        </div>
+      </div>
     </>
   );
 };

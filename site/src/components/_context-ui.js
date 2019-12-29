@@ -2,7 +2,7 @@ import React, { useContext, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 const emptyState = {
-  videoCanvasIsOpen: true,
+  videoCanvasIsOpen: false,
   drawerIsOpen: false,
   toasterRef: React.createRef(),
   showNotificationInApp: true,
