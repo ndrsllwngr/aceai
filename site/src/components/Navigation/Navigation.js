@@ -27,7 +27,7 @@ export const Navigation = () => {
         }}
       >
         <Navbar.Group align={Alignment.LEFT}>
-          <Navbar.Heading>
+          <Navbar.Heading className="text-gray-900">
             <strong style={{ fontWeight: 800 }}>[ACEAI]</strong> BodyPose
           </Navbar.Heading>
         </Navbar.Group>

@@ -7,6 +7,7 @@ module.exports = {
   },
   plugins: [
     `gatsby-plugin-styled-components`,
+    `gatsby-plugin-postcss`,
     `gatsby-plugin-react-helmet`,
     'gatsby-plugin-eslint',
     {

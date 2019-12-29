@@ -4,21 +4,69 @@
 @import "~@blueprintjs/icons/lib/css/blueprint-icons.css";
 @import url('https://rsms.me/inter/inter.css');
 
+/**
+ * This injects Tailwind's base styles and any base styles registered by
+ * plugins.
+ */
+@tailwind base;
+
+/**
+  * This injects Tailwind's component classes and any component classes
+  * registered by plugins.
+  */
+@tailwind components;
+
+/**
+  * This injects Tailwind's utility classes and any utility classes registered
+  * by plugins.
+  */
+@tailwind utilities;
+
+/**
+  * Use this directive to control where Tailwind injects the responsive
+  * variations of each utility.
+  *
+  * If omitted, Tailwind will append these classes to the very end of
+  * your stylesheet by default.
+  */
+@tailwind screens;
+
 html {
-    height: 100%;
+  height: 100%;
 }
 
 body {
-    min-height: 100%;
-    background-color: #edf2f8;
+  min-height: 100%;
+  background-color: #edf2f8;
 }
 
-html, h1, h2, h3, h4, h5, h6, p, span, a, * {
-    font-family: 'Inter', sans-serif;
+html,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+a,
+* {
+  font-family: 'Inter', sans-serif;
 }
 
 @supports (font-variation-settings: normal) {
-    html, h1, h2, h3, h4, h5, h6, p, span, a, * {
-        font-family: 'Inter var', sans-serif;
-    }
+
+  html,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  a,
+  * {
+    font-family: 'Inter var', sans-serif;
+  }
 }
