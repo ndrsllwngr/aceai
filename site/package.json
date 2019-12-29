@@ -35,7 +35,6 @@
     "react-helmet": "5.2.1",
     "react-portal": "4.2.0",
     "react-vis": "1.11.7",
-    "rebass": "4.0.7",
     "rxjs": "6.5.4",
     "styled-components": "4.4.1",
     "uuid": "3.3.3"

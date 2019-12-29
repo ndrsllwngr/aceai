@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
-import { Box } from 'rebass';
 import { Icon, Intent, Tab, Tabs } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import SEO from '../../seo';
@@ -86,18 +85,18 @@ export const Manual = () => {
 };
 
 const InfoSection = props => (
-  <Box>
+  <div>
     <section>
       <h3 className="bp3-heading">{props.heading}</h3>
       {props.children}
     </section>
-  </Box>
+  </div>
 );
 
 const InfoCard = props => {
   const splitHeading = createArrayFromPhrase(props.heading);
   return (
-    <Box>
+    <div>
       <article>
         <h4 className="bp3-heading">
           {`${splitHeading[0]} `}
@@ -106,7 +105,7 @@ const InfoCard = props => {
         <p>{props.body}</p>
         {props.icon}
       </article>
-    </Box>
+    </div>
   );
 };
 

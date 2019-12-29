@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Flex, Box } from 'rebass';
 
 export const Widget = ({
   title,
@@ -11,29 +10,21 @@ export const Widget = ({
 }) => {
   return (
     <>
-      <Flex
-        display="flex"
-        backgroundColor="#ffffff"
-        padding="1.5rem"
-        flexDirection="column"
-        justifyContent="space-between"
+      <div
+        className="flex flex-col justify-between p-6 h-full bg-white rounded-lg shadow"
         style={{
-          boxShadow:
-            '0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05)',
-          borderRadius: '0.5rem',
-          height: '100%',
           ...style,
         }}
       >
-        <Box>
-          <Flex flexDirection="row" justifyContent="flex-start">
+        <div>
+          <div className="flex flex-row justify-start">
             <h5 className="bp3-heading">{title}</h5>
             <div>{tags}</div>
-          </Flex>
+          </div>
           {caption && <p>{caption}</p>}
-        </Box>
+        </div>
         {children}
-      </Flex>
+      </div>
     </>
   );
 };

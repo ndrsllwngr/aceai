@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import get from 'lodash/get';
 import * as posenet from '@tensorflow-models/posenet';
-import { Box } from 'rebass';
 import { Button, Tag, Portal } from '@blueprintjs/core';
 import { Subject } from 'rxjs';
 import { Timer } from 'easytimer.js';
@@ -427,12 +426,7 @@ export const PoseNetCamera = () => {
                 </>
               }
             >
-              <Box
-                height="200px"
-                // width={videoWidth}
-                // style={{ backgroundColor: '#f2f2f2' }}
-                padding="1rem"
-              >
+              <div className="p-4 h-48">
                 <svg
                   width="724"
                   height="724"
@@ -454,7 +448,7 @@ export const PoseNetCamera = () => {
                     fill="#c4c4c4"
                   />
                 </svg>
-              </Box>
+              </div>
             </Widget>
           </div>
           <div className="w-full sm:w-full md:w-1/2 mt-1">
@@ -479,12 +473,7 @@ export const PoseNetCamera = () => {
                 </>
               }
             >
-              <Box
-                height="200px"
-                // width={videoWidth}
-                // style={{ backgroundColor: '#f2f2f2' }}
-                padding="1rem"
-              >
+              <div className="p-4 h-48">
                 {Math.abs(statusEye.value) <
                   appContext.thresholdFrontViewHead && (
                   <svg
@@ -566,7 +555,7 @@ export const PoseNetCamera = () => {
                       </defs>
                     </svg>
                   )}
-              </Box>
+              </div>
             </Widget>
           </div>
         </div>
@@ -586,12 +575,7 @@ export const PoseNetCamera = () => {
           </div>
           <div>
             <Widget title="History of head tilt angle" caption="in real-time">
-              <Box
-                // height={videoHeight}
-                // width={videoWidth}
-                // style={{ backgroundColor: '#f2f2f2' }}
-                padding="1rem"
-              >
+              <div className="p-4">
                 <Graph
                   data={chartDataEye}
                   width={videoWidth}
@@ -599,7 +583,7 @@ export const PoseNetCamera = () => {
                   yDomain={[-50, 50]}
                   loading={loading}
                 />
-              </Box>
+              </div>
             </Widget>
           </div>
           <div>
@@ -607,17 +591,7 @@ export const PoseNetCamera = () => {
               title="History of shoulder tilt angle"
               caption="in real-time"
             >
-              <Box
-                display="flex"
-                width="100%"
-                // height={videoHeight}
-                justifyContent="center"
-                alignItems="center"
-                flexDirection="column"
-                minHeight="400px"
-                position="relative"
-                // backgroundColor="#f2f2f2"
-              >
+              <div className="flex flex-col justify-center items-center w-full relative">
                 <Graph
                   data={chartDataShoulder}
                   width={videoWidth}
@@ -625,19 +599,14 @@ export const PoseNetCamera = () => {
                   yDomain={[-50, 50]}
                   loading={loading}
                 />
-              </Box>
+              </div>
             </Widget>
           </div>
         </div>
         <div style={{ marginBottom: '1rem' }}>
           <div>
             <Widget title="Calibration" caption="to track distance and height">
-              <Box
-                width="100%"
-                display="flex"
-                flexDirection="row"
-                justifyContent="flex-end"
-              >
+              <div className="flex flex-row justify-end w-100">
                 <Button
                   onClick={() => {
                     if (history.length > 0) {
@@ -651,7 +620,7 @@ export const PoseNetCamera = () => {
                 >
                   Calibrate
                 </Button>
-              </Box>
+              </div>
             </Widget>
           </div>
         </div>
