@@ -13,7 +13,12 @@ export const VideoCanvas = ({ videoHeight, videoWidth, loading }) => {
     <Widget
       title={uiContext.videoCanvasIsOpen ? 'Camera' : 'Camera is hidden.'}
       // caption="including PoseNet data"
-      style={{ position: 'fixed', bottom: '1rem', left: '1rem' }}
+      style={{
+        position: 'fixed',
+        bottom: '1rem',
+        left: '1rem',
+        height: 'auto',
+      }}
     >
       <div
         style={{

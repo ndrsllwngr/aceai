@@ -14,17 +14,19 @@ export const Widget = ({
       <Flex
         display="flex"
         backgroundColor="#ffffff"
-        padding="2rem"
+        padding="1.5rem"
         flexDirection="column"
         justifyContent="space-between"
         style={{
-          boxShadow: '0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px 0 rgba(0,0,0,.06)',
+          boxShadow:
+            '0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05)',
           borderRadius: '0.5rem',
+          height: '100%',
           ...style,
         }}
       >
         <Box>
-          <Flex flexDirection="row" justifyContent="space-between">
+          <Flex flexDirection="row" justifyContent="flex-start">
             <h5 className="bp3-heading">{title}</h5>
             <div>{tags}</div>
           </Flex>

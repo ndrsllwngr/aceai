@@ -416,7 +416,7 @@ export const PoseNetCamera = () => {
         />
       </Portal>
       <Container>
-        <Row style={{ marginTop: '1rem' }}>
+        <Row style={{ marginTop: '1rem', marginBottom: '1rem' }}>
           <Col>
             <Widget
               title="Distance to screen and sitting height"
@@ -431,9 +431,9 @@ export const PoseNetCamera = () => {
               }
             >
               <Box
-                height={videoHeight}
-                width={videoWidth}
-                style={{ backgroundColor: '#f2f2f2' }}
+                height="200px"
+                // width={videoWidth}
+                // style={{ backgroundColor: '#f2f2f2' }}
                 padding="1rem"
               >
                 <svg
@@ -483,9 +483,9 @@ export const PoseNetCamera = () => {
               }
             >
               <Box
-                height={videoHeight}
-                width={videoWidth}
-                style={{ backgroundColor: '#f2f2f2' }}
+                height="200px"
+                // width={videoWidth}
+                // style={{ backgroundColor: '#f2f2f2' }}
                 padding="1rem"
               >
                 {Math.abs(statusEye.value) <
@@ -573,7 +573,7 @@ export const PoseNetCamera = () => {
             </Widget>
           </Col>
         </Row>
-        <Row>
+        <Row style={{ marginBottom: '1rem' }}>
           <Col>
             <Widget title="Timers">
               <TimerComponent title="Session (total)" timer={timerSitting} />
@@ -587,6 +587,52 @@ export const PoseNetCamera = () => {
               />
             </Widget>
           </Col>
+          <Col>
+            <Widget title="History of head tilt angle" caption="in real-time">
+              <Box
+                // height={videoHeight}
+                // width={videoWidth}
+                // style={{ backgroundColor: '#f2f2f2' }}
+                padding="1rem"
+              >
+                <Graph
+                  data={chartDataEye}
+                  width={videoWidth}
+                  height={videoHeight}
+                  yDomain={[-50, 50]}
+                  loading={loading}
+                />
+              </Box>
+            </Widget>
+          </Col>
+          <Col>
+            <Widget
+              title="History of shoulder tilt angle"
+              caption="in real-time"
+            >
+              <Box
+                display="flex"
+                width="100%"
+                // height={videoHeight}
+                justifyContent="center"
+                alignItems="center"
+                flexDirection="column"
+                minHeight="400px"
+                position="relative"
+                // backgroundColor="#f2f2f2"
+              >
+                <Graph
+                  data={chartDataShoulder}
+                  width={videoWidth}
+                  height={videoHeight}
+                  yDomain={[-50, 50]}
+                  loading={loading}
+                />
+              </Box>
+            </Widget>
+          </Col>
+        </Row>
+        <Row style={{ marginBottom: '1rem' }}>
           <Col>
             <Widget title="Calibration" caption="to track distance and height">
               <Box
@@ -608,52 +654,6 @@ export const PoseNetCamera = () => {
                 >
                   Calibrate
                 </Button>
-              </Box>
-            </Widget>
-          </Col>
-          <Col>
-            <Widget title="History of head tilt angle" caption="in real-time">
-              <Box
-                height={videoHeight}
-                width={videoWidth}
-                style={{ backgroundColor: '#f2f2f2' }}
-                padding="1rem"
-              >
-                <Graph
-                  data={chartDataEye}
-                  width={videoWidth}
-                  height={videoHeight}
-                  yDomain={[-50, 50]}
-                  loading={loading}
-                />
-              </Box>
-            </Widget>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <Widget
-              title="History of shoulder tilt angle"
-              caption="in real-time"
-            >
-              <Box
-                display="flex"
-                width="100%"
-                height={videoHeight}
-                justifyContent="center"
-                alignItems="center"
-                flexDirection="column"
-                minHeight="400px"
-                position="relative"
-                backgroundColor="#f2f2f2"
-              >
-                <Graph
-                  data={chartDataShoulder}
-                  width={videoWidth}
-                  height={videoHeight}
-                  yDomain={[-50, 50]}
-                  loading={loading}
-                />
               </Box>
             </Widget>
           </Col>

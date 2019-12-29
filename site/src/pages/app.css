@@ -2,6 +2,7 @@
 @import "~normalize.css";
 @import "~@blueprintjs/core/lib/css/blueprint.css";
 @import "~@blueprintjs/icons/lib/css/blueprint-icons.css";
+@import url('https://rsms.me/inter/inter.css');
 
 html {
     height: 100%;
@@ -10,4 +11,14 @@ html {
 body {
     min-height: 100%;
     background-color: #edf2f8;
+}
+
+html, h1, h2, h3, h4, h5, h6, p, span, a, * {
+    font-family: 'Inter', sans-serif;
+}
+
+@supports (font-variation-settings: normal) {
+    html, h1, h2, h3, h4, h5, h6, p, span, a, * {
+        font-family: 'Inter var', sans-serif;
+    }
 }

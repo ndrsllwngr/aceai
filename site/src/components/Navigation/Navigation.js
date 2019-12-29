@@ -17,10 +17,18 @@ export const Navigation = () => {
   };
   return (
     <>
-      <Navbar style={{ position: 'fixed' }}>
+      <Navbar
+        style={{
+          position: 'fixed',
+          boxShadow: '0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px 0 rgba(0,0,0,.06)',
+          color: '#1a202c',
+          height: 'auto',
+          minHeight: '50px',
+        }}
+      >
         <Navbar.Group align={Alignment.LEFT}>
           <Navbar.Heading>
-            <strong>[ACEAI]</strong> BodyPose
+            <strong style={{ fontWeight: 800 }}>[ACEAI]</strong> BodyPose
           </Navbar.Heading>
         </Navbar.Group>
         <Navbar.Group align={Alignment.RIGHT}>
