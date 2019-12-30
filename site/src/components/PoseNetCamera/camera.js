@@ -598,7 +598,7 @@ export const PoseNetCamera = () => {
               title="History of shoulder tilt angle"
               caption="in real-time"
             >
-              <div className="flex flex-col justify-center items-center w-full relative">
+              <div className="p-4">
                 <Graph
                   data={chartDataShoulder}
                   width={videoWidth}
