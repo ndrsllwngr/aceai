@@ -3,7 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Spinner, Collapse } from '@blueprintjs/core';
 import { Widget } from './widget';
-import { useUi } from './_context-ui';
+import { useUi } from './context-ui';
 
 export const VideoCanvas = ({ videoHeight, videoWidth, loading }) => {
   const [uiContext] = useUi();

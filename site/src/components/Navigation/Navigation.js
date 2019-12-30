@@ -2,8 +2,8 @@ import React from 'react';
 import { Match } from '@reach/router';
 import { Link } from 'gatsby';
 import { Alignment, Button, Navbar } from '@blueprintjs/core';
-import { useUi } from '../_context-ui';
-import { useApp } from '../_context-app';
+import { useUi } from '../context-ui';
+import { useApp } from '../context-app';
 
 export const Navigation = () => {
   const [uiContext, setUiContext] = useUi();

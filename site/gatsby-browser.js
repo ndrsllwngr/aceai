@@ -9,8 +9,8 @@ import PropTypes from 'prop-types';
 import { Toaster } from '@blueprintjs/core';
 import Navigation from './src/components/Navigation/index';
 import Drawer from './src/components/Drawer';
-import { UiProvider, useUi } from './src/components/_context-ui';
-import { AppProvider } from './src/components/_context-app';
+import { UiProvider, useUi } from './src/components/context-ui';
+import { AppProvider } from './src/components/context-app';
 import './src/pages/app.css';
 
 const InnerApp = ({ element }) => {

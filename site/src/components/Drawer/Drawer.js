@@ -10,8 +10,8 @@ import {
   Switch,
   Slider,
 } from '@blueprintjs/core';
-import { useUi } from '../_context-ui';
-import { useApp, initialState } from '../_context-app';
+import { useUi } from '../context-ui';
+import { useApp, initialState } from '../context-app';
 import { showNotification } from '../showNotification';
 // import { useApp } from '../../_context-app';
 

@@ -14,7 +14,7 @@ import TickObject, {
   calcMeanForTimeWindow,
   calcMedianForTimeWindow,
 } from '../TickObject';
-import { useApp } from '../_context-app';
+import { useApp } from '../context-app';
 import { TimerComponent } from '../timer';
 import { Widget } from '../widget';
 // PoseNet
@@ -51,7 +51,7 @@ let _streamCopy = null;
 export const PoseNetCamera = () => {
   // const classes = useStyles();
 
-  const [appContext] = useApp();
+  const [appContext, setAppContext] = useApp();
   const [loading, setLoading] = useState(false);
   const [headPostureOverTimeIsBad, setHeadPostureOverTimeIsBad] = useState(
     false,
