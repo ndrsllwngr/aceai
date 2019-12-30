@@ -4,6 +4,7 @@
  * See: https://www.gatsbyjs.org/docs/browser-apis/
  */
 
+// TODO keep gatsby-ssr.js identical
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Toaster } from '@blueprintjs/core';
