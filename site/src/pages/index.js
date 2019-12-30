@@ -9,7 +9,7 @@ const IndexPage = () => {
   return (
     <>
       <SEO title="Home" />
-      <div>
+      <div className="container mx-auto">
         <div>
           <div>
             <h1 className="bp3-heading" style={{ marginTop: '2rem' }}>
@@ -61,42 +61,40 @@ const IndexPage = () => {
           </div>
         </div>
         <div>
-          <InfoSection heading="The Principles">
-            <InfoCard
-              heading="BodyPose is Approved"
-              body="It is based on the latest findings of scientific research. Furthermore we work with an expert in the medical field of orthopaedics in order to provide you only the best advice for your body."
-              icon={<Icon intent={Intent.NONE} icon={IconNames.ASTERISK} />}
-            />
-            <InfoCard
-              heading="BodyPose is Simple"
-              body="All you need is a PC and a webcam. It is set up within seconds, no further gadgets are needed."
-              icon={<Icon intent={Intent.NONE} icon={IconNames.LAYOUT_GRID} />}
-            />
-            <InfoCard
-              heading="BodyPose is Precise"
-              body="We work with Tensorflow's PoseNet Model in order to give you the most precise state of the art feedback for your body posture. It analyzes your alignment and a rule-based system evaluates the quality of your body pose."
-              icon={<Icon intent={Intent.NONE} icon={IconNames.CALCULATOR} />}
-            />
-          </InfoSection>
+          <section>
+            <div className="flex flex-row flex-wrap sm:flex-wrap mx-1 sm:mx-0">
+              <div className="w-full sm:w-full md:w-1/4 mt-1">
+                <h3 className="bp3-heading">The Principles</h3>
+              </div>
+              <InfoCard
+                heading="BodyPose is Approved"
+                body="It is based on the latest findings of scientific research. Furthermore we work with an expert in the medical field of orthopaedics in order to provide you only the best advice for your body."
+                icon={<Icon intent={Intent.NONE} icon={IconNames.ASTERISK} />}
+              />
+              <InfoCard
+                heading="BodyPose is Simple"
+                body="All you need is a PC and a webcam. It is set up within seconds, no further gadgets are needed."
+                icon={
+                  <Icon intent={Intent.NONE} icon={IconNames.LAYOUT_GRID} />
+                }
+              />
+              <InfoCard
+                heading="BodyPose is Precise"
+                body="We work with Tensorflow's PoseNet Model in order to give you the most precise state of the art feedback for your body posture. It analyzes your alignment and a rule-based system evaluates the quality of your body pose."
+                icon={<Icon intent={Intent.NONE} icon={IconNames.CALCULATOR} />}
+              />
+            </div>
+          </section>
         </div>
       </div>
     </>
   );
 };
 
-const InfoSection = props => (
-  <div>
-    <section>
-      <h3 className="bp3-heading">{props.heading}</h3>
-      {props.children}
-    </section>
-  </div>
-);
-
 const InfoCard = props => {
   const splitHeading = createArrayFromPhrase(props.heading);
   return (
-    <div>
+    <div className="w-full sm:w-full md:w-1/4 mt-1">
       <article>
         <h4 className="bp3-heading">
           {`${splitHeading[0]} `}
