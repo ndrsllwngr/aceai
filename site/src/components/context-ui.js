@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 
 const emptyState = {
   videoCanvasIsOpen: false,
-  drawerIsOpen: false,
+  drawerSettingsIsOpen: false,
+  drawerNavigationIsOpen: false,
   toasterRef: React.createRef(),
   showNotificationInApp: true,
   showNotificationBrowser: false,

@@ -1,11 +1,17 @@
 import React from 'react';
-import { Match } from '@reach/router';
+import {
+  Divider,
+  Button,
+  Drawer as BluePrintDrawer,
+  Position,
+  Classes,
+} from '@blueprintjs/core';
 import { Link } from 'gatsby';
-import { Alignment, Button, Navbar } from '@blueprintjs/core';
+import { Match } from '@reach/router';
 import { useUi } from '../context-ui';
 import { useApp } from '../context-app';
 
-export const Navigation = () => {
+export const Drawer = () => {
   const [uiContext, setUiContext] = useUi();
   const [appContext, setAppContext] = useApp();
 
@@ -16,36 +22,29 @@ export const Navigation = () => {
     setUiContext({ ...uiContext, [property]: value });
   };
   return (
-    <>
-      <Navbar
-        style={{
-          position: 'fixed',
-          boxShadow: '0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px 0 rgba(0,0,0,.06)',
-          color: '#1a202c',
-          height: 'auto',
-          minHeight: '50px',
-        }}
-      >
-        <Navbar.Group align={Alignment.LEFT}>
-          <Navbar.Heading>
-            <strong style={{ fontWeight: 800 }}>[ACEAI]</strong> BodyPose
-          </Navbar.Heading>
-        </Navbar.Group>
-        <div className="block md:hidden">
-          <Navbar.Group align={Alignment.RIGHT}>
-            <Button
-              onClick={handleUiContextChange('drawerNavigationIsOpen', true)}
-              className="bp3-minimal"
-              icon="menu"
-            />
-          </Navbar.Group>
-        </div>
-        <div className="hidden md:block">
-          <Navbar.Group align={Alignment.RIGHT}>
+    <BluePrintDrawer
+      autoFocus
+      canEscapeKeyClose
+      canOutsideClickClose
+      isCloseButtonShown
+      icon="menu"
+      title="Menu"
+      enforceFocus
+      hasBackdrop
+      isOpen={uiContext.drawerNavigationIsOpen}
+      position={Position.RIGHT}
+      usePortal
+      onClose={handleUiContextChange('drawerNavigationIsOpen', false)}
+    >
+      <div className={Classes.DRAWER_BODY}>
+        <div className={Classes.DIALOG_BODY}>
+          <div className="flex flex-col">
             <Match path="/">
               {({ match }) => (
                 <Link to="/" style={{ textDecoration: 'none' }}>
                   <Button
+                    fill
+                    large
                     to="/"
                     active={match}
                     className="bp3-minimal"
@@ -59,6 +58,8 @@ export const Navigation = () => {
               {({ match }) => (
                 <Link to="/dashboard" style={{ textDecoration: 'none' }}>
                   <Button
+                    fill
+                    large
                     to="/dashboard"
                     active={match}
                     className="bp3-minimal"
@@ -68,11 +69,13 @@ export const Navigation = () => {
                 </Link>
               )}
             </Match>
-            <Navbar.Divider />
+            <Divider />
             <Button
               className="bp3-minimal"
               icon={appContext.webCam ? 'stop' : 'power'}
               onClick={handleChange}
+              fill
+              large
             />
             <Button
               className="bp3-minimal"
@@ -81,6 +84,8 @@ export const Navigation = () => {
                 'videoCanvasIsOpen',
                 !uiContext.videoCanvasIsOpen,
               )}
+              fill
+              large
             />
             <Button
               className="bp3-minimal"
@@ -93,15 +98,25 @@ export const Navigation = () => {
                 'showNotificationBrowser',
                 !uiContext.showNotificationBrowser,
               )}
+              fill
+              large
             />
             <Button
               className="bp3-minimal"
               icon="cog"
               onClick={handleUiContextChange('drawerSettingsIsOpen', true)}
+              fill
+              large
             />
-          </Navbar.Group>
+          </div>
         </div>
-      </Navbar>
-    </>
+      </div>
+      <div className={Classes.DRAWER_FOOTER}>
+        <a href="https://www.mobile.ifi.lmu.de/lehrveranstaltungen/affective-computing-6/">
+          ACEAI
+        </a>{' '}
+        2019/20
+      </div>
+    </BluePrintDrawer>
   );
 };

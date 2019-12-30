@@ -18,8 +18,8 @@ import { showNotification } from '../showNotification';
 export const Drawer = () => {
   const [uiContext, setUiContext] = useUi();
   const [appContext, setAppContext] = useApp();
-  const handleDrawerIsOpen = val => () => {
-    setUiContext({ ...uiContext, drawerIsOpen: val });
+  const handleDrawerSettingsIsOpen = val => () => {
+    setUiContext({ ...uiContext, drawerSettingsIsOpen: val });
   };
   const resetAppContext = () => setAppContext(initialState);
   const handleMeasure = event => {
@@ -52,10 +52,10 @@ export const Drawer = () => {
       title="Settings"
       enforceFocus
       hasBackdrop
-      isOpen={uiContext.drawerIsOpen}
+      isOpen={uiContext.drawerSettingsIsOpen}
       position={Position.RIGHT}
       usePortal
-      onClose={handleDrawerIsOpen(false)}
+      onClose={handleDrawerSettingsIsOpen(false)}
     >
       <div className={Classes.DRAWER_BODY}>
         <div className={Classes.DIALOG_BODY}>
