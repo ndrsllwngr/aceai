@@ -31,11 +31,11 @@
 @tailwind screens;
 
 html {
-  @apply min-h-full;
+  @apply min-h-full h-full;
 }
 
 body {
-  @apply min-h-full bg-gray-400;
+  @apply min-h-full h-full bg-gray-400;
 }
 
 html,
@@ -53,6 +53,7 @@ a,
 }
 
 @supports (font-variation-settings: normal) {
+
   html,
   h1,
   h2,
@@ -66,4 +67,9 @@ a,
   * {
     font-family: 'Inter var', sans-serif;
   }
+}
+
+body > #___gatsby,
+div[role="group"][tabindex] {
+  @apply h-full;
 }

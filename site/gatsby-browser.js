@@ -20,7 +20,7 @@ const InnerApp = ({ element }) => {
   return (
     <>
       <Navigation />
-      <div className="pt-32 sm:pt-16">{element}</div>
+      <div className="pt-32 sm:pt-16 h-full">{element}</div>
       <Drawer />
       <Toaster
         autoFocus={false}
