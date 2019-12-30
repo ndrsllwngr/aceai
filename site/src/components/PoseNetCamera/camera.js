@@ -413,7 +413,7 @@ export const PoseNetCamera = () => {
       </Portal>
       <div className="container mx-auto">
         <div className="flex flex-row flex-wrap sm:flex-wrap mx-1 sm:mx-0">
-          <div className="w-full sm:w-full md:w-1/2 mt-1">
+          <div className="w-full sm:w-full md:w-1/2 my-1 pr-0 md:pr-1">
             <Widget
               title="Distance to screen and sitting height"
               caption="based on calibration data"
@@ -451,7 +451,7 @@ export const PoseNetCamera = () => {
               </div>
             </Widget>
           </div>
-          <div className="w-full sm:w-full md:w-1/2 mt-1">
+          <div className="w-full sm:w-full md:w-1/2 my-1 pl-0 md:pl-1">
             <Widget
               title="Tilt angle of head and shoulders"
               tags={
@@ -559,21 +559,28 @@ export const PoseNetCamera = () => {
             </Widget>
           </div>
         </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <div>
-            <Widget title="Timers">
-              <TimerComponent title="Session (total)" timer={timerSitting} />
-              <TimerComponent
-                title="Good posture (total)"
-                timer={timerGoodPosture}
-              />
-              <TimerComponent
-                title="Bad posture (total)"
-                timer={timerBadPosture}
-              />
+        <div className="flex flex-row flex-wrap sm:flex-wrap mx-1 sm:mx-0">
+          <div className="w-full my-1">
+            <Widget className="w" title="Timers">
+              <div className="flex flex-row flex-wrap sm:flex-wrap">
+                <div className="w-full sm:w-full md:w-1/3 mt-1 md:mt-0">
+                  <TimerComponent title="Session" timer={timerSitting} />
+                </div>
+                <div className="w-full sm:w-full md:w-1/3 mt-1 md:mt-0">
+                  <TimerComponent
+                    title="Good posture"
+                    timer={timerGoodPosture}
+                  />
+                </div>
+                <div className="w-full sm:w-full md:w-1/3 mt-1 md:mt-0">
+                  <TimerComponent title="Bad posture" timer={timerBadPosture} />
+                </div>
+              </div>
             </Widget>
           </div>
-          <div>
+        </div>
+        <div className="flex flex-row flex-wrap sm:flex-wrap mx-1 sm:mx-0">
+          <div className="w-full sm:w-full md:w-1/2 my-1 pr-0 md:pr-1">
             <Widget title="History of head tilt angle" caption="in real-time">
               <div className="p-4">
                 <Graph
@@ -586,7 +593,7 @@ export const PoseNetCamera = () => {
               </div>
             </Widget>
           </div>
-          <div>
+          <div className="w-full sm:w-full md:w-1/2 my-1 pl-0 md:pl-1">
             <Widget
               title="History of shoulder tilt angle"
               caption="in real-time"
@@ -603,8 +610,8 @@ export const PoseNetCamera = () => {
             </Widget>
           </div>
         </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <div>
+        <div className="flex flex-row flex-wrap sm:flex-wrap mx-1 sm:mx-0">
+          <div className="w-full my-1">
             <Widget title="Calibration" caption="to track distance and height">
               <div className="flex flex-row justify-end w-100">
                 <Button

@@ -4,10 +4,12 @@ import PropTypes from 'prop-types';
 export const TimerComponent = ({ title, timer }) => {
   return (
     <>
-      <span className="camera-time-value">
-        {timer.getTimeValues().toString()}
-      </span>
-      <span className="camera-time-label">{title}</span>
+      <div className="flex flex-col items-center">
+        <span className="camera-time-value">
+          {timer.getTimeValues().toString()}
+        </span>
+        <span className="camera-time-label">{title}</span>
+      </div>
     </>
   );
 };

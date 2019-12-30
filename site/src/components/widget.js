@@ -11,7 +11,7 @@ export const Widget = ({
   return (
     <>
       <div
-        className="flex flex-col justify-between p-6 h-full bg-white rounded-lg shadow"
+        className="flex flex-col justify-between p-6 h-full bg-white rounded shadow"
         style={{
           ...style,
         }}

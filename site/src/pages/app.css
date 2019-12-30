@@ -31,12 +31,11 @@
 @tailwind screens;
 
 html {
-  height: 100%;
+  @apply min-h-full;
 }
 
 body {
-  min-height: 100%;
-  background-color: #edf2f8;
+  @apply min-h-full bg-gray-400;
 }
 
 html,

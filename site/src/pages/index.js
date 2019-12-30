@@ -8,7 +8,7 @@ import SEO from '../components/seo';
 const IndexPage = () => {
   return (
     <>
-      <SEO title="Home" />
+      <SEO title="About" />
       <div className="container mx-auto">
         <div>
           <div>

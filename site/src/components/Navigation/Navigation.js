@@ -40,7 +40,7 @@ export const Navigation = () => {
                   active={match}
                   className="bp3-minimal"
                   icon="manual"
-                  text="Manual"
+                  text="About"
                 />
               </Link>
             )}
