@@ -3,9 +3,12 @@
 import React from 'react';
 import { Icon, Intent, Tab, Tabs } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
+import { useUi } from '../components/context-ui';
 import SEO from '../components/seo';
 
 const IndexPage = () => {
+  const [uiContext] = useUi();
+
   return (
     <>
       <SEO title="About" />
@@ -24,13 +27,13 @@ const IndexPage = () => {
               animate
               renderActiveTabPanelOnly
               large
-              vertical={false}
+              vertical={!uiContext.screenWidthSmallerThanSM}
             >
               <Tab
                 id="about"
                 title="About"
                 panel={
-                  <div className="pt-16 pb-10">
+                  <div className="pt-8 sm:pt-2 pb-6 pl-0 sm:pl-3">
                     <h2 className="font-normal leading-none text-2xl">
                       What is BodyPose?
                     </h2>
@@ -46,14 +49,15 @@ const IndexPage = () => {
                 }
               />
               <Tab
-                disabled
                 id="manual"
                 title="Manual"
                 panel={
-                  <p>
-                    Rapidly build beautiful and accessible experiences. The
-                    Carbon kit contains all resources you need to get started.
-                  </p>
+                  <div className="pt-8 sm:pt-2 pb-6 pl-0 sm:pl-3">
+                    <h2 className="font-normal leading-none text-2xl">
+                      How does BodyPose work?
+                    </h2>
+                    <p className="text-base mt-6 max-w-3xl">tbd</p>
+                  </div>
                 }
               />
               <Tab
@@ -69,10 +73,8 @@ const IndexPage = () => {
               />
             </Tabs>
           </div>
-        </div>
-        <div className="mx-1 my-1 flex-shrink-0">
-          <section>
-            <div className="flex flex-row flex-wrap sm:flex-wrap mx-1 sm:mx-0">
+          <section className="mx-1 my-10">
+            <div className="flex flex-row flex-wrap sm:flex-wrap">
               <div className="w-full sm:w-full md:w-1/4 mt-1">
                 <h3 className="font-normal leading-none text-2xl py-4">
                   The Principles
@@ -105,6 +107,28 @@ const IndexPage = () => {
               </div>
             </div>
           </section>
+        </div>
+        <div className="mx-1 my-1 flex-shrink-0">
+          <div className="flex flex-row justify-between text-gray-700">
+            <p className="font-normal">
+              Made with <span>&#9829;</span> in Germany
+            </p>
+            <div>
+              <a
+                className="underline text-gray-700"
+                href="https://www.mobile.ifi.lmu.de/lehrveranstaltungen/affective-computing-6/"
+              >
+                ACEAI
+              </a>
+              <span className="mx-2">•</span>
+              <a
+                className="underline text-gray-700"
+                href="https://github.com/ndrsllwngr/aceai"
+              >
+                GitHub
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </>

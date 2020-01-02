@@ -21,14 +21,13 @@ export const Navigation = () => {
         style={{
           position: 'fixed',
           boxShadow: '0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px 0 rgba(0,0,0,.06)',
-          color: '#1a202c',
           height: 'auto',
-          minHeight: '50px',
         }}
       >
         <Navbar.Group align={Alignment.LEFT}>
           <Navbar.Heading>
-            <strong style={{ fontWeight: 800 }}>[ACEAI]</strong> BodyPose
+            <span className="font-extrabold">BodyPose</span>{' '}
+            <span className="text-gray-700">v0.6</span>
           </Navbar.Heading>
         </Navbar.Group>
         <div className="block md:hidden">

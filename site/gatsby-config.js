@@ -1,7 +1,7 @@
 module.exports = {
   siteMetadata: {
-    title: `[ACEAI] BodyPose`,
-    description: `Kick off your next, great Gatsby project with this default starter. This barebones starter ships with the main Gatsby configuration files you might need.`,
+    title: `BodyPose`,
+    description: `Improve your posture with BodyPose`,
     author: `@gatsbyjs`,
     siteUrl: `https://aceai.netlify.com`,
   },
@@ -41,7 +41,7 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `[ACEAI] BodyPose`,
+        name: `BodyPose`,
         short_name: `BodyPose`,
         start_url: `/`,
         background_color: `#fff`,

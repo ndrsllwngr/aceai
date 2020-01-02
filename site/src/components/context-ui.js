@@ -2,6 +2,7 @@ import React, { useContext, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 const emptyState = {
+  screenWidthSmallerThanSM: false,
   videoCanvasIsOpen: false,
   drawerSettingsIsOpen: false,
   drawerNavigationIsOpen: false,
