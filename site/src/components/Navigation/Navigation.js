@@ -24,81 +24,83 @@ export const Navigation = () => {
           height: 'auto',
         }}
       >
-        <Navbar.Group align={Alignment.LEFT}>
-          <Navbar.Heading>
-            <span className="font-extrabold">BodyPose</span>{' '}
-            <span className="text-gray-700">v0.6</span>
-          </Navbar.Heading>
-        </Navbar.Group>
-        <div className="block md:hidden">
-          <Navbar.Group align={Alignment.RIGHT}>
-            <Button
-              onClick={handleUiContextChange('drawerNavigationIsOpen', true)}
-              className="bp3-minimal"
-              icon="menu"
-            />
+        <div className="container mx-auto flex flex-row h-full justify-between">
+          <Navbar.Group align={Alignment.LEFT}>
+            <Navbar.Heading>
+              <span className="font-extrabold">BodyPose</span>{' '}
+              <span className="text-gray-700">v0.6</span>
+            </Navbar.Heading>
           </Navbar.Group>
-        </div>
-        <div className="hidden md:block">
-          <Navbar.Group align={Alignment.RIGHT}>
-            <Match path="/">
-              {({ match }) => (
-                <Link to="/" style={{ textDecoration: 'none' }}>
-                  <Button
-                    to="/"
-                    active={match}
-                    className="bp3-minimal"
-                    icon="manual"
-                    text="About"
-                  />
-                </Link>
-              )}
-            </Match>
-            <Match path="/dashboard">
-              {({ match }) => (
-                <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-                  <Button
-                    to="/dashboard"
-                    active={match}
-                    className="bp3-minimal"
-                    icon="dashboard"
-                    text="Dashboard"
-                  />
-                </Link>
-              )}
-            </Match>
-            <Navbar.Divider />
-            <Button
-              className="bp3-minimal"
-              icon={appContext.webCam ? 'stop' : 'power'}
-              onClick={handleChange}
-            />
-            <Button
-              className="bp3-minimal"
-              icon={uiContext.videoCanvasIsOpen ? 'eye-on' : 'eye-open'}
-              onClick={handleUiContextChange(
-                'videoCanvasIsOpen',
-                !uiContext.videoCanvasIsOpen,
-              )}
-            />
-            <Button
-              className="bp3-minimal"
-              icon={
-                uiContext.showNotificationBrowser
-                  ? 'notifications-updated'
-                  : 'notifications'
-              }
-              onClick={handleUiContextChange(
-                'showNotificationBrowser',
-                !uiContext.showNotificationBrowser,
-              )}
-            />
-            <Button
-              className="bp3-minimal"
-              icon="cog"
-              onClick={handleUiContextChange('drawerSettingsIsOpen', true)}
-            />
-          </Navbar.Group>
+          <div className="block md:hidden">
+            <Navbar.Group align={Alignment.RIGHT}>
+              <Button
+                onClick={handleUiContextChange('drawerNavigationIsOpen', true)}
+                className="bp3-minimal"
+                icon="menu"
+              />
+            </Navbar.Group>
+          </div>
+          <div className="hidden md:block">
+            <Navbar.Group align={Alignment.RIGHT}>
+              <Match path="/">
+                {({ match }) => (
+                  <Link to="/" style={{ textDecoration: 'none' }}>
+                    <Button
+                      to="/"
+                      active={match}
+                      className="bp3-minimal"
+                      icon="manual"
+                      text="About"
+                    />
+                  </Link>
+                )}
+              </Match>
+              <Match path="/dashboard">
+                {({ match }) => (
+                  <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+                    <Button
+                      to="/dashboard"
+                      active={match}
+                      className="bp3-minimal"
+                      icon="dashboard"
+                      text="Dashboard"
+                    />
+                  </Link>
+                )}
+              </Match>
+              <Navbar.Divider />
+              <Button
+                className="bp3-minimal"
+                icon={appContext.webCam ? 'stop' : 'power'}
+                onClick={handleChange}
+              />
+              <Button
+                className="bp3-minimal"
+                icon={uiContext.videoCanvasIsOpen ? 'eye-on' : 'eye-open'}
+                onClick={handleUiContextChange(
+                  'videoCanvasIsOpen',
+                  !uiContext.videoCanvasIsOpen,
+                )}
+              />
+              <Button
+                className="bp3-minimal"
+                icon={
+                  uiContext.showNotificationBrowser
+                    ? 'notifications-updated'
+                    : 'notifications'
+                }
+                onClick={handleUiContextChange(
+                  'showNotificationBrowser',
+                  !uiContext.showNotificationBrowser,
+                )}
+              />
+              <Button
+                className="bp3-minimal"
+                icon="cog"
+                onClick={handleUiContextChange('drawerSettingsIsOpen', true)}
+              />
+            </Navbar.Group>
+          </div>
         </div>
       </Navbar>
     </>
