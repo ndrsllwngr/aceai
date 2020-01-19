@@ -5,7 +5,6 @@ import get from 'lodash/get';
 import * as posenet from '@tensorflow-models/posenet';
 import { Button, Tag, Portal } from '@blueprintjs/core';
 import { Subject } from 'rxjs';
-import { Timer } from 'easytimer.js';
 // COMPONENTS
 import { Graph } from '../graph';
 import { VideoCanvas } from '../VideoCanvas';
@@ -15,6 +14,13 @@ import TickObject, {
   calcMedianForTimeWindow,
 } from '../TickObject';
 import { useApp } from '../context-app';
+import {
+  timerSitting,
+  timerGoodPosture,
+  timerBadPosture,
+  timerShoulderMeanBadPosture,
+  timerEyeMeanBadPosture,
+} from './utilsTimer';
 import { TimerComponent } from '../timer';
 import { Widget } from '../widget';
 // PoseNet
@@ -23,6 +29,7 @@ import {
   drawKeypoints,
   drawSkeleton,
   isMobile,
+  poseNetState,
 } from './utils';
 // CSS
 import '../../../node_modules/react-vis/dist/style.css';
@@ -30,12 +37,6 @@ import '../../../node_modules/react-vis/dist/style.css';
 const videoWidth = 343;
 const videoHeight = 242;
 
-const timerSitting = new Timer();
-// const timerPause = new Timer();
-const timerGoodPosture = new Timer();
-const timerBadPosture = new Timer();
-const timerShoulderMeanBadPosture = new Timer();
-const timerEyeMeanBadPosture = new Timer();
 // gets updated every second
 const history = [];
 const subject = new Subject();
@@ -76,17 +77,18 @@ export const PoseNetCamera = () => {
   useEffect(() => {
     if (appContext.webCam) {
       // eslint-disable-next-line no-inner-declarations
-      async function bind() {
+      async function running() {
         if (appContext.webCam === false) {
           return;
         }
+        console.log('async function running()');
         setLoading(true);
         const net = await posenet.load({
-          architecture: guiState.input.architecture,
-          outputStride: guiState.input.outputStride,
-          inputResolution: guiState.input.inputResolution,
-          multiplier: guiState.input.multiplier,
-          quantBytes: guiState.input.quantBytes,
+          architecture: poseNetState.input.architecture,
+          outputStride: poseNetState.input.outputStride,
+          inputResolution: poseNetState.input.inputResolution,
+          multiplier: poseNetState.input.multiplier,
+          quantBytes: poseNetState.input.quantBytes,
         });
         let video;
         try {
@@ -100,15 +102,16 @@ export const PoseNetCamera = () => {
           throw e;
         }
         setLoading(false);
-        guiState.net = net;
+        poseNetState.net = net;
         // setupFPS();
         detectPoseInRealTime(video, net);
       }
-      bind();
+      running();
       timerSitting.start();
     } else {
       // eslint-disable-next-line no-inner-declarations
-      async function bind2() {
+      async function shuttingDown() {
+        console.log('async function shuttingDown()');
         // timerSitting.pause();
         setLoading(false);
         setStatusShoulder(emptyState);
@@ -118,7 +121,7 @@ export const PoseNetCamera = () => {
         stopStreamedVideo();
         // clearCanvas();
       }
-      bind2();
+      shuttingDown();
     }
   }, [
     appContext,
@@ -128,6 +131,7 @@ export const PoseNetCamera = () => {
     setStatusShoulder,
   ]);
 
+  // CALIBRATION
   useEffect(() => {
     if (calibrationDataRaw) {
       const { time, tick } = calibrationDataRaw;
@@ -697,44 +701,6 @@ function stopStreamedVideo() {
 //   ctx.clearRect(0, 0, videoWidth, videoHeight);
 // }
 
-const defaultQuantBytes = 4;
-
-const defaultMobileNetMultiplier = isMobile() ? 0.5 : 0.75;
-const defaultMobileNetStride = 16;
-const defaultMobileNetInputResolution = 350;
-
-// const defaultResNetMultiplier = 0.75;
-// const defaultResNetStride = 32;
-// const defaultResNetInputResolution = 250;
-
-const guiState = {
-  algorithm: 'multi-pose',
-  input: {
-    architecture: 'MobileNetV1',
-    outputStride: defaultMobileNetStride,
-    inputResolution: defaultMobileNetInputResolution,
-    multiplier: defaultMobileNetMultiplier,
-    quantBytes: defaultQuantBytes,
-  },
-  singlePoseDetection: {
-    minPoseConfidence: 0.1,
-    minPartConfidence: 0.5,
-  },
-  multiPoseDetection: {
-    maxPoseDetections: 1,
-    minPoseConfidence: 0.1,
-    minPartConfidence: 0.1,
-    nmsRadius: 30.0,
-  },
-  output: {
-    showVideo: true,
-    showSkeleton: true,
-    showPoints: true,
-    showBoundingBox: false,
-  },
-  net: null,
-};
-
 /**
  * Feeds an image to posenet to estimate poses - this is where the magic
  * happens. This function loops with a requestAnimationFrame method.
@@ -758,30 +724,34 @@ function detectPoseInRealTime(video, _net) {
       let poses = [];
       let minPoseConfidence;
       let minPartConfidence;
-      switch (guiState.algorithm) {
+      switch (poseNetState.algorithm) {
         case 'single-pose':
           // eslint-disable-next-line no-case-declarations
-          const pose = await guiState.net.estimatePoses(video, {
+          const pose = await poseNetState.net.estimatePoses(video, {
             flipHorizontal: flipPoseHorizontal,
             decodingMethod: 'single-person',
           });
           poses = poses.concat(pose);
-          minPoseConfidence = +guiState.singlePoseDetection.minPoseConfidence;
-          minPartConfidence = +guiState.singlePoseDetection.minPartConfidence;
+          minPoseConfidence = +poseNetState.singlePoseDetection
+            .minPoseConfidence;
+          minPartConfidence = +poseNetState.singlePoseDetection
+            .minPartConfidence;
           break;
         case 'multi-pose':
           // eslint-disable-next-line no-case-declarations
-          const allPoses = await guiState.net.estimatePoses(video, {
+          const allPoses = await poseNetState.net.estimatePoses(video, {
             flipHorizontal: flipPoseHorizontal,
             decodingMethod: 'multi-person',
-            maxDetections: guiState.multiPoseDetection.maxPoseDetections,
-            scoreThreshold: guiState.multiPoseDetection.minPartConfidence,
-            nmsRadius: guiState.multiPoseDetection.nmsRadius,
+            maxDetections: poseNetState.multiPoseDetection.maxPoseDetections,
+            scoreThreshold: poseNetState.multiPoseDetection.minPartConfidence,
+            nmsRadius: poseNetState.multiPoseDetection.nmsRadius,
           });
 
           poses = poses.concat(allPoses);
-          minPoseConfidence = +guiState.multiPoseDetection.minPoseConfidence;
-          minPartConfidence = +guiState.multiPoseDetection.minPartConfidence;
+          minPoseConfidence = +poseNetState.multiPoseDetection
+            .minPoseConfidence;
+          minPartConfidence = +poseNetState.multiPoseDetection
+            .minPartConfidence;
           break;
         default:
           console.log('reached default case (poseDetectionFrame)');
@@ -789,7 +759,7 @@ function detectPoseInRealTime(video, _net) {
 
       ctx.clearRect(0, 0, videoWidth, videoHeight);
 
-      if (guiState.output.showVideo) {
+      if (poseNetState.output.showVideo) {
         ctx.save();
         ctx.scale(-1, 1);
         ctx.translate(-videoWidth, 0);
@@ -802,13 +772,13 @@ function detectPoseInRealTime(video, _net) {
       // scores
       poses.forEach(({ score, keypoints }) => {
         if (score >= minPoseConfidence) {
-          if (guiState.output.showPoints) {
+          if (poseNetState.output.showPoints) {
             drawKeypoints(keypoints, minPartConfidence, ctx);
           }
-          if (guiState.output.showSkeleton) {
+          if (poseNetState.output.showSkeleton) {
             drawSkeleton(keypoints, minPartConfidence, ctx);
           }
-          if (guiState.output.showBoundingBox) {
+          if (poseNetState.output.showBoundingBox) {
             drawBoundingBox(keypoints, ctx);
           }
         }
@@ -822,6 +792,7 @@ function detectPoseInRealTime(video, _net) {
         subject.next(newData);
       }
       // console.log(datas)
+      // TODO stop loop here!
       requestAnimationFrame(poseDetectionFrame);
     } catch (e) {
       console.log('ERROR in async poseDetectionFrame');
@@ -869,116 +840,3 @@ if (typeof window !== `undefined`) {
     navigator.webkitGetUserMedia ||
     navigator.mozGetUserMedia;
 }
-
-// useEffect(() => {
-//   const subscription = subject.subscribe({
-//     next: nextObj => {
-//       try {
-//         const timeStamp = nextObj.time;
-//         const cloneHistory = [...history];
-//         const tick = cloneHistory.length;
-//         if (cloneHistory.length > appContext.epochCount - 1) {
-//           if (cloneHistory[cloneHistory.length - 1].poseData) {
-//             const slicedHistory = cloneHistory.slice(
-//               cloneHistory.length - appContext.epochCount,
-//               cloneHistory.length,
-//             );
-//             const leftShoulderEpoch = new EpochPart(
-//               'leftShoulder',
-//               timeStamp,
-//               tick,
-//             );
-//             const rightShoulderEpoch = new EpochPart(
-//               'rightShoulder',
-//               timeStamp,
-//               tick,
-//             );
-//             const leftEyeEpoch = new EpochPart('leftEye', timeStamp, tick);
-//             const rightEyeEpoch = new EpochPart('rightEye', timeStamp, tick);
-//             // eslint-disable-next-line no-plusplus
-//             for (let i = 0; i < slicedHistory.length; i++) {
-//               leftShoulderEpoch.extractCoordinates(slicedHistory[i]);
-//               rightShoulderEpoch.extractCoordinates(slicedHistory[i]);
-//               leftEyeEpoch.extractCoordinates(slicedHistory[i]);
-//               rightEyeEpoch.extractCoordinates(slicedHistory[i]);
-//             }
-//             const shoulderFusion = new EpochFusion(
-//               'shoulder',
-//               leftShoulderEpoch,
-//               rightShoulderEpoch,
-//               timeStamp,
-//               tick,
-//             );
-//             const eyeFusion = new EpochFusion(
-//               'eye',
-//               leftEyeEpoch,
-//               rightEyeEpoch,
-//               timeStamp,
-//               tick,
-//             );
-
-//             // OLD: calculate y distance of ONLY latest frame
-//             if (appContext.epochMode) {
-//               eyeFusion.absDifferenceEpochYThreshold(
-//                 thresholdEye,
-//                 setStatusEye,
-//               );
-//               shoulderFusion.absDifferenceEpochYThreshold(
-//                 thresholdShoulder,
-//                 setStatusShoulder,
-//               );
-//             } else {
-//               eyeFusion.absDifferenceLatestYThreshold(
-//                 thresholdEye,
-//                 setStatusEye,
-//               );
-//               shoulderFusion.absDifferenceLatestYThreshold(
-//                 thresholdShoulder,
-//                 setStatusShoulder,
-//               );
-//             }
-//             if (appContext.consoleLog) {
-//               leftShoulderEpoch.logData();
-//               rightShoulderEpoch.logData();
-//               leftEyeEpoch.logData();
-//               rightEyeEpoch.logData();
-//               shoulderFusion.logData();
-//               eyeFusion.logData();
-//             }
-//             // PRINT data
-//             // if (appContext.charts) {
-//             //   // const chartTime = new Date(timeStamp);
-//             //   shoulderFusion.printAbsDifferenceLatestYCoor(
-//             //     chartDataShoulder,
-//             //     setChartDataShoulder,
-//             //     timeStamp,
-//             //   );
-//             //   eyeFusion.printAbsDifferenceLatestYCoor(
-//             //     chartDataEye,
-//             //     setChartDataEye,
-//             //     timeStamp,
-//             //   );
-//             // }
-//             // TODO: veränderung zur calibration: abs. abstand zu calb zu mean
-//             // TODO: schiefhaltung: jetzt über zeit zu threashold mean
-//           }
-//         }
-//       } catch (e) {
-//         console.log(e);
-//       }
-//     },
-//   });
-
-//   return () => {
-//     subscription.unsubscribe();
-//   };
-// }, [
-//   appContext.charts,
-//   appContext.consoleLog,
-//   appContext.epochCount,
-//   appContext.epochMode,
-//   chartDataEye,
-//   chartDataShoulder,
-//   thresholdEye,
-//   thresholdShoulder,
-// ]);

@@ -3,22 +3,6 @@
 /* eslint-disable no-shadow */
 /* eslint-disable vars-on-top */
 /* eslint-disable no-var */
-/**
- * @license
- * Copyright 2018 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================================
- */
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 
@@ -30,6 +14,44 @@ export const tryResNetButtonName = 'tryResNetButton';
 export const tryResNetButtonText = '[New] Try ResNet50';
 const tryResNetButtonTextCss = 'width:100%;text-decoration:underline;';
 const tryResNetButtonBackgroundCss = 'background:#e61d5f;';
+
+const defaultQuantBytes = 4;
+
+const defaultMobileNetMultiplier = isMobile() ? 0.5 : 0.75;
+const defaultMobileNetStride = 16;
+const defaultMobileNetInputResolution = 350;
+
+// const defaultResNetMultiplier = 0.75;
+// const defaultResNetStride = 32;
+// const defaultResNetInputResolution = 250;
+
+export const poseNetState = {
+  algorithm: 'multi-pose',
+  input: {
+    architecture: 'MobileNetV1',
+    outputStride: defaultMobileNetStride,
+    inputResolution: defaultMobileNetInputResolution,
+    multiplier: defaultMobileNetMultiplier,
+    quantBytes: defaultQuantBytes,
+  },
+  singlePoseDetection: {
+    minPoseConfidence: 0.1,
+    minPartConfidence: 0.5,
+  },
+  multiPoseDetection: {
+    maxPoseDetections: 1,
+    minPoseConfidence: 0.1,
+    minPartConfidence: 0.1,
+    nmsRadius: 30.0,
+  },
+  output: {
+    showVideo: true,
+    showSkeleton: true,
+    showPoints: true,
+    showBoundingBox: false,
+  },
+  net: null,
+};
 
 // function isAndroid() {
 //   return /Android/i.test(navigator.userAgent);

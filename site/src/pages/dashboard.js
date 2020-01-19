@@ -1,6 +1,6 @@
 import React from 'react';
 import SEO from '../components/seo';
-import { PoseNetCamera } from '../components/PoseNetCamera/camera';
+import { PoseNetCamera } from '../components/PoseDetection/camera';
 
 const Dashboard = () => {
   return (
