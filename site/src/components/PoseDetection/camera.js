@@ -3,16 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import get from 'lodash/get';
 import * as posenet from '@tensorflow-models/posenet';
-import {
-  Button,
-  Tag,
-  Portal,
-  Dialog,
-  Classes,
-  AnchorButton,
-  Tooltip,
-  Intent,
-} from '@blueprintjs/core';
+import { Tag, Portal } from '@blueprintjs/core';
 import { Subject } from 'rxjs';
 // COMPONENTS
 import { Graph } from '../graph';
@@ -39,12 +30,12 @@ import {
   drawSkeleton,
   isMobile,
   poseNetState,
+  videoWidth,
+  videoHeight,
 } from './utils';
 // CSS
 import '../../../node_modules/react-vis/dist/style.css';
-
-const videoWidth = 343;
-const videoHeight = 242;
+import { Calibration } from './calibration';
 
 // gets updated every second
 export const history = [];
@@ -81,11 +72,6 @@ export const PoseNetCamera = () => {
 
   const [calibrationDataRaw, setCalibrationDataRaw] = useState(undefined);
   const [calibrationData, setCalibrationData] = useState(undefined);
-  const [calibrationDialogIsOpen, setCalibrationDialogIsOpen] = useState(false);
-
-  const handleDialogIsOpen = bool => () => {
-    setCalibrationDialogIsOpen(bool);
-  };
 
   // POWER POSENET
   useEffect(() => {
@@ -597,88 +583,7 @@ export const PoseNetCamera = () => {
         <div className="flex flex-row flex-wrap sm:flex-wrap mx-1 sm:mx-0">
           <div className="w-full my-1">
             <Widget title="Calibration" caption="to track distance and height">
-              <div className="flex flex-row justify-end w-100">
-                <Button
-                  // onClick={() => {
-                  //   if (history.length > 0) {
-                  //     const cloneHistory = [...history];
-                  //     const tick = cloneHistory.length;
-                  //     const currentPoseData =
-                  //       cloneHistory[cloneHistory.length - 1];
-                  //     setCalibrationDataRaw({ tick, ...currentPoseData });
-                  //   }
-                  // }}
-                  onClick={handleDialogIsOpen(true)}
-                >
-                  Calibrate
-                </Button>
-                <Dialog
-                  icon="info-sign"
-                  onClose={handleDialogIsOpen(false)}
-                  title="Calibration dialog"
-                  autoFocus
-                  canEscapeKeyClose
-                  canOutsideClickClose
-                  enforceFocus
-                  isOpen={calibrationDialogIsOpen}
-                  usePortal
-                >
-                  <div className={Classes.DIALOG_BODY}>
-                    <p>
-                      <strong>
-                        Data integration is the seminal problem of the digital
-                        age. For over ten years, we’ve helped the world’s
-                        premier organizations rise to the challenge.
-                      </strong>
-                    </p>
-                    <p>
-                      Palantir Foundry radically reimagines the way enterprises
-                      interact with data by amplifying and extending the power
-                      of data integration. With Foundry, anyone can source,
-                      fuse, and transform data into any shape they desire.
-                      Business analysts become data engineers — and leaders in
-                      their organization’s data revolution.
-                    </p>
-                    <p>
-                      Foundry’s back end includes a suite of best-in-class data
-                      integration capabilities: data provenance, git-style
-                      versioning semantics, granular access controls, branching,
-                      transformation authoring, and more. But these powers are
-                      not limited to the back-end IT shop.
-                    </p>
-                    <p>
-                      In Foundry, tables, applications, reports, presentations,
-                      and spreadsheets operate as data integrations in their own
-                      right. Access controls, transformation logic, and data
-                      quality flow from original data source to intermediate
-                      analysis to presentation in real time. Every end product
-                      created in Foundry becomes a new data source that other
-                      users can build upon. And the enterprise data foundation
-                      goes where the business drives it.
-                    </p>
-                    <p>
-                      Start the revolution. Unleash the power of data
-                      integration with Palantir Foundry.
-                    </p>
-                  </div>
-                  <div className={Classes.DIALOG_FOOTER}>
-                    <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                      <Tooltip content="This button is hooked up to close the dialog.">
-                        <Button onClick={handleDialogIsOpen(false)}>
-                          Close
-                        </Button>
-                      </Tooltip>
-                      <AnchorButton
-                        intent={Intent.PRIMARY}
-                        href="https://www.palantir.com/palantir-foundry/"
-                        target="_blank"
-                      >
-                        Visit the Foundry website
-                      </AnchorButton>
-                    </div>
-                  </div>
-                </Dialog>
-              </div>
+              <Calibration />
             </Widget>
           </div>
         </div>

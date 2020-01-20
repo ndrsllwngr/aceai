@@ -6,6 +6,9 @@
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 
+export const videoWidth = 343;
+export const videoHeight = 242;
+
 const color = 'aqua';
 const boundingBoxColor = 'red';
 const lineWidth = 2;

@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 
-export const CountDownComponent = ({ period }) => {
+export const CountDownComponent = ({ period, callback }) => {
   const [timeLeft, setTimeLeft] = useState(period);
   useEffect(() => {
+    if (timeLeft === 0) {
+      callback();
+    }
     if (timeLeft > 0) {
       setTimeout(() => {
         if (timeLeft > 0) {
@@ -12,7 +15,7 @@ export const CountDownComponent = ({ period }) => {
         }
       }, 1000);
     }
-  }, [timeLeft]);
+  }, [callback, timeLeft]);
   return (
     <>
       <div key={timeLeft} className="flex flex-col items-center">
@@ -28,4 +31,5 @@ export const CountDownComponent = ({ period }) => {
 
 CountDownComponent.propTypes = {
   period: PropTypes.number,
+  callback: PropTypes.func,
 };
