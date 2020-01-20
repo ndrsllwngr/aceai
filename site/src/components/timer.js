@@ -6,7 +6,9 @@ export const TimerComponent = ({ title, timer }) => {
     <>
       <div className="flex flex-col items-center">
         <span className="camera-time-value">
-          {timer.getTimeValues().toString()}
+          {timer
+            .getTimeValues()
+            .toString(['hours', 'minutes', 'seconds', 'secondTenths'])}
         </span>
         <span className="camera-time-label">{title}</span>
       </div>

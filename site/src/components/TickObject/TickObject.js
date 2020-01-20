@@ -23,9 +23,9 @@ export class TickObject {
 
   differenceY = undefined;
 
-  deviationToCalibratedDifferenceX = undefined;
+  // deviationToCalibratedDifferenceX = undefined;
 
-  constructor(name, createdAt, tick, leftPoint, rightPoint, calibrationData) {
+  constructor(name, createdAt, tick, leftPoint, rightPoint) {
     this.name = name;
     this.createdAt = createdAt;
     this.tick = tick;
@@ -35,11 +35,11 @@ export class TickObject {
     this.lengthOfVector = this.calcLenghtOfVector();
     this.differenceX = this.calcDifferenceX();
     this.differenceY = this.calcDifferenceY();
-    if (calibrationData) {
-      this.deviationToCalibratedDifferenceX = this.calcDeviationToCalibratedDifferenceX(
-        calibrationData,
-      );
-    }
+    // if (calibrationData) {
+    //   this.deviationToCalibratedDifferenceX = this.calcDeviationToCalibratedDifferenceX(
+    //     calibrationData,
+    //   );
+    // }
   }
 
   calcAngleOfVector() {
@@ -72,25 +72,14 @@ export class TickObject {
   }
 
   // can be used as testimony for a change in sitting distance
-  calcDeviationToCalibratedDifferenceX(calibrationData) {
-    return this.differenceX - calibrationData.differenceX;
-  }
+  // calcDeviationToCalibratedDifferenceX(calibrationData) {
+  //   return this.differenceX - calibrationData.differenceX;
+  // }
 
   logData() {
     // this.absDifferenceLatestXCoor();
     // this.absDifferenceLatestYCoor();
     // eslint-disable-next-line no-console
-    console.log({
-      tick: this.tick,
-      name: this.name,
-      angleOfVector: this.angleOfVector,
-      lengthOfVector: this.lengthOfVector,
-      differenceX: this.differenceX,
-      differenceY: this.differenceY,
-      rightPoint: this.rightPoint,
-      leftPoint: this.leftPoint,
-      createdAt: this.createdAt,
-      deviationToCalibratedDifferenceX: this.deviationToCalibratedDifferenceX,
-    });
+    console.log(this);
   }
 }

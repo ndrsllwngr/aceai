@@ -26,7 +26,6 @@ export function calcMeanForTimeWindow(
       break;
     }
   }
-  // eslint-disable-next-line no-console
   // console.log(timeWindowData.length);
   return (
     timeWindowData
@@ -55,7 +54,6 @@ export function calcMedianForTimeWindow(
   const revisedData = timeWindowData.map(obj => Math.abs(obj.angleOfVector));
   let result = 0;
   if (revisedData.length === 0) {
-    // eslint-disable-next-line no-console
     // console.log(result);
     return result;
   }
@@ -68,12 +66,10 @@ export function calcMedianForTimeWindow(
   const half = Math.floor(revisedData.length / 2);
   if (revisedData.length % 2) {
     result = revisedData[half];
-    // eslint-disable-next-line no-console
     // console.log(result);
     return result;
   }
   result = (revisedData[half - 1] + revisedData[half]) / 2.0;
-  // eslint-disable-next-line no-console
   // console.log(result);
   return result;
 }

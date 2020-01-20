@@ -13,6 +13,8 @@ import {
 import { useUi } from '../context-ui';
 import { useApp, initialState } from '../context-app';
 import { showNotification } from '../showNotification';
+import { history, historyShoulder, historyEye } from '../PoseDetection/camera';
+import { ObjectsToCsv } from '../PoseDetection/ObjectsToCsv';
 // import { useApp } from '../../_context-app';
 
 export const Drawer = () => {
@@ -125,6 +127,36 @@ export const Drawer = () => {
             </a>{' '}
             for further information.
           </p>
+          <Button
+            onClick={() => {
+              const csv = new ObjectsToCsv(history);
+              // Save to file:
+              csv.toDisk('rawData.csv');
+            }}
+            intent="primary"
+          >
+            Export raw PoseNetData
+          </Button>
+          <Button
+            onClick={() => {
+              const csv = new ObjectsToCsv(historyEye);
+              // Save to file:
+              csv.toDisk('historyHead.csv');
+            }}
+            intent="primary"
+          >
+            Export HEAD Data
+          </Button>
+          <Button
+            onClick={() => {
+              const csv = new ObjectsToCsv(historyShoulder);
+              // Save to file:
+              csv.toDisk('historyShoulder.csv');
+            }}
+            intent="primary"
+          >
+            Export SHOULDER Data
+          </Button>
           <Button onClick={resetAppContext} intent="danger">
             Reset App Settings
           </Button>

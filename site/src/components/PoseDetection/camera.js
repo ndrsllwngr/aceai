@@ -3,7 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import get from 'lodash/get';
 import * as posenet from '@tensorflow-models/posenet';
-import { Button, Tag, Portal } from '@blueprintjs/core';
+import {
+  Button,
+  Tag,
+  Portal,
+  Dialog,
+  Classes,
+  AnchorButton,
+  Tooltip,
+  Intent,
+} from '@blueprintjs/core';
 import { Subject } from 'rxjs';
 // COMPONENTS
 import { Graph } from '../graph';
@@ -38,11 +47,11 @@ const videoWidth = 343;
 const videoHeight = 242;
 
 // gets updated every second
-const history = [];
+export const history = [];
 const subject = new Subject();
-const historyShoulder = [];
+export const historyShoulder = [];
 const subjectShoulder = new Subject();
-const historyEye = [];
+export const historyEye = [];
 const subjectEye = new Subject();
 
 const emptyState = { msg: 'Loading...', value: 0.0, status: 'default' };
@@ -72,6 +81,11 @@ export const PoseNetCamera = () => {
 
   const [calibrationDataRaw, setCalibrationDataRaw] = useState(undefined);
   const [calibrationData, setCalibrationData] = useState(undefined);
+  const [calibrationDialogIsOpen, setCalibrationDialogIsOpen] = useState(false);
+
+  const handleDialogIsOpen = bool => () => {
+    setCalibrationDialogIsOpen(bool);
+  };
 
   // POWER POSENET
   useEffect(() => {
@@ -105,9 +119,9 @@ export const PoseNetCamera = () => {
         poseNetState.net = net;
         // setupFPS();
         detectPoseInRealTime(video, net);
+        timerSitting.start({ precision: 'secondTenths' });
       }
       running();
-      timerSitting.start();
     } else {
       // eslint-disable-next-line no-inner-declarations
       async function shuttingDown() {
@@ -119,7 +133,7 @@ export const PoseNetCamera = () => {
         // setChartDataShoulder([]);
         // setChartDataEye([]);
         stopStreamedVideo();
-        // clearCanvas();
+        clearCanvas();
       }
       shuttingDown();
     }
@@ -131,172 +145,90 @@ export const PoseNetCamera = () => {
     setStatusShoulder,
   ]);
 
-  // CALIBRATION
-  useEffect(() => {
-    if (calibrationDataRaw) {
-      const { time, tick } = calibrationDataRaw;
-      const tickObjectShoulder = new TickObject(
-        'shoulder',
-        time,
-        tick,
-        extractPointObj('leftShoulder', calibrationDataRaw),
-        extractPointObj('rightShoulder', calibrationDataRaw),
-      );
-      const tickObjectEye = new TickObject(
-        'eye',
-        time,
-        tick,
-        extractPointObj('leftEye', calibrationDataRaw),
-        extractPointObj('rightEye', calibrationDataRaw),
-      );
-      setCalibrationData({ eye: tickObjectEye, shoulder: tickObjectShoulder });
-      tickObjectShoulder.logData();
-      tickObjectEye.logData();
-    }
-  }, [calibrationDataRaw]);
-
-  // LOG POSENET DATA
-  useEffect(() => {
-    const subscription = subject.subscribe({
-      next: nextObj => {
-        if (appContext.consoleLog) {
-          console.log({
-            time: new Date(nextObj.time).toISOString(),
-            tick: history.length,
-            nextObj,
-          });
-        }
-      },
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [appContext.consoleLog]);
-
-  // TODO: Change STATUS output to angle, switch threshold to angle?
-  // TODO: Add calibration functionality (button, calc D_c to mean of Y_(L-r))
-  // TODO: Over time? Time counter!
-  // TODO: Revamp UI
-
-  // CALCULATE TICK OBJECTS
+  // CALCULATIONS, TIMERS
   useEffect(() => {
     const subscription = subject.subscribe({
       next: nextObj => {
         try {
-          const timeStamp = nextObj.time;
-          const cloneHistory = [...history];
-          const tick = cloneHistory.length;
-          if (cloneHistory.length > 0) {
-            if (cloneHistory[cloneHistory.length - 1].poseData) {
-              const lastHistoryDataObject =
-                cloneHistory[cloneHistory.length - 1];
+          // CALCULATE POSTURE IF GOOD OR BAD VIA MEAN AND TIME
+          const cloneHistoryShoulder = [...historyShoulder];
+          const cloneHistoryEye = [...historyEye];
+          let meanOrMedianShoulder;
+          let meanOrMedianEye;
 
-              const tickObjectShoulder = new TickObject(
-                'shoulder',
-                timeStamp,
-                tick,
-                extractPointObj('leftShoulder', lastHistoryDataObject),
-                extractPointObj('rightShoulder', lastHistoryDataObject),
-                get(calibrationData, 'shoulder'),
-              );
-              const tickObjectEye = new TickObject(
-                'eye',
-                timeStamp,
-                tick,
-                extractPointObj('leftEye', lastHistoryDataObject),
-                extractPointObj('rightEye', lastHistoryDataObject),
-                get(calibrationData, 'eye'),
-              );
-              historyShoulder.push(tickObjectShoulder);
-              subjectShoulder.next(tickObjectShoulder);
-              historyEye.push(tickObjectEye);
-              subjectEye.next(tickObjectEye);
-
-              if (appContext.consoleLog) {
-                tickObjectShoulder.logData();
-                tickObjectEye.logData();
-              }
-              // CALCULATE POSTURE IF GOOD OR BAD VIA MEAN AND TIME
-
-              const cloneHistoryShoulder = [...historyShoulder];
-              const cloneHistoryEye = [...historyEye];
-              let meanOrMedianShoulder;
-              let meanOrMedianEye;
-
-              if (appContext.measure === 'median') {
-                meanOrMedianShoulder = calcMedianForTimeWindow(
-                  cloneHistoryShoulder,
-                  3000,
-                  timeStamp,
-                );
-                meanOrMedianEye = calcMedianForTimeWindow(
-                  cloneHistoryEye,
-                  3000,
-                  timeStamp,
-                );
-              } else {
-                meanOrMedianShoulder = calcMeanForTimeWindow(
-                  cloneHistoryShoulder,
-                  3000,
-                  timeStamp,
-                );
-                meanOrMedianEye = calcMeanForTimeWindow(
-                  cloneHistoryEye,
-                  3000,
-                  timeStamp,
-                );
-              }
-
-              // TIMER
-              if (
-                timerShoulderMeanBadPosture.getTotalTimeValues().seconds > 5
-              ) {
-                // GENERAL
-                timerBadPosture.start();
-                if (timerGoodPosture.isRunning()) {
-                  timerGoodPosture.pause();
-                }
-                setBodyPostureOverTimeIsBad(true);
-                // console.log('bad posture shoulder (> 5 seconds)');
-              } else {
-                setBodyPostureOverTimeIsBad(false);
-              }
-              if (timerEyeMeanBadPosture.getTotalTimeValues().seconds > 5) {
-                // GENERAL
-                timerBadPosture.start();
-                if (timerGoodPosture.isRunning()) {
-                  timerGoodPosture.pause();
-                }
-                // console.log('bad posture eye (> 5 seconds)');
-                setHeadPostureOverTimeIsBad(true);
-              } else {
-                setHeadPostureOverTimeIsBad(false);
-              }
-              if (
-                !(
-                  timerShoulderMeanBadPosture.getTotalTimeValues().seconds > 5
-                ) &&
-                !(timerEyeMeanBadPosture.getTotalTimeValues().seconds > 5)
-              ) {
-                if (timerBadPosture.isRunning()) {
-                  timerBadPosture.pause();
-                }
-                timerGoodPosture.start();
-              }
-              if (meanOrMedianShoulder > appContext.thresholdFrontViewBody) {
-                timerShoulderMeanBadPosture.start();
-              } else {
-                timerShoulderMeanBadPosture.reset();
-              }
-              if (meanOrMedianEye > appContext.thresholdFrontViewHead) {
-                timerEyeMeanBadPosture.start();
-              } else {
-                timerEyeMeanBadPosture.reset();
-              }
-              // TODO reset timers on unmount
-            }
+          if (appContext.measure === 'median') {
+            meanOrMedianShoulder = calcMedianForTimeWindow(
+              cloneHistoryShoulder,
+              3000,
+              nextObj.createdAt,
+            );
+            meanOrMedianEye = calcMedianForTimeWindow(
+              cloneHistoryEye,
+              3000,
+              nextObj.createdAt,
+            );
+          } else {
+            meanOrMedianShoulder = calcMeanForTimeWindow(
+              cloneHistoryShoulder,
+              3000,
+              nextObj.createdAt,
+            );
+            meanOrMedianEye = calcMeanForTimeWindow(
+              cloneHistoryEye,
+              3000,
+              nextObj.createdAt,
+            );
           }
+
+          // TIMER
+          if (timerShoulderMeanBadPosture.getTotalTimeValues().seconds > 5) {
+            // GENERAL
+            timerBadPosture.start({ precision: 'secondTenths' });
+            if (timerGoodPosture.isRunning()) {
+              timerGoodPosture.pause();
+            }
+            setBodyPostureOverTimeIsBad(true);
+            // console.log('bad posture shoulder (> 5 seconds)');
+          } else {
+            setBodyPostureOverTimeIsBad(false);
+          }
+
+          if (timerEyeMeanBadPosture.getTotalTimeValues().seconds > 5) {
+            // GENERAL
+            timerBadPosture.start({ precision: 'secondTenths' });
+            if (timerGoodPosture.isRunning()) {
+              timerGoodPosture.pause();
+            }
+            // console.log('bad posture eye (> 5 seconds)');
+            setHeadPostureOverTimeIsBad(true);
+          } else {
+            setHeadPostureOverTimeIsBad(false);
+          }
+
+          if (
+            !(timerShoulderMeanBadPosture.getTotalTimeValues().seconds > 5) &&
+            !(timerEyeMeanBadPosture.getTotalTimeValues().seconds > 5)
+          ) {
+            if (timerBadPosture.isRunning()) {
+              timerBadPosture.pause();
+            }
+            timerGoodPosture.start({ precision: 'secondTenths' });
+          }
+
+          if (meanOrMedianShoulder > appContext.thresholdFrontViewBody) {
+            timerShoulderMeanBadPosture.start({ precision: 'secondTenths' });
+          } else {
+            timerShoulderMeanBadPosture.reset();
+          }
+
+          if (meanOrMedianEye > appContext.thresholdFrontViewHead) {
+            timerEyeMeanBadPosture.start({ precision: 'secondTenths' });
+          } else {
+            timerEyeMeanBadPosture.reset();
+          }
+          // TODO reset timers on unmount
+          // }
+          // }
         } catch (e) {
           console.log(e);
         }
@@ -313,6 +245,54 @@ export const PoseNetCamera = () => {
     appContext.thresholdFrontViewHead,
     calibrationData,
   ]);
+
+  // TODO: Change STATUS output to angle, switch threshold to angle?
+  // TODO: Add calibration functionality (button, calc D_c to mean of Y_(L-r))
+  // TODO: Over time? Time counter!
+  // TODO: Revamp UI
+
+  // CALIBRATION
+  // useEffect(() => {
+  //   if (calibrationDataRaw) {
+  //     const { time, tick } = calibrationDataRaw;
+  //     const tickObjectShoulder = new TickObject(
+  //       'shoulder',
+  //       time,
+  //       tick,
+  //       extractPointObj('leftShoulder', calibrationDataRaw),
+  //       extractPointObj('rightShoulder', calibrationDataRaw),
+  //     );
+  //     const tickObjectEye = new TickObject(
+  //       'eye',
+  //       time,
+  //       tick,
+  //       extractPointObj('leftEye', calibrationDataRaw),
+  //       extractPointObj('rightEye', calibrationDataRaw),
+  //     );
+  //     setCalibrationData({ eye: tickObjectEye, shoulder: tickObjectShoulder });
+  //     tickObjectShoulder.logData();
+  //     tickObjectEye.logData();
+  //   }
+  // }, [calibrationDataRaw]);
+
+  // LOG POSENET DATA
+  useEffect(() => {
+    const subscription = subject.subscribe({
+      next: nextObj => {
+        if (appContext.consoleLog) {
+          console.log(nextObj);
+          if (nextObj.tick > 0) {
+            historyEye[historyEye.length - 1].logData();
+            historyShoulder[historyShoulder.length - 1].logData();
+          }
+        }
+      },
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [appContext.consoleLog]);
 
   // UPDATE STATUS, CHART of shoulder
   useEffect(() => {
@@ -619,18 +599,85 @@ export const PoseNetCamera = () => {
             <Widget title="Calibration" caption="to track distance and height">
               <div className="flex flex-row justify-end w-100">
                 <Button
-                  onClick={() => {
-                    if (history.length > 0) {
-                      const cloneHistory = [...history];
-                      const tick = cloneHistory.length;
-                      const currentPoseData =
-                        cloneHistory[cloneHistory.length - 1];
-                      setCalibrationDataRaw({ tick, ...currentPoseData });
-                    }
-                  }}
+                  // onClick={() => {
+                  //   if (history.length > 0) {
+                  //     const cloneHistory = [...history];
+                  //     const tick = cloneHistory.length;
+                  //     const currentPoseData =
+                  //       cloneHistory[cloneHistory.length - 1];
+                  //     setCalibrationDataRaw({ tick, ...currentPoseData });
+                  //   }
+                  // }}
+                  onClick={handleDialogIsOpen(true)}
                 >
                   Calibrate
                 </Button>
+                <Dialog
+                  icon="info-sign"
+                  onClose={handleDialogIsOpen(false)}
+                  title="Calibration dialog"
+                  autoFocus
+                  canEscapeKeyClose
+                  canOutsideClickClose
+                  enforceFocus
+                  isOpen={calibrationDialogIsOpen}
+                  usePortal
+                >
+                  <div className={Classes.DIALOG_BODY}>
+                    <p>
+                      <strong>
+                        Data integration is the seminal problem of the digital
+                        age. For over ten years, we’ve helped the world’s
+                        premier organizations rise to the challenge.
+                      </strong>
+                    </p>
+                    <p>
+                      Palantir Foundry radically reimagines the way enterprises
+                      interact with data by amplifying and extending the power
+                      of data integration. With Foundry, anyone can source,
+                      fuse, and transform data into any shape they desire.
+                      Business analysts become data engineers — and leaders in
+                      their organization’s data revolution.
+                    </p>
+                    <p>
+                      Foundry’s back end includes a suite of best-in-class data
+                      integration capabilities: data provenance, git-style
+                      versioning semantics, granular access controls, branching,
+                      transformation authoring, and more. But these powers are
+                      not limited to the back-end IT shop.
+                    </p>
+                    <p>
+                      In Foundry, tables, applications, reports, presentations,
+                      and spreadsheets operate as data integrations in their own
+                      right. Access controls, transformation logic, and data
+                      quality flow from original data source to intermediate
+                      analysis to presentation in real time. Every end product
+                      created in Foundry becomes a new data source that other
+                      users can build upon. And the enterprise data foundation
+                      goes where the business drives it.
+                    </p>
+                    <p>
+                      Start the revolution. Unleash the power of data
+                      integration with Palantir Foundry.
+                    </p>
+                  </div>
+                  <div className={Classes.DIALOG_FOOTER}>
+                    <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+                      <Tooltip content="This button is hooked up to close the dialog.">
+                        <Button onClick={handleDialogIsOpen(false)}>
+                          Close
+                        </Button>
+                      </Tooltip>
+                      <AnchorButton
+                        intent={Intent.PRIMARY}
+                        href="https://www.palantir.com/palantir-foundry/"
+                        target="_blank"
+                      >
+                        Visit the Foundry website
+                      </AnchorButton>
+                    </div>
+                  </div>
+                </Dialog>
               </div>
             </Widget>
           </div>
@@ -695,11 +742,13 @@ function stopStreamedVideo() {
   }
 }
 
-// function clearCanvas() {
-//   const canvas = document.getElementById('output');
-//   const ctx = canvas.getContext('2d');
-//   ctx.clearRect(0, 0, videoWidth, videoHeight);
-// }
+function clearCanvas() {
+  const canvas = document.getElementById('output');
+  if (canvas && canvas !== null) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, videoWidth, videoHeight);
+  }
+}
 
 /**
  * Feeds an image to posenet to estimate poses - this is where the magic
@@ -757,6 +806,45 @@ function detectPoseInRealTime(video, _net) {
           console.log('reached default case (poseDetectionFrame)');
       }
 
+      // IF POSE DATA IS AVAILABLE PUSH NEW DATA TO GLOBAL STORAGE,
+      // CALCULATE TICK OBJECTS AND STORE THEM ACCORDINGLY
+      if (poses[0] !== undefined) {
+        const timeStamp = Date.now();
+        const tick = history.length;
+        const rawPoseDataObject = {
+          name: 'rawPoseData',
+          createdAt: timeStamp,
+          tick,
+          poseData: poses[0],
+        };
+
+        const tickObjectShoulder = new TickObject(
+          'shoulder',
+          timeStamp,
+          tick,
+          extractPointObj('leftShoulder', rawPoseDataObject),
+          extractPointObj('rightShoulder', rawPoseDataObject),
+          // get(calibrationData, 'shoulder'),
+        );
+        const tickObjectEye = new TickObject(
+          'eye',
+          timeStamp,
+          tick,
+          extractPointObj('leftEye', rawPoseDataObject),
+          extractPointObj('rightEye', rawPoseDataObject),
+          // get(calibrationData, 'eye'),
+        );
+        // ADD TICK OBJECTS TO STORAGE and ANNOUNCE NEW TICK OBJECTS
+        history.push(rawPoseDataObject);
+        historyShoulder.push(tickObjectShoulder);
+        historyEye.push(tickObjectEye);
+
+        subject.next(rawPoseDataObject);
+        subjectShoulder.next(tickObjectShoulder);
+        subjectEye.next(tickObjectEye);
+      }
+
+      // DRAWING
       ctx.clearRect(0, 0, videoWidth, videoHeight);
 
       if (poseNetState.output.showVideo) {
@@ -786,12 +874,6 @@ function detectPoseInRealTime(video, _net) {
 
       // End monitoring code for frames per second
       // stats.end();
-      if (poses[0] !== undefined) {
-        const newData = { time: Date.now(), poseData: poses[0] };
-        history.push(newData);
-        subject.next(newData);
-      }
-      // console.log(datas)
       // TODO stop loop here!
       requestAnimationFrame(poseDetectionFrame);
     } catch (e) {
