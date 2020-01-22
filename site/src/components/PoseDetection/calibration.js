@@ -12,6 +12,7 @@ import {
   Tooltip,
   Spinner,
   Intent,
+  ProgressBar,
 } from '@blueprintjs/core';
 import { Subject } from 'rxjs';
 
@@ -47,6 +48,32 @@ export const Calibration = () => {
   const [isStarted, setIsStarted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [countDownIsFinished, setCountDownIsFinished] = useState(false);
+  const [timeLeftCalibrating, setTimeLeftCalibrating] = useState(3);
+  const [progress, setProgress] = useState(0.0);
+
+  useEffect(() => {
+    if (countDownIsFinished) {
+      // callback
+      if (timeLeftCalibrating === 0) {
+        setProgress(1);
+        handleDialogIsOpen(false)();
+      } else if (timeLeftCalibrating === 3) {
+        setProgress(0.0);
+      } else if (timeLeftCalibrating === 2) {
+        setProgress(0.33);
+      } else if (timeLeftCalibrating === 1) {
+        setProgress(0.66);
+      }
+      // countdown
+      if (timeLeftCalibrating > 0) {
+        setTimeout(() => {
+          if (timeLeftCalibrating > 0) {
+            setTimeLeftCalibrating(timeLeftCalibrating - 1);
+          }
+        }, 1000);
+      }
+    }
+  }, [countDownIsFinished, timeLeftCalibrating]);
 
   const handleDialogIsOpen = bool => () => {
     if (bool === false) {
@@ -167,6 +194,12 @@ export const Calibration = () => {
                   </div>
                 </div>
               )}
+              <ProgressBar
+                value={progress}
+                intent={Intent.SUCCESS}
+                stripes
+                animate
+              ></ProgressBar>
               <canvas
                 id="output-cal"
                 //   style={{
