@@ -8,7 +8,7 @@ const emptyState = {
   drawerNavigationIsOpen: false,
   toasterRef: React.createRef(),
   showNotificationInApp: true,
-  showNotificationBrowser: false,
+  showNotificationBrowser: true,
 };
 
 const UiContext = React.createContext();

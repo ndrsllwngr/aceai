@@ -96,16 +96,38 @@ export const PoseNetCamera = () => {
         Intent.DANGER,
       );
     }
-    if (!headPostureOverTimeIsBad) {
+    if (timerSitting.getTotalTimeValues() > 0 && !headPostureOverTimeIsBad) {
       showToast('Well done. Your head is well aligned now.', Intent.SUCCESS);
     }
+  }, [
+    headPostureOverTimeIsBad,
+    uiContext.showNotificationBrowser,
+    uiContext.showNotificationInApp,
+    uiContext.toasterRef,
+  ]);
+
+  useEffect(() => {
+    const showToast = (message = '', intent = Intent.PRIMARY) => {
+      if (uiContext.showNotificationInApp && uiContext.toasterRef.current) {
+        const toastObj = {
+          message,
+          intent,
+        };
+        console.log(toastObj);
+        uiContext.toasterRef.current.show(toastObj);
+      }
+      if (uiContext.showNotificationBrowser) {
+        showNotification(message);
+      }
+    };
+
     if (bodyPostureOverTimeIsBad) {
       showToast(
         'Misalignment of head detected. Correct posture if possible.',
         Intent.DANGER,
       );
     }
-    if (!bodyPostureOverTimeIsBad) {
+    if (timerSitting.getTotalTimeValues() > 0 && !bodyPostureOverTimeIsBad) {
       showToast(
         'Well done. Your shoulders is well aligned now.',
         Intent.SUCCESS,
@@ -113,7 +135,6 @@ export const PoseNetCamera = () => {
     }
   }, [
     bodyPostureOverTimeIsBad,
-    headPostureOverTimeIsBad,
     uiContext.showNotificationBrowser,
     uiContext.showNotificationInApp,
     uiContext.toasterRef,
