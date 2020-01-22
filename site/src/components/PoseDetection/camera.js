@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import get from 'lodash/get';
 import * as posenet from '@tensorflow-models/posenet';
-import { Tag, Portal } from '@blueprintjs/core';
+import { Tag, Portal, Intent } from '@blueprintjs/core';
 import { Subject } from 'rxjs';
 // COMPONENTS
 import { Graph } from '../graph';
@@ -14,6 +14,7 @@ import TickObject, {
   calcMedianForTimeWindow,
 } from '../TickObject';
 import { useApp } from '../context-app';
+import { useUi } from '../context-ui';
 import {
   timerSitting,
   timerGoodPosture,
@@ -36,7 +37,7 @@ import {
 // CSS
 import '../../../node_modules/react-vis/dist/style.css';
 import { Calibration } from './calibration';
-
+import { showNotification } from '../showNotification';
 // gets updated every second
 export const history = [];
 const subject = new Subject();
@@ -53,6 +54,7 @@ export const PoseNetCamera = () => {
   // const classes = useStyles();
 
   const [appContext, setAppContext] = useApp();
+  const [uiContext, setUiContext] = useUi();
   const [loading, setLoading] = useState(false);
   const [headPostureOverTimeIsBad, setHeadPostureOverTimeIsBad] = useState(
     false,
@@ -72,6 +74,50 @@ export const PoseNetCamera = () => {
 
   const [calibrationDataRaw, setCalibrationDataRaw] = useState(undefined);
   const [calibrationData, setCalibrationData] = useState(undefined);
+
+  useEffect(() => {
+    const showToast = (message = '', intent = Intent.PRIMARY) => {
+      if (uiContext.showNotificationInApp && uiContext.toasterRef.current) {
+        const toastObj = {
+          message,
+          intent,
+        };
+        console.log(toastObj);
+        uiContext.toasterRef.current.show(toastObj);
+      }
+      if (uiContext.showNotificationBrowser) {
+        showNotification(message);
+      }
+    };
+
+    if (headPostureOverTimeIsBad) {
+      showToast(
+        'Misalignment of shoulders detected. Correct posture if possible.',
+        Intent.DANGER,
+      );
+    }
+    if (!headPostureOverTimeIsBad) {
+      showToast('Well done. Your head is well aligned now.', Intent.SUCCESS);
+    }
+    if (bodyPostureOverTimeIsBad) {
+      showToast(
+        'Misalignment of head detected. Correct posture if possible.',
+        Intent.DANGER,
+      );
+    }
+    if (!bodyPostureOverTimeIsBad) {
+      showToast(
+        'Well done. Your shoulders is well aligned now.',
+        Intent.SUCCESS,
+      );
+    }
+  }, [
+    bodyPostureOverTimeIsBad,
+    headPostureOverTimeIsBad,
+    uiContext.showNotificationBrowser,
+    uiContext.showNotificationInApp,
+    uiContext.toasterRef,
+  ]);
 
   // POWER POSENET
   useEffect(() => {
@@ -167,7 +213,10 @@ export const PoseNetCamera = () => {
           }
 
           // TIMER
-          if (timerShoulderMeanBadPosture.getTotalTimeValues().seconds > 5) {
+          if (
+            timerShoulderMeanBadPosture.getTotalTimeValues().seconds >
+            appContext.timeUntilBadPosture
+          ) {
             // GENERAL
             timerBadPosture.start({ precision: 'secondTenths' });
             if (timerGoodPosture.isRunning()) {
@@ -179,7 +228,10 @@ export const PoseNetCamera = () => {
             setBodyPostureOverTimeIsBad(false);
           }
 
-          if (timerEyeMeanBadPosture.getTotalTimeValues().seconds > 5) {
+          if (
+            timerEyeMeanBadPosture.getTotalTimeValues().seconds >
+            appContext.timeUntilBadPosture
+          ) {
             // GENERAL
             timerBadPosture.start({ precision: 'secondTenths' });
             if (timerGoodPosture.isRunning()) {
@@ -192,8 +244,14 @@ export const PoseNetCamera = () => {
           }
 
           if (
-            !(timerShoulderMeanBadPosture.getTotalTimeValues().seconds > 5) &&
-            !(timerEyeMeanBadPosture.getTotalTimeValues().seconds > 5)
+            !(
+              timerShoulderMeanBadPosture.getTotalTimeValues().seconds >
+              appContext.timeUntilBadPosture
+            ) &&
+            !(
+              timerEyeMeanBadPosture.getTotalTimeValues().seconds >
+              appContext.timeUntilBadPosture
+            )
           ) {
             if (timerBadPosture.isRunning()) {
               timerBadPosture.pause();
@@ -229,6 +287,7 @@ export const PoseNetCamera = () => {
     appContext.measure,
     appContext.thresholdFrontViewBody,
     appContext.thresholdFrontViewHead,
+    appContext.timeUntilBadPosture,
     calibrationData,
   ]);
 

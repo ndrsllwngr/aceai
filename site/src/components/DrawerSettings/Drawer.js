@@ -94,6 +94,15 @@ export const Drawer = () => {
             stepSize={1}
             onChange={handleAppContextChangeSlider('epochCount')}
           />
+          <p>TIME UNTIL BAD POSTURE NOTIFICATION (SECONDS)</p>
+          <Slider
+            value={appContext.timeUntilBadPosture}
+            min={0}
+            max={60}
+            labelStepSize={20}
+            stepSize={1}
+            onChange={handleAppContextChangeSlider('timeUntilBadPosture')}
+          />
           <p>Threshold (FRONT: Head)</p>
           <Slider
             value={appContext.thresholdFrontViewHead}

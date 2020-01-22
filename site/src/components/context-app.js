@@ -11,6 +11,7 @@ export const initialState = {
   openDrawer: true,
   epochMode: false,
   epochCount: 50,
+  timeUntilBadPosture: 5,
   thresholdFrontViewBody: 15,
   thresholdFrontViewHead: 7,
   measure: 'median',
