@@ -92,11 +92,14 @@ export const PoseNetCamera = () => {
 
     if (headPostureOverTimeIsBad) {
       showToast(
-        'Misalignment of shoulders detected. Correct posture if possible.',
+        'Misalignment of head detected. Correct posture if possible.',
         Intent.DANGER,
       );
     }
-    if (timerSitting.getTotalTimeValues() > 0 && !headPostureOverTimeIsBad) {
+    if (
+      timerSitting.getTotalTimeValues().seconds > 0 &&
+      !headPostureOverTimeIsBad
+    ) {
       showToast('Well done. Your head is well aligned now.', Intent.SUCCESS);
     }
   }, [
@@ -123,15 +126,15 @@ export const PoseNetCamera = () => {
 
     if (bodyPostureOverTimeIsBad) {
       showToast(
-        'Misalignment of head detected. Correct posture if possible.',
+        'Misalignment of body detected. Correct posture if possible.',
         Intent.DANGER,
       );
     }
-    if (timerSitting.getTotalTimeValues() > 0 && !bodyPostureOverTimeIsBad) {
-      showToast(
-        'Well done. Your shoulders is well aligned now.',
-        Intent.SUCCESS,
-      );
+    if (
+      timerSitting.getTotalTimeValues().seconds > 0 &&
+      !bodyPostureOverTimeIsBad
+    ) {
+      showToast('Well done. Your body is well aligned now.', Intent.SUCCESS);
     }
   }, [
     bodyPostureOverTimeIsBad,
