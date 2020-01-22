@@ -34,7 +34,7 @@ export const Navigation = () => {
           <Navbar.Group align={Alignment.LEFT}>
             <Navbar.Heading>
               <span className="font-extrabold">BodyPose</span>{' '}
-              <span className="text-gray-700">v0.6</span>
+              <span className="text-gray-700">v0.8</span>
             </Navbar.Heading>
           </Navbar.Group>
           <div className="block md:hidden">
@@ -77,13 +77,20 @@ export const Navigation = () => {
               <Navbar.Divider />
 
               <Tooltip
-                content={appContext.webCam ? 'Stop BodyPose' : 'Start BodyPose'}
+                content={appContext.webCam ? 'Stop' : 'Start'}
                 position={Position.BOTTOM}
               >
                 <Button
                   className="bp3-minimal"
                   icon={appContext.webCam ? 'stop' : 'power'}
                   onClick={handleChange}
+                />
+              </Tooltip>
+              <Tooltip content="Calibrate" position={Position.BOTTOM}>
+                <Button
+                  className="bp3-minimal"
+                  icon="cube-add"
+                  // onClick={handleChange}
                 />
               </Tooltip>
               <Tooltip

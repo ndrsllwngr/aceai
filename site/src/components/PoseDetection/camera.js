@@ -509,20 +509,16 @@ export const PoseNetCamera = () => {
               title="Tilt angle of head and shoulders"
               tags={
                 <>
-                  {bodyPostureOverTimeIsBad ? (
-                    <Tag intent="danger" style={{ marginRight: '0.5rem' }}>
-                      BODY
-                    </Tag>
-                  ) : (
-                    <Tag intent="success" style={{ marginRight: '0.5rem' }}>
-                      BODY
-                    </Tag>
-                  )}
-                  {headPostureOverTimeIsBad ? (
-                    <Tag intent="danger">HEAD</Tag>
-                  ) : (
-                    <Tag intent="success">HEAD</Tag>
-                  )}
+                  <Tag
+                    intent={bodyPostureOverTimeIsBad ? 'danger' : 'success'}
+                    style={{ marginRight: '0.5rem' }}
+                  >
+                    BODY {statusShoulder.value}°
+                  </Tag>
+
+                  <Tag intent={headPostureOverTimeIsBad ? 'danger' : 'success'}>
+                    HEAD {statusEye.value}°
+                  </Tag>
                 </>
               }
             >

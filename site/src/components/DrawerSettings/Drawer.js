@@ -9,6 +9,8 @@ import {
   Classes,
   Switch,
   Slider,
+  Divider,
+  ButtonGroup,
 } from '@blueprintjs/core';
 import { useUi } from '../context-ui';
 import { useApp, initialState } from '../context-app';
@@ -61,9 +63,48 @@ export const Drawer = () => {
     >
       <div className={Classes.DRAWER_BODY}>
         <div className={Classes.DIALOG_BODY}>
-          <Button onClick={showToast} intent="primary">
-            Trigger Notification
-          </Button>
+          <p>Threshold of head angle (° deg)</p>
+          <Slider
+            value={appContext.thresholdFrontViewHead}
+            min={0}
+            max={100}
+            labelStepSize={20}
+            stepSize={1}
+            onChange={handleAppContextChangeSlider('thresholdFrontViewHead')}
+          />
+          <p>Threshold of shoulder angle (° deg)</p>
+          <Slider
+            value={appContext.thresholdFrontViewBody}
+            min={0}
+            max={100}
+            labelStepSize={20}
+            stepSize={1}
+            onChange={handleAppContextChangeSlider('thresholdFrontViewBody')}
+          />
+          <div className="my-4">
+            <Divider />
+          </div>
+          <p>Time frame of one epoch (tick)</p>
+          <Slider
+            value={appContext.epochCount}
+            min={0}
+            max={100}
+            labelStepSize={20}
+            stepSize={1}
+            onChange={handleAppContextChangeSlider('epochCount')}
+          />
+          <p>Time until bad posture triggers notification (sec)</p>
+          <Slider
+            value={appContext.timeUntilBadPosture}
+            min={0}
+            max={60}
+            labelStepSize={20}
+            stepSize={1}
+            onChange={handleAppContextChangeSlider('timeUntilBadPosture')}
+          />
+          <div className="my-4">
+            <Divider />
+          </div>
           <Switch
             label="Logging (consoleLog)"
             checked={appContext.consoleLog}
@@ -85,42 +126,9 @@ export const Drawer = () => {
             checked={appContext.charts}
             onChange={handleAppContextChange('charts', !appContext.charts)}
           />
-          <p>TIME FRAME (TICKS)</p>
-          <Slider
-            value={appContext.epochCount}
-            min={0}
-            max={100}
-            labelStepSize={20}
-            stepSize={1}
-            onChange={handleAppContextChangeSlider('epochCount')}
-          />
-          <p>TIME UNTIL BAD POSTURE NOTIFICATION (SECONDS)</p>
-          <Slider
-            value={appContext.timeUntilBadPosture}
-            min={0}
-            max={60}
-            labelStepSize={20}
-            stepSize={1}
-            onChange={handleAppContextChangeSlider('timeUntilBadPosture')}
-          />
-          <p>Threshold (FRONT: Head)</p>
-          <Slider
-            value={appContext.thresholdFrontViewHead}
-            min={0}
-            max={100}
-            labelStepSize={20}
-            stepSize={1}
-            onChange={handleAppContextChangeSlider('thresholdFrontViewHead')}
-          />
-          <p>Threshold (FRONT: Body)</p>
-          <Slider
-            value={appContext.thresholdFrontViewBody}
-            min={0}
-            max={100}
-            labelStepSize={20}
-            stepSize={1}
-            onChange={handleAppContextChangeSlider('thresholdFrontViewBody')}
-          />
+          <div className="my-4">
+            <Divider />
+          </div>
           <RadioGroup
             label="Measures of Central Tendency"
             onChange={handleMeasure}
@@ -136,39 +144,56 @@ export const Drawer = () => {
             </a>{' '}
             for further information.
           </p>
-          <Button
-            onClick={() => {
-              const csv = new ObjectsToCsv(history);
-              // Save to file:
-              csv.toDisk('rawData.csv');
-            }}
-            intent="primary"
-          >
-            Export raw PoseNetData
-          </Button>
-          <Button
-            onClick={() => {
-              const csv = new ObjectsToCsv(historyEye);
-              // Save to file:
-              csv.toDisk('historyHead.csv');
-            }}
-            intent="primary"
-          >
-            Export HEAD Data
-          </Button>
-          <Button
-            onClick={() => {
-              const csv = new ObjectsToCsv(historyShoulder);
-              // Save to file:
-              csv.toDisk('historyShoulder.csv');
-            }}
-            intent="primary"
-          >
-            Export SHOULDER Data
-          </Button>
-          <Button onClick={resetAppContext} intent="danger">
-            Reset App Settings
-          </Button>
+          <div className="my-4">
+            <Divider />
+          </div>
+          <p>Export session data as .csv</p>
+          <ButtonGroup>
+            <Button
+              icon="download"
+              onClick={() => {
+                const csv = new ObjectsToCsv(history);
+                // Save to file:
+                csv.toDisk('rawData.csv');
+              }}
+              intent={Intent.NONE}
+            >
+              Source
+            </Button>
+            <Button
+              icon="download"
+              onClick={() => {
+                const csv = new ObjectsToCsv(historyEye);
+                // Save to file:
+                csv.toDisk('historyHead.csv');
+              }}
+              intent={Intent.NONE}
+            >
+              Head
+            </Button>
+            <Button
+              icon="download"
+              onClick={() => {
+                const csv = new ObjectsToCsv(historyShoulder);
+                // Save to file:
+                csv.toDisk('historyShoulder.csv');
+              }}
+              intent={Intent.NONE}
+            >
+              Shoulder
+            </Button>
+          </ButtonGroup>
+          <div className="my-4">
+            <Divider />
+          </div>
+          <ButtonGroup>
+            <Button onClick={showToast} intent={Intent.NONE}>
+              Test browser notifications
+            </Button>
+            <Button onClick={resetAppContext} intent={Intent.DANGER}>
+              Reset app context
+            </Button>
+          </ButtonGroup>
         </div>
       </div>
       <div className={Classes.DRAWER_FOOTER}>
