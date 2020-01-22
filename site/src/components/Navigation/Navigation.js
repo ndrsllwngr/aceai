@@ -48,7 +48,7 @@ export const Navigation = () => {
           </div>
           <div className="hidden md:block">
             <Navbar.Group align={Alignment.RIGHT}>
-              <Match path="/">
+              <Match exact path="/">
                 {({ match }) => (
                   <Link to="/" style={{ textDecoration: 'none' }}>
                     <Button
