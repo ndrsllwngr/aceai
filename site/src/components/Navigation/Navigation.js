@@ -1,7 +1,13 @@
 import React from 'react';
 import { Match } from '@reach/router';
 import { Link } from 'gatsby';
-import { Alignment, Button, Navbar } from '@blueprintjs/core';
+import {
+  Alignment,
+  Button,
+  Navbar,
+  Tooltip,
+  Position,
+} from '@blueprintjs/core';
 import { useUi } from '../context-ui';
 import { useApp } from '../context-app';
 
@@ -69,36 +75,62 @@ export const Navigation = () => {
                 )}
               </Match>
               <Navbar.Divider />
-              <Button
-                className="bp3-minimal"
-                icon={appContext.webCam ? 'stop' : 'power'}
-                onClick={handleChange}
-              />
-              <Button
-                className="bp3-minimal"
-                icon={uiContext.videoCanvasIsOpen ? 'eye-on' : 'eye-open'}
-                onClick={handleUiContextChange(
-                  'videoCanvasIsOpen',
-                  !uiContext.videoCanvasIsOpen,
-                )}
-              />
-              <Button
-                className="bp3-minimal"
-                icon={
-                  uiContext.showNotificationBrowser
-                    ? 'notifications-updated'
-                    : 'notifications'
+
+              <Tooltip
+                content={appContext.webCam ? 'Stop BodyPose' : 'Start BodyPose'}
+                position={Position.BOTTOM}
+              >
+                <Button
+                  className="bp3-minimal"
+                  icon={appContext.webCam ? 'stop' : 'power'}
+                  onClick={handleChange}
+                />
+              </Tooltip>
+              <Tooltip
+                content={
+                  uiContext.videoCanvasIsOpen
+                    ? 'Hide camera feed'
+                    : 'Show camera feed'
                 }
-                onClick={handleUiContextChange(
-                  'showNotificationBrowser',
-                  !uiContext.showNotificationBrowser,
-                )}
-              />
-              <Button
-                className="bp3-minimal"
-                icon="cog"
-                onClick={handleUiContextChange('drawerSettingsIsOpen', true)}
-              />
+                position={Position.BOTTOM}
+              >
+                <Button
+                  className="bp3-minimal"
+                  icon={uiContext.videoCanvasIsOpen ? 'eye-on' : 'eye-open'}
+                  onClick={handleUiContextChange(
+                    'videoCanvasIsOpen',
+                    !uiContext.videoCanvasIsOpen,
+                  )}
+                />
+              </Tooltip>
+              <Tooltip
+                content={
+                  uiContext.showNotificationBrowser
+                    ? 'Disable browser notifications'
+                    : 'Enable browser notiifications'
+                }
+                position={Position.BOTTOM}
+              >
+                <Button
+                  className="bp3-minimal"
+                  icon={
+                    uiContext.showNotificationBrowser
+                      ? 'notifications-updated'
+                      : 'notifications'
+                  }
+                  onClick={handleUiContextChange(
+                    'showNotificationBrowser',
+                    !uiContext.showNotificationBrowser,
+                  )}
+                />
+              </Tooltip>
+              <Tooltip content="Settings" position={Position.BOTTOM}>
+                <Button
+                  className="bp3-minimal"
+                  icon="cog"
+                  onClick={handleUiContextChange('drawerSettingsIsOpen', true)}
+                />
+              </Tooltip>
             </Navbar.Group>
           </div>
         </div>
