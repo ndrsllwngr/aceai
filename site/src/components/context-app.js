@@ -14,6 +14,7 @@ export const initialState = {
   timeUntilBadPosture: 5,
   thresholdFrontViewBody: 15,
   thresholdFrontViewHead: 7,
+  successfullSetup: false,
   measure: 'median',
   timeWindowMeanInMilliseconds: 20000,
 };

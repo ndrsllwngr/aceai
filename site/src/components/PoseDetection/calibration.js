@@ -111,7 +111,7 @@ export const Calibration = () => {
 
   return (
     <>
-      <div className="flex flex-row justify-end w-100">
+      <div>
         <Button
           // onClick={() => {
           //   if (history.length > 0) {
@@ -122,14 +122,15 @@ export const Calibration = () => {
           //     setCalibrationDataRaw({ tick, ...currentPoseData });
           //   }
           // }}
+          intent={Intent.PRIMARY}
           onClick={handleDialogIsOpen(true)}
         >
           Calibrate
         </Button>
         <Dialog
-          icon="info-sign"
+          icon="cube-add"
           onClose={handleDialogIsOpen(false)}
-          title="Calibration dialog"
+          title="Calibration"
           autoFocus
           canEscapeKeyClose
           canOutsideClickClose
