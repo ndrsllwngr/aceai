@@ -1,4 +1,6 @@
+/* eslint-disable no-console */
 import get from 'lodash/get';
+import TickObject from './index';
 
 export function extractPointObj(partName, data) {
   const keypoints = get(data, `poseData.keypoints`);
@@ -7,6 +9,45 @@ export function extractPointObj(partName, data) {
     x: get(partData, `position.x`),
     y: get(partData, `position.y`),
   };
+}
+
+function median(array) {
+  const values = [...array];
+  // console.log(array);
+  if (values.length === 0) return 0;
+
+  // eslint-disable-next-line func-names
+  values.sort(function(a, b) {
+    return a - b;
+  });
+
+  const half = Math.floor(values.length / 2);
+
+  if (values.length % 2) return values[half];
+
+  return (values[half - 1] + values[half]) / 2.0;
+}
+
+export function getCalibrationMedianTickObject(name, tickArray) {
+  const values = [...tickArray];
+  const leftPoints = { x: [], y: [] };
+  const rightPoints = { x: [], y: [] };
+  for (let i = 0; i < values.length; i += 1) {
+    leftPoints.x.push(get(values[i], 'leftPoint.x'));
+    leftPoints.y.push(get(values[i], 'leftPoint.y'));
+    rightPoints.x.push(get(values[i], 'rightPoint.x'));
+    rightPoints.y.push(get(values[i], 'rightPoint.y'));
+  }
+  const leftPoint = { x: median(leftPoints.x), y: median(leftPoints.y) };
+  const rightPoint = { x: median(rightPoints.x), y: median(rightPoints.y) };
+  return new TickObject(
+    name,
+    Date.now(),
+    values.length,
+    leftPoint,
+    rightPoint,
+    // get(calibrationData, 'shoulder'),
+  );
 }
 
 export function calcMeanForTimeWindow(

@@ -18,6 +18,10 @@ import { showNotification } from '../showNotification';
 import { history, historyShoulder, historyEye } from '../PoseDetection/camera';
 import { ObjectsToCsv } from '../PoseDetection/ObjectsToCsv';
 // import { useApp } from '../../_context-app';
+import {
+  eyeCalibration,
+  shoulderCalibration,
+} from '../PoseDetection/calibration';
 
 export const Drawer = () => {
   const [uiContext, setUiContext] = useUi();
@@ -181,6 +185,30 @@ export const Drawer = () => {
               intent={Intent.NONE}
             >
               Shoulder
+            </Button>
+          </ButtonGroup>
+          <ButtonGroup>
+            <Button
+              icon="download"
+              onClick={() => {
+                const csv = new ObjectsToCsv(eyeCalibration);
+                // Save to file:
+                csv.toDisk('eyeCalibration.csv');
+              }}
+              intent={Intent.NONE}
+            >
+              eyeCalibration
+            </Button>
+            <Button
+              icon="download"
+              onClick={() => {
+                const csv = new ObjectsToCsv(shoulderCalibration);
+                // Save to file:
+                csv.toDisk('shoulderCalibration.csv');
+              }}
+              intent={Intent.NONE}
+            >
+              shoulderCalibration
             </Button>
           </ButtonGroup>
           <div className="my-4">

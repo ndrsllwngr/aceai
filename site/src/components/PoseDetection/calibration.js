@@ -8,13 +8,12 @@ import {
   Button,
   Dialog,
   Classes,
-  AnchorButton,
-  Tooltip,
   Spinner,
   Intent,
   ProgressBar,
 } from '@blueprintjs/core';
-import { Subject } from 'rxjs';
+import { Subject, ReplaySubject } from 'rxjs';
+import { useApp } from '../context-app';
 
 import {
   videoWidth,
@@ -30,20 +29,26 @@ import TickObject, {
   //   calcMeanForTimeWindow,
   //   calcMedianForTimeWindow,
 } from '../TickObject';
+import { getCalibrationMedianTickObject } from '../TickObject/Utils';
 import { CountDownComponent } from '../countdown';
 
-export const history = [];
+const history = [];
 const subject = new Subject();
-export const historyShoulder = [];
+const historyShoulder = [];
 const subjectShoulder = new Subject();
-export const historyEye = [];
+const historyEye = [];
 const subjectEye = new Subject();
+export const eyeCalibration = [];
+export const shoulderCalibration = [];
+export const subjectEyeCalibration = new ReplaySubject();
+export const subjectShoulderCalibration = new ReplaySubject();
 
 let showPoses = false;
 // eslint-disable-next-line no-underscore-dangle
 let _streamCopy = null;
 
 export const Calibration = () => {
+  const [appContext, setAppContext] = useApp();
   const [calibrationDialogIsOpen, setCalibrationDialogIsOpen] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -57,6 +62,23 @@ export const Calibration = () => {
       if (timeLeftCalibrating === 0) {
         setProgress(1);
         handleDialogIsOpen(false)();
+        if (appContext.consoleLog) {
+          console.log(history);
+        }
+        // TODO add to camera.
+        const objEye = getCalibrationMedianTickObject('eye', historyEye);
+        const objShoulder = getCalibrationMedianTickObject(
+          'shoulder',
+          historyShoulder,
+        );
+        subjectEyeCalibration.next(objEye);
+        subjectShoulderCalibration.next(objShoulder);
+        eyeCalibration.push(objEye);
+        shoulderCalibration.push(objShoulder);
+        setAppContext({
+          ...appContext,
+          successfullSetup: !appContext.successfullSetup,
+        });
       } else if (timeLeftCalibrating === 3) {
         setProgress(0.0);
       } else if (timeLeftCalibrating === 2) {
@@ -73,7 +95,13 @@ export const Calibration = () => {
         }, 1000);
       }
     }
-  }, [countDownIsFinished, timeLeftCalibrating]);
+  }, [
+    appContext,
+    appContext.successfullSetup,
+    countDownIsFinished,
+    setAppContext,
+    timeLeftCalibrating,
+  ]);
 
   const handleDialogIsOpen = bool => () => {
     if (bool === false) {
@@ -190,31 +218,37 @@ export const Calibration = () => {
                     className="flex flex-row items-center justify-center"
                     style={{ height: videoHeight, width: videoWidth }}
                   >
-                    <CountDownComponent period={5} callback={handleCountDown} />
+                    <CountDownComponent period={3} callback={handleCountDown} />
                   </div>
                 </div>
               )}
-              <ProgressBar
-                value={progress}
-                intent={Intent.SUCCESS}
-                stripes
-                animate
-              ></ProgressBar>
               <canvas
                 id="output-cal"
                 //   style={{
                 //     display: uiContext.videoCanvasIsOpen ? 'block' : 'none',
                 //   }}
               />
+              {countDownIsFinished && (
+                <ProgressBar
+                  value={progress}
+                  intent={Intent.SUCCESS}
+                  stripes
+                  animate
+                />
+              )}
             </div>
           </div>
           <div className={Classes.DIALOG_FOOTER}>
             <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-              <Tooltip content="This button is hooked up to close the dialog.">
-                <Button onClick={handleDialogIsOpen(false)}>Close</Button>
-              </Tooltip>
+              <Button
+                disabled={isStarted || countDownIsFinished}
+                onClick={handleDialogIsOpen(false)}
+              >
+                Close
+              </Button>
               <Button
                 intent={Intent.PRIMARY}
+                disabled={isStarted || countDownIsFinished}
                 onClick={() => {
                   setIsStarted(true);
                 }}
@@ -355,40 +389,42 @@ function detectPoseInRealTime(video, _net) {
 
       // IF POSE DATA IS AVAILABLE PUSH NEW DATA TO GLOBAL STORAGE,
       // CALCULATE TICK OBJECTS AND STORE THEM ACCORDINGLY
-      if (poses[0] !== undefined) {
-        const timeStamp = Date.now();
-        const tick = history.length;
-        const rawPoseDataObject = {
-          name: 'rawPoseData',
-          createdAt: timeStamp,
-          tick,
-          poseData: poses[0],
-        };
+      if (showPoses) {
+        if (poses[0] !== undefined) {
+          const timeStamp = Date.now();
+          const tick = history.length;
+          const rawPoseDataObject = {
+            name: 'rawPoseData',
+            createdAt: timeStamp,
+            tick,
+            poseData: poses[0],
+          };
 
-        const tickObjectShoulder = new TickObject(
-          'shoulder',
-          timeStamp,
-          tick,
-          extractPointObj('leftShoulder', rawPoseDataObject),
-          extractPointObj('rightShoulder', rawPoseDataObject),
-          // get(calibrationData, 'shoulder'),
-        );
-        const tickObjectEye = new TickObject(
-          'eye',
-          timeStamp,
-          tick,
-          extractPointObj('leftEye', rawPoseDataObject),
-          extractPointObj('rightEye', rawPoseDataObject),
-          // get(calibrationData, 'eye'),
-        );
-        // ADD TICK OBJECTS TO STORAGE and ANNOUNCE NEW TICK OBJECTS
-        history.push(rawPoseDataObject);
-        historyShoulder.push(tickObjectShoulder);
-        historyEye.push(tickObjectEye);
+          const tickObjectShoulder = new TickObject(
+            'shoulder',
+            timeStamp,
+            tick,
+            extractPointObj('leftShoulder', rawPoseDataObject),
+            extractPointObj('rightShoulder', rawPoseDataObject),
+            // get(calibrationData, 'shoulder'),
+          );
+          const tickObjectEye = new TickObject(
+            'eye',
+            timeStamp,
+            tick,
+            extractPointObj('leftEye', rawPoseDataObject),
+            extractPointObj('rightEye', rawPoseDataObject),
+            // get(calibrationData, 'eye'),
+          );
+          // ADD TICK OBJECTS TO STORAGE and ANNOUNCE NEW TICK OBJECTS
+          history.push(rawPoseDataObject);
+          historyShoulder.push(tickObjectShoulder);
+          historyEye.push(tickObjectEye);
 
-        subject.next(rawPoseDataObject);
-        subjectShoulder.next(tickObjectShoulder);
-        subjectEye.next(tickObjectEye);
+          subject.next(rawPoseDataObject);
+          subjectShoulder.next(tickObjectShoulder);
+          subjectEye.next(tickObjectEye);
+        }
       }
 
       // DRAWING

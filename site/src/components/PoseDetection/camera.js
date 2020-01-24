@@ -37,7 +37,11 @@ import {
 } from './utils';
 // CSS
 import '../../../node_modules/react-vis/dist/style.css';
-import { Calibration } from './calibration';
+import {
+  Calibration,
+  subjectEyeCalibration,
+  subjectShoulderCalibration,
+} from './calibration';
 import { showNotification } from '../showNotification';
 // gets updated every second
 export const history = [];
@@ -73,8 +77,11 @@ export const PoseNetCamera = () => {
   // const [thresholdEye, setThresholdEye] = useState(7);
   const [chartDataEye, setChartDataEye] = useState([]);
 
-  const [calibrationDataRaw, setCalibrationDataRaw] = useState(undefined);
-  const [calibrationData, setCalibrationData] = useState(undefined);
+  const [eyeCalibrationTick, setEyeCalibrationTick] = useState();
+  const [shoulderCalibrationTick, setShoulderCalibrationTick] = useState();
+
+  // const [calibrationDataRaw, setCalibrationDataRaw] = useState(undefined);
+  // const [calibrationData, setCalibrationData] = useState(undefined);
 
   useEffect(() => {
     const showToast = (message = '', intent = Intent.PRIMARY) => {
@@ -313,7 +320,6 @@ export const PoseNetCamera = () => {
     appContext.thresholdFrontViewBody,
     appContext.thresholdFrontViewHead,
     appContext.timeUntilBadPosture,
-    calibrationData,
   ]);
 
   // TODO: Change STATUS output to angle, switch threshold to angle?
@@ -344,6 +350,32 @@ export const PoseNetCamera = () => {
   //     tickObjectEye.logData();
   //   }
   // }, [calibrationDataRaw]);
+
+  useEffect(() => {
+    const subscription = subjectShoulderCalibration.subscribe({
+      next: nextObj => {
+        setShoulderCalibrationTick(nextObj);
+        console.log(nextObj);
+      },
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    const subscription = subjectEyeCalibration.subscribe({
+      next: nextObj => {
+        setEyeCalibrationTick(nextObj);
+        console.log(nextObj);
+      },
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   // LOG POSENET DATA
   useEffect(() => {
