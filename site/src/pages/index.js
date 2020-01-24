@@ -109,10 +109,8 @@ const IndexPage = () => {
           </section>
         </div>
         <div className="mx-1 my-1 flex-shrink-0">
-          <div className="flex flex-row justify-between text-gray-700">
-            <p className="font-normal">
-              Made with <span>&#9829;</span> in Germany
-            </p>
+          <div className="flex flex-row justify-between text-gray-700 mb-10">
+            <p className="font-normal"></p>
             <div>
               <a
                 className="underline text-gray-700"
