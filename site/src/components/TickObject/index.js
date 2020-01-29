@@ -1,4 +1,5 @@
 import { TickObject } from './TickObject';
+export { getCalibrationMedianTickObject } from './TickObject';
 export {
   extractPointObj,
   calcMeanForTimeWindow,

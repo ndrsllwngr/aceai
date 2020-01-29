@@ -1,3 +1,5 @@
+import get from 'lodash/get';
+
 export class TickObject {
   name = undefined;
 
@@ -23,6 +25,10 @@ export class TickObject {
 
   differenceY = undefined;
 
+  meanX = undefined;
+
+  meanY = undefined;
+
   // deviationToCalibratedDifferenceX = undefined;
 
   constructor(name, createdAt, tick, leftPoint, rightPoint) {
@@ -35,6 +41,8 @@ export class TickObject {
     this.lengthOfVector = this.calcLenghtOfVector();
     this.differenceX = this.calcDifferenceX();
     this.differenceY = this.calcDifferenceY();
+    this.meanX = this.calcMeanX();
+    this.meanY = this.calcMeanY();
     // if (calibrationData) {
     //   this.deviationToCalibratedDifferenceX = this.calcDeviationToCalibratedDifferenceX(
     //     calibrationData,
@@ -51,6 +59,14 @@ export class TickObject {
         180) /
       Math.PI
     );
+  }
+
+  calcMeanX() {
+    return (this.leftPoint.x + this.rightPoint.x) / 2;
+  }
+
+  calcMeanY() {
+    return (this.leftPoint.y + this.rightPoint.y) / 2;
   }
 
   calcLenghtOfVector() {
@@ -82,4 +98,43 @@ export class TickObject {
     // eslint-disable-next-line no-console
     console.log(this);
   }
+}
+
+function median(array) {
+  const values = [...array];
+  // console.log(array);
+  if (values.length === 0) return 0;
+
+  // eslint-disable-next-line func-names
+  values.sort(function(a, b) {
+    return a - b;
+  });
+
+  const half = Math.floor(values.length / 2);
+
+  if (values.length % 2) return values[half];
+
+  return (values[half - 1] + values[half]) / 2.0;
+}
+
+export function getCalibrationMedianTickObject(name, tickArray) {
+  const values = [...tickArray];
+  const leftPoints = { x: [], y: [] };
+  const rightPoints = { x: [], y: [] };
+  for (let i = 0; i < values.length; i += 1) {
+    leftPoints.x.push(get(values[i], 'leftPoint.x'));
+    leftPoints.y.push(get(values[i], 'leftPoint.y'));
+    rightPoints.x.push(get(values[i], 'rightPoint.x'));
+    rightPoints.y.push(get(values[i], 'rightPoint.y'));
+  }
+  const leftPoint = { x: median(leftPoints.x), y: median(leftPoints.y) };
+  const rightPoint = { x: median(rightPoints.x), y: median(rightPoints.y) };
+  return new TickObject(
+    name,
+    Date.now(),
+    values.length,
+    leftPoint,
+    rightPoint,
+    // get(calibrationData, 'shoulder'),
+  );
 }

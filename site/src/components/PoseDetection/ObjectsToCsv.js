@@ -132,4 +132,78 @@ async function convert(data, header = true, allColumns = false) {
   return await csv.stringify(csvInput);
 }
 
+export function convertToCSV(objArray) {
+  const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
+  let str = '';
+
+  for (let i = 0; i < array.length; i += 1) {
+    let line = '';
+    // eslint-disable-next-line no-restricted-syntax, guard-for-in
+    for (const index in array[i]) {
+      if (line !== '') line += ',';
+
+      line += array[i][index];
+    }
+
+    str += `${line}\r\n`;
+  }
+
+  return str;
+}
+
+export function exportCSVFile(headers, items, fileTitle) {
+  if (headers) {
+    items.unshift(headers);
+  }
+
+  // Convert Object to JSON
+  const jsonObject = JSON.stringify(items);
+
+  const csvObject = convertToCSV(jsonObject);
+
+  const exportedFilenmae = `${fileTitle}.csv` || 'export.csv';
+
+  const blob = new Blob([csvObject], { type: 'text/csv;charset=utf-8;' });
+  if (navigator.msSaveBlob) {
+    // IE 10+
+    navigator.msSaveBlob(blob, exportedFilenmae);
+  } else {
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+      // feature detection
+      // Browsers that support HTML5 download attribute
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', exportedFilenmae);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+}
+
+export function downloadFile(data, fileTitle) {
+  const exportedFilenmae = `${fileTitle}.csv` || 'export.csv';
+
+  const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+  if (navigator.msSaveBlob) {
+    // IE 10+
+    navigator.msSaveBlob(blob, exportedFilenmae);
+  } else {
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+      // feature detection
+      // Browsers that support HTML5 download attribute
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', exportedFilenmae);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+}
+
 // module.exports = ObjectsToCsv;

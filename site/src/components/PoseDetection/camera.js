@@ -69,6 +69,8 @@ export const PoseNetCamera = () => {
   );
 
   const [statusShoulder, setStatusShoulder] = useState(emptyState);
+  const [statusHeight, setStatusHeight] = useState(emptyState);
+  const [statusDistance, setStatusDistance] = useState(emptyState);
   // const [thresholdShoulder, setThresholdShoulder] = useState(15);
   const [chartDataShoulder, setChartDataShoulder] = useState([]);
 
@@ -76,6 +78,7 @@ export const PoseNetCamera = () => {
 
   // const [thresholdEye, setThresholdEye] = useState(7);
   const [chartDataEye, setChartDataEye] = useState([]);
+  const [heightDiff, setHeightDiff] = useState(0);
 
   const [eyeCalibrationTick, setEyeCalibrationTick] = useState();
   const [shoulderCalibrationTick, setShoulderCalibrationTick] = useState();
@@ -351,6 +354,7 @@ export const PoseNetCamera = () => {
   //   }
   // }, [calibrationDataRaw]);
 
+  // FETCH LATEST CALIBRATION DATA and SET (SHOULDER)
   useEffect(() => {
     const subscription = subjectShoulderCalibration.subscribe({
       next: nextObj => {
@@ -364,6 +368,7 @@ export const PoseNetCamera = () => {
     };
   }, []);
 
+  // FETCH LATEST CALIBRATION DATA and SET (EYE)
   useEffect(() => {
     const subscription = subjectEyeCalibration.subscribe({
       next: nextObj => {
@@ -415,6 +420,55 @@ export const PoseNetCamera = () => {
             status: 'good',
           });
         }
+        // HEIGHT DIFF
+        if (
+          Math.abs(
+            get(shoulderCalibrationTick, 'meanY', 0) - get(nextObj, 'meanY', 0),
+          ) > appContext.thresholdHeight
+        ) {
+          setStatusHeight({
+            msg: `Bad (${nextObj.name})`,
+            value: (
+              get(shoulderCalibrationTick, 'meanY', 0) -
+              get(nextObj, 'meanY', 0)
+            ).toFixed(2),
+            status: 'bad',
+          });
+        } else {
+          setStatusHeight({
+            msg: `Good (${nextObj.name})`,
+            value: (
+              get(shoulderCalibrationTick, 'meanY', 0) -
+              get(nextObj, 'meanY', 0)
+            ).toFixed(2),
+            status: 'good',
+          });
+        }
+        // DISTANCE DIFF
+        if (
+          Math.abs(
+            get(shoulderCalibrationTick, 'lengthOfVector', 0) -
+              get(nextObj, 'lengthOfVector', 0),
+          ) > appContext.thresholdDistance
+        ) {
+          setStatusDistance({
+            msg: `Bad (${nextObj.name})`,
+            value: (
+              get(shoulderCalibrationTick, 'lengthOfVector', 0) -
+              get(nextObj, 'lengthOfVector', 0)
+            ).toFixed(2),
+            status: 'bad',
+          });
+        } else {
+          setStatusDistance({
+            msg: `Good (${nextObj.name})`,
+            value: (
+              get(shoulderCalibrationTick, 'lengthOfVector', 0) -
+              get(nextObj, 'lengthOfVector', 0)
+            ).toFixed(2),
+            status: 'good',
+          });
+        }
         // PRINT data
         if (appContext.charts) {
           const copyArr = [...chartDataShoulder];
@@ -437,9 +491,12 @@ export const PoseNetCamera = () => {
     };
   }, [
     appContext.charts,
+    appContext.thresholdDistance,
     appContext.thresholdFrontViewBody,
+    appContext.thresholdHeight,
     chartDataShoulder,
     setStatusShoulder,
+    shoulderCalibrationTick,
   ]);
 
   // UPDATE STATUS, CHART of eye
@@ -507,10 +564,24 @@ export const PoseNetCamera = () => {
                   caption="based on calibration data"
                   tags={
                     <>
-                      <Tag intent="none" style={{ marginRight: '0.5rem' }}>
-                        DISTANCE
+                      <Tag
+                        // intent={
+                        //   statusDistance.status === 'bad' ? 'danger' : 'none'
+                        // }
+                        intent="none"
+                        style={{ marginRight: '0.5rem' }}
+                      >
+                        Distance {statusDistance.value}
                       </Tag>
-                      <Tag intent="none">HEIGHT</Tag>
+                      <Tag
+                        // intent={
+                        //   statusHeight.status === 'bad' ? 'danger' : 'none'
+                        // }
+                        intent="none"
+                        style={{ marginRight: '0.5rem' }}
+                      >
+                        HEIGHT {statusHeight.value}
+                      </Tag>
                     </>
                   }
                 >

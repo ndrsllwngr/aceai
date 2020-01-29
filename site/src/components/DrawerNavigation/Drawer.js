@@ -74,6 +74,7 @@ export const Drawer = () => {
               className="bp3-minimal"
               icon={appContext.webCam ? 'stop' : 'power'}
               onClick={handleChange}
+              // disabled={appContext.successfullSetup === false} // TODO not working
               fill
               large
             />

@@ -16,7 +16,12 @@ import { useUi } from '../context-ui';
 import { useApp, initialState } from '../context-app';
 import { showNotification } from '../showNotification';
 import { history, historyShoulder, historyEye } from '../PoseDetection/camera';
-import { ObjectsToCsv } from '../PoseDetection/ObjectsToCsv';
+import {
+  ObjectsToCsv,
+  // convertToCSV,
+  downloadFile,
+  exportCSVFile,
+} from '../PoseDetection/ObjectsToCsv';
 // import { useApp } from '../../_context-app';
 import {
   eyeCalibration,
@@ -84,6 +89,24 @@ export const Drawer = () => {
             labelStepSize={20}
             stepSize={1}
             onChange={handleAppContextChangeSlider('thresholdFrontViewBody')}
+          />
+          <p>Threshold of distance to screen</p>
+          <Slider
+            value={appContext.thresholdDistance}
+            min={0}
+            max={100}
+            labelStepSize={20}
+            stepSize={1}
+            onChange={handleAppContextChangeSlider('thresholdDistance')}
+          />
+          <p>Threshold of height variance</p>
+          <Slider
+            value={appContext.thresholdHeight}
+            min={0}
+            max={100}
+            labelStepSize={20}
+            stepSize={1}
+            onChange={handleAppContextChangeSlider('thresholdHeight')}
           />
           <div className="my-4">
             <Divider />
@@ -192,8 +215,10 @@ export const Drawer = () => {
               icon="download"
               onClick={() => {
                 const csv = new ObjectsToCsv(eyeCalibration);
+                const strCsv = csv.stringify();
+                downloadFile(strCsv, 'eyeCalibration');
                 // Save to file:
-                csv.toDisk('eyeCalibration.csv');
+                // csv.toDisk('eyeCalibration.csv');
               }}
               intent={Intent.NONE}
             >
@@ -202,9 +227,21 @@ export const Drawer = () => {
             <Button
               icon="download"
               onClick={() => {
-                const csv = new ObjectsToCsv(shoulderCalibration);
-                // Save to file:
-                csv.toDisk('shoulderCalibration.csv');
+                const columnNames = [
+                  ...shoulderCalibration.reduce((columns, row) => {
+                    // check each object to compile a full list of column names
+                    Object.keys(row).map(rowKey => columns.add(rowKey));
+                    return columns;
+                  }, new Set()),
+                ];
+                exportCSVFile(
+                  columnNames,
+                  shoulderCalibration,
+                  'shoulderCalibration',
+                );
+                // const csv = new ObjectsToCsv(shoulderCalibration);
+                // // Save to file:
+                // csv.toDisk('shoulderCalibration.csv');
               }}
               intent={Intent.NONE}
             >

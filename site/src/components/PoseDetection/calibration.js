@@ -26,10 +26,9 @@ import {
 } from './utils';
 import TickObject, {
   extractPointObj,
-  //   calcMeanForTimeWindow,
-  //   calcMedianForTimeWindow,
+  getCalibrationMedianTickObject,
 } from '../TickObject';
-import { getCalibrationMedianTickObject } from '../TickObject/Utils';
+
 import { CountDownComponent } from '../countdown';
 
 const history = [];
