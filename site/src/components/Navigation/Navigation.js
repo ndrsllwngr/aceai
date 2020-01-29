@@ -34,7 +34,7 @@ export const Navigation = () => {
           <Navbar.Group align={Alignment.LEFT}>
             <Navbar.Heading>
               <span className="font-extrabold">BodyPose</span>{' '}
-              <span className="text-gray-700">v0.8</span>
+              <span className="text-gray-700">v0.9</span>
             </Navbar.Heading>
           </Navbar.Group>
           <div className="block md:hidden">
@@ -84,6 +84,7 @@ export const Navigation = () => {
                   className="bp3-minimal"
                   icon={appContext.webCam ? 'stop' : 'power'}
                   onClick={handleChange}
+                  disabled={appContext.successfullSetup === false}
                 />
               </Tooltip>
               <Tooltip content="Calibrate" position={Position.BOTTOM}>
