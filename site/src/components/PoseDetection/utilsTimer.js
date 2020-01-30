@@ -1,8 +1,9 @@
 import { Timer } from 'easytimer.js';
 
-// const timerPause = new Timer();
-export const timerSitting = new Timer();
-export const timerGoodPosture = new Timer();
-export const timerBadPosture = new Timer();
-export const timerShoulderMeanBadPosture = new Timer();
-export const timerEyeMeanBadPosture = new Timer();
+export const timerSession = new Timer();
+export const timerOverallGood = new Timer();
+export const timerOverallBad = new Timer();
+export const timerBadHead = new Timer();
+export const timerBadBody = new Timer();
+export const timerBadDistance = new Timer();
+export const timerBadHeight = new Timer();

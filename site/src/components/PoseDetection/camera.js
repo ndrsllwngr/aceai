@@ -17,11 +17,11 @@ import TickObject, {
 import { useApp } from '../context-app';
 import { useUi } from '../context-ui';
 import {
-  timerSitting,
-  timerGoodPosture,
-  timerBadPosture,
-  timerShoulderMeanBadPosture,
-  timerEyeMeanBadPosture,
+  timerSession,
+  timerOverallGood,
+  timerOverallBad,
+  timerBadBody,
+  timerBadHead,
 } from './utilsTimer';
 import { TimerComponent } from '../timer';
 import { Widget } from '../widget';
@@ -108,7 +108,7 @@ export const PoseNetCamera = () => {
       );
     }
     if (
-      timerSitting.getTotalTimeValues().seconds > 0 &&
+      timerSession.getTotalTimeValues().seconds > 0 &&
       !headPostureOverTimeIsBad
     ) {
       showToast('Well done. Your head is well aligned now.', Intent.SUCCESS);
@@ -142,7 +142,7 @@ export const PoseNetCamera = () => {
       );
     }
     if (
-      timerSitting.getTotalTimeValues().seconds > 0 &&
+      timerSession.getTotalTimeValues().seconds > 0 &&
       !bodyPostureOverTimeIsBad
     ) {
       showToast('Well done. Your body is well aligned now.', Intent.SUCCESS);
@@ -200,14 +200,14 @@ export const PoseNetCamera = () => {
         poseNetState.net = net;
         // setupFPS();
         detectPoseInRealTime(video, net);
-        timerSitting.start({ precision: 'secondTenths' });
+        timerSession.start({ precision: 'secondTenths' });
       }
       running();
     } else {
       // eslint-disable-next-line no-inner-declarations
       async function shuttingDown() {
         console.log('async function shuttingDown()');
-        // timerSitting.pause();
+        // timerSession.pause();
         setLoading(false);
         setStatusShoulder(emptyState);
         setStatusEye(emptyState);
@@ -257,13 +257,13 @@ export const PoseNetCamera = () => {
 
           // TIMER
           if (
-            timerShoulderMeanBadPosture.getTotalTimeValues().seconds >
+            timerBadBody.getTotalTimeValues().seconds >
             appContext.timer_timeUntilBadPosture
           ) {
             // GENERAL
-            timerBadPosture.start({ precision: 'secondTenths' });
-            if (timerGoodPosture.isRunning()) {
-              timerGoodPosture.pause();
+            timerOverallBad.start({ precision: 'secondTenths' });
+            if (timerOverallGood.isRunning()) {
+              timerOverallGood.pause();
             }
             setBodyPostureOverTimeIsBad(true);
             // console.log('bad posture shoulder (> 5 seconds)');
@@ -272,13 +272,13 @@ export const PoseNetCamera = () => {
           }
 
           if (
-            timerEyeMeanBadPosture.getTotalTimeValues().seconds >
+            timerBadHead.getTotalTimeValues().seconds >
             appContext.timer_timeUntilBadPosture
           ) {
             // GENERAL
-            timerBadPosture.start({ precision: 'secondTenths' });
-            if (timerGoodPosture.isRunning()) {
-              timerGoodPosture.pause();
+            timerOverallBad.start({ precision: 'secondTenths' });
+            if (timerOverallGood.isRunning()) {
+              timerOverallGood.pause();
             }
             // console.log('bad posture eye (> 5 seconds)');
             setHeadPostureOverTimeIsBad(true);
@@ -288,30 +288,30 @@ export const PoseNetCamera = () => {
 
           if (
             !(
-              timerShoulderMeanBadPosture.getTotalTimeValues().seconds >
+              timerBadBody.getTotalTimeValues().seconds >
               appContext.timer_timeUntilBadPosture
             ) &&
             !(
-              timerEyeMeanBadPosture.getTotalTimeValues().seconds >
+              timerBadHead.getTotalTimeValues().seconds >
               appContext.timer_timeUntilBadPosture
             )
           ) {
-            if (timerBadPosture.isRunning()) {
-              timerBadPosture.pause();
+            if (timerOverallBad.isRunning()) {
+              timerOverallBad.pause();
             }
-            timerGoodPosture.start({ precision: 'secondTenths' });
+            timerOverallGood.start({ precision: 'secondTenths' });
           }
 
           if (meanOrMedianShoulder > appContext.threshold_body) {
-            timerShoulderMeanBadPosture.start({ precision: 'secondTenths' });
+            timerBadBody.start({ precision: 'secondTenths' });
           } else {
-            timerShoulderMeanBadPosture.reset();
+            timerBadBody.reset();
           }
 
           if (meanOrMedianEye > appContext.threshold_head) {
-            timerEyeMeanBadPosture.start({ precision: 'secondTenths' });
+            timerBadHead.start({ precision: 'secondTenths' });
           } else {
-            timerEyeMeanBadPosture.reset();
+            timerBadHead.reset();
           }
           // TODO reset timers on unmount
           // }
@@ -715,18 +715,18 @@ export const PoseNetCamera = () => {
                 <Widget className="w" title="Timers">
                   <div className="flex flex-row flex-wrap sm:flex-wrap">
                     <div className="w-full sm:w-full md:w-1/3 mt-1 md:mt-0">
-                      <TimerComponent title="Session" timer={timerSitting} />
+                      <TimerComponent title="Session" timer={timerSession} />
                     </div>
                     <div className="w-full sm:w-full md:w-1/3 mt-1 md:mt-0">
                       <TimerComponent
                         title="Good posture"
-                        timer={timerGoodPosture}
+                        timer={timerOverallGood}
                       />
                     </div>
                     <div className="w-full sm:w-full md:w-1/3 mt-1 md:mt-0">
                       <TimerComponent
                         title="Bad posture"
-                        timer={timerBadPosture}
+                        timer={timerOverallBad}
                       />
                     </div>
                   </div>
