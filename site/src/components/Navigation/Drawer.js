@@ -78,7 +78,7 @@ export const Drawer = () => {
               icon={appContext.posenet_turnedOn ? 'stop' : 'power'}
               onClick={handleChange}
               disabled={
-                appContext.calibration_calibationDataAvailable === false
+                appContext.calibration_calibrationDataAvailable === false
               }
               fill
               large

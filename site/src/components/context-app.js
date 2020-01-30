@@ -8,7 +8,7 @@ export const initialState = {
   global_logging: false,
   global_openDrawer: true,
   // CALIBRATION
-  calibration_calibationDataAvailable: false,
+  calibration_calibrationDataAvailable: false,
   // POSENET
   posenet_turnedOn: false,
   posenet_loading: false,

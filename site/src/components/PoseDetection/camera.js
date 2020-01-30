@@ -39,17 +39,17 @@ import {
 import '../../../node_modules/react-vis/dist/style.css';
 import {
   Calibration,
-  subjectEyeCalibration,
-  subjectShoulderCalibration,
+  subjectHeadCalibration,
+  subjectBodyCalibration,
 } from './calibration';
 import { showNotification } from '../showNotification';
 // gets updated every second
 export const history = [];
 const subject = new Subject();
-export const historyShoulder = [];
-const subjectShoulder = new Subject();
-export const historyEye = [];
-const subjectEye = new Subject();
+export const historyBody = [];
+const subjectBody = new Subject();
+export const historyHead = [];
+const subjectHead = new Subject();
 
 const emptyState = { msg: 'Loading...', value: 0.0, status: 'default' };
 // eslint-disable-next-line no-underscore-dangle
@@ -80,8 +80,8 @@ export const PoseNetCamera = () => {
   const [chartDataEye, setChartDataEye] = useState([]);
   const [heightDiff, setHeightDiff] = useState(0);
 
-  const [eyeCalibrationTick, setEyeCalibrationTick] = useState();
-  const [shoulderCalibrationTick, setShoulderCalibrationTick] = useState();
+  const [calibrationHeadTick, setcalibrationHeadTick] = useState();
+  const [calibrationBodyTick, setcalibrationBodyTick] = useState();
 
   // const [calibrationDataRaw, setCalibrationDataRaw] = useState(undefined);
   // const [calibrationData, setCalibrationData] = useState(undefined);
@@ -157,16 +157,16 @@ export const PoseNetCamera = () => {
   // AFTER CALIBRATION TURN POSENET ON if calibration data is not older than 5sec
   useEffect(() => {
     if (
-      appContext.calibration_calibationDataAvailable &&
+      appContext.calibration_calibrationDataAvailable &&
       !appContext.posenet_turnedOn
     ) {
-      if (eyeCalibrationTick !== undefined) {
-        if (Math.abs(eyeCalibrationTick.createdAt - Date.now()) < 5000) {
+      if (calibrationHeadTick !== undefined) {
+        if (Math.abs(calibrationHeadTick.createdAt - Date.now()) < 5000) {
           setAppContext({ ...appContext, posenet_turnedOn: true });
         }
       }
     }
-  }, [appContext, eyeCalibrationTick, setAppContext]);
+  }, [appContext, calibrationHeadTick, setAppContext]);
 
   // POWER POSENET
   useEffect(() => {
@@ -226,30 +226,30 @@ export const PoseNetCamera = () => {
       next: nextObj => {
         try {
           // CALCULATE POSTURE IF GOOD OR BAD VIA MEAN AND TIME
-          const cloneHistoryShoulder = [...historyShoulder];
-          const cloneHistoryEye = [...historyEye];
+          const clonehistoryBody = [...historyBody];
+          const clonehistoryHead = [...historyHead];
           let meanOrMedianShoulder;
           let meanOrMedianEye;
 
           if (appContext.posenet_measurement === 'median') {
             meanOrMedianShoulder = calcMedianForTimeWindow(
-              cloneHistoryShoulder,
+              clonehistoryBody,
               3000,
               nextObj.createdAt,
             );
             meanOrMedianEye = calcMedianForTimeWindow(
-              cloneHistoryEye,
+              clonehistoryHead,
               3000,
               nextObj.createdAt,
             );
           } else {
             meanOrMedianShoulder = calcMeanForTimeWindow(
-              cloneHistoryShoulder,
+              clonehistoryBody,
               3000,
               nextObj.createdAt,
             );
             meanOrMedianEye = calcMeanForTimeWindow(
-              cloneHistoryEye,
+              clonehistoryHead,
               3000,
               nextObj.createdAt,
             );
@@ -363,9 +363,9 @@ export const PoseNetCamera = () => {
 
   // FETCH LATEST CALIBRATION DATA and SET (SHOULDER)
   useEffect(() => {
-    const subscription = subjectShoulderCalibration.subscribe({
+    const subscription = subjectBodyCalibration.subscribe({
       next: nextObj => {
-        setShoulderCalibrationTick(nextObj);
+        setcalibrationBodyTick(nextObj);
         console.log(nextObj);
       },
     });
@@ -377,9 +377,9 @@ export const PoseNetCamera = () => {
 
   // FETCH LATEST CALIBRATION DATA and SET (EYE)
   useEffect(() => {
-    const subscription = subjectEyeCalibration.subscribe({
+    const subscription = subjectHeadCalibration.subscribe({
       next: nextObj => {
-        setEyeCalibrationTick(nextObj);
+        setcalibrationHeadTick(nextObj);
         console.log(nextObj);
       },
     });
@@ -396,8 +396,8 @@ export const PoseNetCamera = () => {
         if (appContext.gobal_logging) {
           console.log(nextObj);
           if (nextObj.tick > 0) {
-            historyEye[historyEye.length - 1].logData();
-            historyShoulder[historyShoulder.length - 1].logData();
+            historyHead[historyHead.length - 1].logData();
+            historyBody[historyBody.length - 1].logData();
           }
         }
       },
@@ -410,7 +410,7 @@ export const PoseNetCamera = () => {
 
   // UPDATE STATUS, CHART of shoulder
   useEffect(() => {
-    const subscription = subjectShoulder.subscribe({
+    const subscription = subjectBody.subscribe({
       next: nextObj => {
         if (Math.abs(nextObj.angleOfVector) > appContext.threshold_body) {
           setStatusShoulder({
@@ -428,14 +428,13 @@ export const PoseNetCamera = () => {
         // HEIGHT DIFF
         if (
           Math.abs(
-            get(shoulderCalibrationTick, 'meanY', 0) - get(nextObj, 'meanY', 0),
+            get(calibrationBodyTick, 'meanY', 0) - get(nextObj, 'meanY', 0),
           ) > appContext.threshold_height
         ) {
           setStatusHeight({
             msg: `Bad (${nextObj.name})`,
             value: (
-              get(shoulderCalibrationTick, 'meanY', 0) -
-              get(nextObj, 'meanY', 0)
+              get(calibrationBodyTick, 'meanY', 0) - get(nextObj, 'meanY', 0)
             ).toFixed(2),
             status: 'bad',
           });
@@ -443,8 +442,7 @@ export const PoseNetCamera = () => {
           setStatusHeight({
             msg: `Good (${nextObj.name})`,
             value: (
-              get(shoulderCalibrationTick, 'meanY', 0) -
-              get(nextObj, 'meanY', 0)
+              get(calibrationBodyTick, 'meanY', 0) - get(nextObj, 'meanY', 0)
             ).toFixed(2),
             status: 'good',
           });
@@ -452,14 +450,14 @@ export const PoseNetCamera = () => {
         // DISTANCE DIFF
         if (
           Math.abs(
-            get(shoulderCalibrationTick, 'lengthOfVector', 0) -
+            get(calibrationBodyTick, 'lengthOfVector', 0) -
               get(nextObj, 'lengthOfVector', 0),
           ) > appContext.threshold_distance
         ) {
           setStatusDistance({
             msg: `Bad (${nextObj.name})`,
             value: (
-              get(shoulderCalibrationTick, 'lengthOfVector', 0) -
+              get(calibrationBodyTick, 'lengthOfVector', 0) -
               get(nextObj, 'lengthOfVector', 0)
             ).toFixed(2),
             status: 'bad',
@@ -468,7 +466,7 @@ export const PoseNetCamera = () => {
           setStatusDistance({
             msg: `Good (${nextObj.name})`,
             value: (
-              get(shoulderCalibrationTick, 'lengthOfVector', 0) -
+              get(calibrationBodyTick, 'lengthOfVector', 0) -
               get(nextObj, 'lengthOfVector', 0)
             ).toFixed(2),
             status: 'good',
@@ -500,12 +498,12 @@ export const PoseNetCamera = () => {
     appContext.threshold_distance,
     appContext.threshold_height,
     chartDataShoulder,
-    shoulderCalibrationTick,
+    calibrationBodyTick,
   ]);
 
   // UPDATE STATUS, CHART of eye
   useEffect(() => {
-    const subscription = subjectEye.subscribe({
+    const subscription = subjectHead.subscribe({
       next: nextObj => {
         if (Math.abs(nextObj.angleOfVector) > appContext.threshold_head) {
           setStatusEye({
@@ -544,7 +542,7 @@ export const PoseNetCamera = () => {
 
   return (
     <>
-      {appContext.calibration_calibationDataAvailable ? (
+      {appContext.calibration_calibrationDataAvailable ? (
         <>
           <Portal>
             <VideoCanvas
@@ -932,12 +930,12 @@ function detectPoseInRealTime(video, _net) {
         );
         // ADD TICK OBJECTS TO STORAGE and ANNOUNCE NEW TICK OBJECTS
         history.push(rawPoseDataObject);
-        historyShoulder.push(tickObjectShoulder);
-        historyEye.push(tickObjectEye);
+        historyBody.push(tickObjectShoulder);
+        historyHead.push(tickObjectEye);
 
         subject.next(rawPoseDataObject);
-        subjectShoulder.next(tickObjectShoulder);
-        subjectEye.next(tickObjectEye);
+        subjectBody.next(tickObjectShoulder);
+        subjectHead.next(tickObjectEye);
       }
 
       // DRAWING

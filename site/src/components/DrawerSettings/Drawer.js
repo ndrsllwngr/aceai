@@ -15,7 +15,7 @@ import {
 import { useUi } from '../context-ui';
 import { useApp, initialState } from '../context-app';
 import { showNotification } from '../showNotification';
-import { history, historyShoulder, historyEye } from '../PoseDetection/camera';
+import { history, historyBody, historyHead } from '../PoseDetection/camera';
 import {
   ObjectsToCsv,
   // convertToCSV,
@@ -23,10 +23,7 @@ import {
   exportCSVFile,
 } from '../PoseDetection/ObjectsToCsv';
 // import { useApp } from '../../_context-app';
-import {
-  eyeCalibration,
-  shoulderCalibration,
-} from '../PoseDetection/calibration';
+import { calibrationHead, calibrationBody } from '../PoseDetection/calibration';
 
 export const Drawer = () => {
   const [uiContext, setUiContext] = useUi();
@@ -193,7 +190,7 @@ export const Drawer = () => {
             <Button
               icon="download"
               onClick={() => {
-                const csv = new ObjectsToCsv(historyEye);
+                const csv = new ObjectsToCsv(historyHead);
                 // Save to file:
                 csv.toDisk('historyHead.csv');
               }}
@@ -204,9 +201,9 @@ export const Drawer = () => {
             <Button
               icon="download"
               onClick={() => {
-                const csv = new ObjectsToCsv(historyShoulder);
+                const csv = new ObjectsToCsv(historyBody);
                 // Save to file:
-                csv.toDisk('historyShoulder.csv');
+                csv.toDisk('historyBody.csv');
               }}
               intent={Intent.NONE}
             >
@@ -217,38 +214,34 @@ export const Drawer = () => {
             <Button
               icon="download"
               onClick={() => {
-                const csv = new ObjectsToCsv(eyeCalibration);
+                const csv = new ObjectsToCsv(calibrationHead);
                 const strCsv = csv.stringify();
-                downloadFile(strCsv, 'eyeCalibration');
+                downloadFile(strCsv, 'calibrationHead');
                 // Save to file:
-                // csv.toDisk('eyeCalibration.csv');
+                // csv.toDisk('calibrationHead.csv');
               }}
               intent={Intent.NONE}
             >
-              eyeCalibration
+              calibrationHead
             </Button>
             <Button
               icon="download"
               onClick={() => {
                 const columnNames = [
-                  ...shoulderCalibration.reduce((columns, row) => {
+                  ...calibrationBody.reduce((columns, row) => {
                     // check each object to compile a full list of column names
                     Object.keys(row).map(rowKey => columns.add(rowKey));
                     return columns;
                   }, new Set()),
                 ];
-                exportCSVFile(
-                  columnNames,
-                  shoulderCalibration,
-                  'shoulderCalibration',
-                );
-                // const csv = new ObjectsToCsv(shoulderCalibration);
+                exportCSVFile(columnNames, calibrationBody, 'calibrationBody');
+                // const csv = new ObjectsToCsv(calibrationBody);
                 // // Save to file:
-                // csv.toDisk('shoulderCalibration.csv');
+                // csv.toDisk('calibrationBody.csv');
               }}
               intent={Intent.NONE}
             >
-              shoulderCalibration
+              calibrationBody
             </Button>
           </ButtonGroup>
           <div className="my-4">

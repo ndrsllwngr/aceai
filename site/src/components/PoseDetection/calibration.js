@@ -33,14 +33,14 @@ import { CountDownComponent } from '../countdown';
 
 const history = [];
 const subject = new Subject();
-const historyShoulder = [];
-const subjectShoulder = new Subject();
-const historyEye = [];
-const subjectEye = new Subject();
-export const eyeCalibration = [];
-export const shoulderCalibration = [];
-export const subjectEyeCalibration = new ReplaySubject();
-export const subjectShoulderCalibration = new ReplaySubject();
+const historyBody = [];
+const subjectBody = new Subject();
+const historyHead = [];
+const subjectHead = new Subject();
+export const calibrationHead = [];
+export const calibrationBody = [];
+export const subjectHeadCalibration = new ReplaySubject();
+export const subjectBodyCalibration = new ReplaySubject();
 
 let showPoses = false;
 // eslint-disable-next-line no-underscore-dangle
@@ -65,18 +65,18 @@ export const Calibration = () => {
           console.log(history);
         }
         // TODO add to camera.
-        const objEye = getCalibrationMedianTickObject('eye', historyEye);
+        const objEye = getCalibrationMedianTickObject('eye', historyHead);
         const objShoulder = getCalibrationMedianTickObject(
           'shoulder',
-          historyShoulder,
+          historyBody,
         );
-        subjectEyeCalibration.next(objEye);
-        subjectShoulderCalibration.next(objShoulder);
-        eyeCalibration.push(objEye);
-        shoulderCalibration.push(objShoulder);
+        subjectHeadCalibration.next(objEye);
+        subjectBodyCalibration.next(objShoulder);
+        calibrationHead.push(objEye);
+        calibrationBody.push(objShoulder);
         setAppContext({
           ...appContext,
-          calibration_calibationDataAvailable: !appContext.calibration_calibationDataAvailable,
+          calibration_calibrationDataAvailable: !appContext.calibration_calibrationDataAvailable,
         });
       } else if (timeLeftCalibrating === 3) {
         setProgress(0.0);
@@ -411,12 +411,12 @@ function detectPoseInRealTime(video, _net) {
           );
           // ADD TICK OBJECTS TO STORAGE and ANNOUNCE NEW TICK OBJECTS
           history.push(rawPoseDataObject);
-          historyShoulder.push(tickObjectShoulder);
-          historyEye.push(tickObjectEye);
+          historyBody.push(tickObjectShoulder);
+          historyHead.push(tickObjectEye);
 
           subject.next(rawPoseDataObject);
-          subjectShoulder.next(tickObjectShoulder);
-          subjectEye.next(tickObjectEye);
+          subjectBody.next(tickObjectShoulder);
+          subjectHead.next(tickObjectEye);
         }
       }
 
