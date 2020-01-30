@@ -154,12 +154,26 @@ export const PoseNetCamera = () => {
     uiContext.toasterRef,
   ]);
 
+  // AFTER CALIBRATION TURN POSENET ON if calibration data is not older than 5sec
+  useEffect(() => {
+    if (
+      appContext.calibration_calibationDataAvailable &&
+      !appContext.posenet_turnedOn
+    ) {
+      if (eyeCalibrationTick !== undefined) {
+        if (Math.abs(eyeCalibrationTick.createdAt - Date.now()) < 5000) {
+          setAppContext({ ...appContext, posenet_turnedOn: true });
+        }
+      }
+    }
+  }, [appContext, eyeCalibrationTick, setAppContext]);
+
   // POWER POSENET
   useEffect(() => {
-    if (appContext.webCam) {
+    if (appContext.posenet_turnedOn) {
       // eslint-disable-next-line no-inner-declarations
       async function running() {
-        if (appContext.webCam === false) {
+        if (appContext.posenet_turnedOn === false) {
           return;
         }
         console.log('async function running()');
@@ -204,13 +218,7 @@ export const PoseNetCamera = () => {
       }
       shuttingDown();
     }
-  }, [
-    appContext,
-    appContext.webCam,
-    setLoading,
-    setStatusEye,
-    setStatusShoulder,
-  ]);
+  }, [appContext.posenet_turnedOn]);
 
   // CALCULATIONS, TIMERS
   useEffect(() => {
@@ -223,7 +231,7 @@ export const PoseNetCamera = () => {
           let meanOrMedianShoulder;
           let meanOrMedianEye;
 
-          if (appContext.measure === 'median') {
+          if (appContext.posenet_measurement === 'median') {
             meanOrMedianShoulder = calcMedianForTimeWindow(
               cloneHistoryShoulder,
               3000,
@@ -250,7 +258,7 @@ export const PoseNetCamera = () => {
           // TIMER
           if (
             timerShoulderMeanBadPosture.getTotalTimeValues().seconds >
-            appContext.timeUntilBadPosture
+            appContext.timer_timeUntilBadPosture
           ) {
             // GENERAL
             timerBadPosture.start({ precision: 'secondTenths' });
@@ -265,7 +273,7 @@ export const PoseNetCamera = () => {
 
           if (
             timerEyeMeanBadPosture.getTotalTimeValues().seconds >
-            appContext.timeUntilBadPosture
+            appContext.timer_timeUntilBadPosture
           ) {
             // GENERAL
             timerBadPosture.start({ precision: 'secondTenths' });
@@ -281,11 +289,11 @@ export const PoseNetCamera = () => {
           if (
             !(
               timerShoulderMeanBadPosture.getTotalTimeValues().seconds >
-              appContext.timeUntilBadPosture
+              appContext.timer_timeUntilBadPosture
             ) &&
             !(
               timerEyeMeanBadPosture.getTotalTimeValues().seconds >
-              appContext.timeUntilBadPosture
+              appContext.timer_timeUntilBadPosture
             )
           ) {
             if (timerBadPosture.isRunning()) {
@@ -294,13 +302,13 @@ export const PoseNetCamera = () => {
             timerGoodPosture.start({ precision: 'secondTenths' });
           }
 
-          if (meanOrMedianShoulder > appContext.thresholdFrontViewBody) {
+          if (meanOrMedianShoulder > appContext.threshold_body) {
             timerShoulderMeanBadPosture.start({ precision: 'secondTenths' });
           } else {
             timerShoulderMeanBadPosture.reset();
           }
 
-          if (meanOrMedianEye > appContext.thresholdFrontViewHead) {
+          if (meanOrMedianEye > appContext.threshold_head) {
             timerEyeMeanBadPosture.start({ precision: 'secondTenths' });
           } else {
             timerEyeMeanBadPosture.reset();
@@ -318,11 +326,10 @@ export const PoseNetCamera = () => {
       subscription.unsubscribe();
     };
   }, [
-    appContext.consoleLog,
-    appContext.measure,
-    appContext.thresholdFrontViewBody,
-    appContext.thresholdFrontViewHead,
-    appContext.timeUntilBadPosture,
+    appContext.posenet_measurement,
+    appContext.threshold_body,
+    appContext.threshold_head,
+    appContext.timer_timeUntilBadPosture,
   ]);
 
   // TODO: Change STATUS output to angle, switch threshold to angle?
@@ -386,7 +393,7 @@ export const PoseNetCamera = () => {
   useEffect(() => {
     const subscription = subject.subscribe({
       next: nextObj => {
-        if (appContext.consoleLog) {
+        if (appContext.gobal_logging) {
           console.log(nextObj);
           if (nextObj.tick > 0) {
             historyEye[historyEye.length - 1].logData();
@@ -399,15 +406,13 @@ export const PoseNetCamera = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [appContext.consoleLog]);
+  }, [appContext.gobal_logging]);
 
   // UPDATE STATUS, CHART of shoulder
   useEffect(() => {
     const subscription = subjectShoulder.subscribe({
       next: nextObj => {
-        if (
-          Math.abs(nextObj.angleOfVector) > appContext.thresholdFrontViewBody
-        ) {
+        if (Math.abs(nextObj.angleOfVector) > appContext.threshold_body) {
           setStatusShoulder({
             msg: `Bad (${nextObj.name})`,
             value: nextObj.angleOfVector.toFixed(2),
@@ -424,7 +429,7 @@ export const PoseNetCamera = () => {
         if (
           Math.abs(
             get(shoulderCalibrationTick, 'meanY', 0) - get(nextObj, 'meanY', 0),
-          ) > appContext.thresholdHeight
+          ) > appContext.threshold_height
         ) {
           setStatusHeight({
             msg: `Bad (${nextObj.name})`,
@@ -449,7 +454,7 @@ export const PoseNetCamera = () => {
           Math.abs(
             get(shoulderCalibrationTick, 'lengthOfVector', 0) -
               get(nextObj, 'lengthOfVector', 0),
-          ) > appContext.thresholdDistance
+          ) > appContext.threshold_distance
         ) {
           setStatusDistance({
             msg: `Bad (${nextObj.name})`,
@@ -470,7 +475,7 @@ export const PoseNetCamera = () => {
           });
         }
         // PRINT data
-        if (appContext.charts) {
+        if (appContext.posenet_charts) {
           const copyArr = [...chartDataShoulder];
           // Chart window
           // eslint-disable-next-line no-console
@@ -490,12 +495,11 @@ export const PoseNetCamera = () => {
       subscription.unsubscribe();
     };
   }, [
-    appContext.charts,
-    appContext.thresholdDistance,
-    appContext.thresholdFrontViewBody,
-    appContext.thresholdHeight,
+    appContext.posenet_charts,
+    appContext.threshold_body,
+    appContext.threshold_distance,
+    appContext.threshold_height,
     chartDataShoulder,
-    setStatusShoulder,
     shoulderCalibrationTick,
   ]);
 
@@ -503,9 +507,7 @@ export const PoseNetCamera = () => {
   useEffect(() => {
     const subscription = subjectEye.subscribe({
       next: nextObj => {
-        if (
-          Math.abs(nextObj.angleOfVector) > appContext.thresholdFrontViewHead
-        ) {
+        if (Math.abs(nextObj.angleOfVector) > appContext.threshold_head) {
           setStatusEye({
             msg: `Bad (${nextObj.name})`,
             value: nextObj.angleOfVector.toFixed(2),
@@ -519,7 +521,7 @@ export const PoseNetCamera = () => {
           });
         }
         // PRINT data
-        if (appContext.charts) {
+        if (appContext.posenet_charts) {
           const copyArr = [...chartDataEye];
           // Chart window
           // eslint-disable-next-line no-console
@@ -538,16 +540,11 @@ export const PoseNetCamera = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [
-    appContext.charts,
-    appContext.thresholdFrontViewHead,
-    chartDataEye,
-    setStatusEye,
-  ]);
+  }, [appContext.posenet_charts, appContext.threshold_head, chartDataEye]);
 
   return (
     <>
-      {appContext.successfullSetup ? (
+      {appContext.calibration_calibationDataAvailable ? (
         <>
           <Portal>
             <VideoCanvas
@@ -631,8 +628,7 @@ export const PoseNetCamera = () => {
                   }
                 >
                   <div className="p-4 h-48">
-                    {Math.abs(statusEye.value) <
-                      appContext.thresholdFrontViewHead && (
+                    {Math.abs(statusEye.value) < appContext.threshold_head && (
                       <svg
                         width="724"
                         height="724"
@@ -651,8 +647,7 @@ export const PoseNetCamera = () => {
                         />
                       </svg>
                     )}
-                    {Math.abs(statusEye.value) >
-                      appContext.thresholdFrontViewHead &&
+                    {Math.abs(statusEye.value) > appContext.threshold_head &&
                       statusEye.value < 0 && (
                         <svg
                           width="724"
@@ -684,8 +679,7 @@ export const PoseNetCamera = () => {
                           </defs>
                         </svg>
                       )}
-                    {Math.abs(statusEye.value) >
-                      appContext.thresholdFrontViewHead &&
+                    {Math.abs(statusEye.value) > appContext.threshold_head &&
                       statusEye.value > 0 && (
                         <svg
                           width="724"

@@ -61,7 +61,7 @@ export const Calibration = () => {
       if (timeLeftCalibrating === 0) {
         setProgress(1);
         handleDialogIsOpen(false)();
-        if (appContext.consoleLog) {
+        if (appContext.global_logging) {
           console.log(history);
         }
         // TODO add to camera.
@@ -76,7 +76,7 @@ export const Calibration = () => {
         shoulderCalibration.push(objShoulder);
         setAppContext({
           ...appContext,
-          successfullSetup: !appContext.successfullSetup,
+          calibration_calibationDataAvailable: !appContext.calibration_calibationDataAvailable,
         });
       } else if (timeLeftCalibrating === 3) {
         setProgress(0.0);
@@ -94,13 +94,7 @@ export const Calibration = () => {
         }, 1000);
       }
     }
-  }, [
-    appContext,
-    appContext.successfullSetup,
-    countDownIsFinished,
-    setAppContext,
-    timeLeftCalibrating,
-  ]);
+  }, [appContext, countDownIsFinished, setAppContext, timeLeftCalibrating]);
 
   const handleDialogIsOpen = bool => () => {
     if (bool === false) {

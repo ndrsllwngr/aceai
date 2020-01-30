@@ -2,9 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import { ResizeSensor, Toaster } from '@blueprintjs/core';
-import Navigation from './Navigation/index';
+import Navigation, { Drawer as DrawerNavigation } from './Navigation';
 import DrawerSettings from './DrawerSettings';
-import DrawerNavigation from './DrawerNavigation';
 import { useUi } from './context-ui';
 
 export const InnerApp = ({ element }) => {

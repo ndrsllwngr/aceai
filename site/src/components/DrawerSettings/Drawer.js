@@ -36,7 +36,7 @@ export const Drawer = () => {
   };
   const resetAppContext = () => setAppContext(initialState);
   const handleMeasure = event => {
-    setAppContext({ ...appContext, measure: event.target.value });
+    setAppContext({ ...appContext, posenet_measurement: event.target.value });
   };
   const handleAppContextChangeSlider = property => val => {
     setAppContext({ ...appContext, [property]: val });
@@ -74,84 +74,87 @@ export const Drawer = () => {
         <div className={Classes.DIALOG_BODY}>
           <p>Threshold of head angle (° deg)</p>
           <Slider
-            value={appContext.thresholdFrontViewHead}
+            value={appContext.threshold_head}
             min={0}
             max={100}
             labelStepSize={20}
             stepSize={1}
-            onChange={handleAppContextChangeSlider('thresholdFrontViewHead')}
+            onChange={handleAppContextChangeSlider('threshold_head')}
           />
           <p>Threshold of shoulder angle (° deg)</p>
           <Slider
-            value={appContext.thresholdFrontViewBody}
+            value={appContext.threshold_body}
             min={0}
             max={100}
             labelStepSize={20}
             stepSize={1}
-            onChange={handleAppContextChangeSlider('thresholdFrontViewBody')}
+            onChange={handleAppContextChangeSlider('threshold_body')}
           />
           <p>Threshold of distance to screen</p>
           <Slider
-            value={appContext.thresholdDistance}
+            value={appContext.threshold_distance}
             min={0}
             max={100}
             labelStepSize={20}
             stepSize={1}
-            onChange={handleAppContextChangeSlider('thresholdDistance')}
+            onChange={handleAppContextChangeSlider('threshold_distance')}
           />
           <p>Threshold of height variance</p>
           <Slider
-            value={appContext.thresholdHeight}
+            value={appContext.threshold_height}
             min={0}
             max={100}
             labelStepSize={20}
             stepSize={1}
-            onChange={handleAppContextChangeSlider('thresholdHeight')}
+            onChange={handleAppContextChangeSlider('threshold_height')}
           />
           <div className="my-4">
             <Divider />
           </div>
           <p>Time frame of one epoch (tick)</p>
           <Slider
-            value={appContext.epochCount}
+            value={appContext.epoch_epochCount}
             min={0}
             max={100}
             labelStepSize={20}
             stepSize={1}
-            onChange={handleAppContextChangeSlider('epochCount')}
+            onChange={handleAppContextChangeSlider('epoch_epochCount')}
           />
           <p>Time until bad posture triggers notification (sec)</p>
           <Slider
-            value={appContext.timeUntilBadPosture}
+            value={appContext.timer_timeUntilBadPosture}
             min={0}
             max={60}
             labelStepSize={20}
             stepSize={1}
-            onChange={handleAppContextChangeSlider('timeUntilBadPosture')}
+            onChange={handleAppContextChangeSlider('timer_timeUntilBadPosture')}
           />
           <div className="my-4">
             <Divider />
           </div>
           <Switch
             label="Logging (consoleLog)"
-            checked={appContext.consoleLog}
+            checked={appContext.global_logging}
             onChange={handleAppContextChange(
-              'consoleLog',
-              !appContext.consoleLog,
+              'global_logging',
+              !appContext.global_logging,
             )}
           />
           <Switch
-            label="Calculate over time (epochMode)"
-            checked={appContext.epochMode}
+            label="Calculate over time (epoch_epochMode)"
+            checked={appContext.epoch_epochMode}
             onChange={handleAppContextChange(
-              'epochMode',
-              !appContext.epochMode,
+              'epoch_epochMode',
+              !appContext.epoch_epochMode,
             )}
           />
           <Switch
-            label="Charts (epochchartsMode)"
-            checked={appContext.charts}
-            onChange={handleAppContextChange('charts', !appContext.charts)}
+            label="Charts (posenet_charts)"
+            checked={appContext.posenet_charts}
+            onChange={handleAppContextChange(
+              'posenet_charts',
+              !appContext.posenet_charts,
+            )}
           />
           <div className="my-4">
             <Divider />
@@ -159,7 +162,7 @@ export const Drawer = () => {
           <RadioGroup
             label="Measures of Central Tendency"
             onChange={handleMeasure}
-            selectedValue={appContext.measure}
+            selectedValue={appContext.posenet_measurement}
           >
             <Radio label="Mean (Arithmetic)" value="mean" />
             <Radio label="Median" value="median" />

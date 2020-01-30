@@ -16,7 +16,10 @@ export const Drawer = () => {
   const [appContext, setAppContext] = useApp();
 
   const handleChange = () => {
-    setAppContext({ ...appContext, webCam: !appContext.webCam });
+    setAppContext({
+      ...appContext,
+      posenet_turnedOn: !appContext.posenet_turnedOn,
+    });
   };
   const handleUiContextChange = (property, value) => () => {
     setUiContext({ ...uiContext, [property]: value });
@@ -72,9 +75,11 @@ export const Drawer = () => {
             <Divider />
             <Button
               className="bp3-minimal"
-              icon={appContext.webCam ? 'stop' : 'power'}
+              icon={appContext.posenet_turnedOn ? 'stop' : 'power'}
               onClick={handleChange}
-              disabled={appContext.successfullSetup === false}
+              disabled={
+                appContext.calibration_calibationDataAvailable === false
+              }
               fill
               large
             />
