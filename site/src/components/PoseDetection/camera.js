@@ -1,10 +1,18 @@
+/* eslint-disable func-names */
 /* eslint-disable react/button-has-type */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 import React, { useEffect, useState } from 'react';
 import get from 'lodash/get';
 import * as posenet from '@tensorflow-models/posenet';
-import { Tag, Portal, Intent } from '@blueprintjs/core';
+import {
+  Tag,
+  Portal,
+  Intent,
+  Tooltip,
+  Position,
+  Button,
+} from '@blueprintjs/core';
 import { Subject } from 'rxjs';
 import { Graph } from '../graph';
 import { VideoCanvas } from '../VideoCanvas';
@@ -28,7 +36,7 @@ import {
   timerBadHeight,
 } from './utilsTimer';
 import { TimerComponent } from '../timer';
-import { Widget } from '../widget';
+import { Widget, WidgetModern, states } from '../widget';
 import {
   drawBoundingBox,
   drawKeypoints,
@@ -64,6 +72,8 @@ export const PoseNetCamera = () => {
 
   // INTERNAL LOGIC
   const [loading, setLoading] = useState(false);
+  const [showScores, setShowScores] = useState(true);
+  const [showTimers, setShowTimers] = useState(true);
 
   // LATEST CALIBRATION DATA
   const [calibrationHeadTick, setcalibrationHeadTick] = useState();
@@ -86,6 +96,16 @@ export const PoseNetCamera = () => {
   );
   const [distanceOverTimeIsBad, setDistanceOverTimeIsBad] = useState(false);
   const [heightOverTimeIsBad, setHeightOverTimeIsBad] = useState(false);
+
+  // WARNING
+  const [headPostureOverTimeWarning, setHeadPostureOverTimeWarning] = useState(
+    false,
+  );
+  const [bodyPostureOverTimeWarning, setBodyPostureOverTimeWarning] = useState(
+    false,
+  );
+  const [distanceOverTimeWarning, setDistanceOverTimeWarning] = useState(false);
+  const [heightOverTimeWarning, setHeightOverTimeWarning] = useState(false);
 
   // TODO: Add calibration functionality (button, calc D_c to mean of Y_(L-r))
   // TODO: Over time? Time counter!
@@ -170,6 +190,8 @@ export const PoseNetCamera = () => {
         setLoading(false);
         setStateBody(emptyState);
         setStateHead(emptyState);
+        setStateDistance(emptyState);
+        setStateHeight(emptyState);
         // setChartDataShoulder([]);
         // setChartDataEye([]);
         stopStreamedVideo();
@@ -361,18 +383,22 @@ export const PoseNetCamera = () => {
           if (centralTendencyBody > appContext.threshold_body) {
             // START -BAD- BODY TIMER
             timerBadBody.start({ precision: 'secondTenths' });
+            setBodyPostureOverTimeWarning(true);
           } else {
             // RESET -BAD- BODY TIMER
             timerBadBody.reset();
+            setBodyPostureOverTimeWarning(false);
           }
 
           // IF CENTRAL TENDENCY OF -HEAD- not within THRESHOLD
           if (centralTendencyHead > appContext.threshold_head) {
             // START -BAD- HEAD TIMER
             timerBadHead.start({ precision: 'secondTenths' });
+            setHeadPostureOverTimeWarning(true);
           } else {
             // RESET -HEAD- BODY TIMER
             timerBadHead.reset();
+            setHeadPostureOverTimeWarning(false);
           }
 
           // IF CENTRAL TENDENCY OF -DISTANCE- not within THRESHOLD
@@ -384,9 +410,11 @@ export const PoseNetCamera = () => {
           ) {
             // START -BAD- DISTANCE TIMER
             timerBadDistance.start({ precision: 'secondTenths' });
+            setDistanceOverTimeWarning(true);
           } else {
             // RESET -BAD- DISTANCE TIMER
             timerBadDistance.reset();
+            setDistanceOverTimeWarning(false);
           }
 
           // IF CENTRAL TENDENCY OF -HEIGHT- not within THRESHOLD
@@ -398,9 +426,11 @@ export const PoseNetCamera = () => {
           ) {
             // START -BAD- HEIGHT TIMER
             timerBadHeight.start({ precision: 'secondTenths' });
+            setHeadPostureOverTimeWarning(true);
           } else {
             // RESET -BAD- HEIGHT TIMER
             timerBadHeight.reset();
+            setHeadPostureOverTimeWarning(false);
           }
         } catch (e) {
           console.log(e);
@@ -716,6 +746,14 @@ export const PoseNetCamera = () => {
     };
   }, [appContext.global_logging]);
 
+  const toggleScores = () => {
+    setShowScores(!showScores);
+  };
+
+  const toggleTimers = () => {
+    setShowTimers(!showTimers);
+  };
+
   return (
     <>
       {appContext.calibration_calibrationDataAvailable ? (
@@ -727,79 +765,194 @@ export const PoseNetCamera = () => {
               loading={loading}
             />
           </Portal>
-          <div className="container mx-auto">
-            <div className="flex flex-row flex-wrap sm:flex-wrap mx-1 sm:mx-0">
-              <div className="w-full sm:w-full md:w-1/2 my-1 pr-0 md:pr-1">
-                <Widget
-                  title="Distance to screen and sitting height"
-                  caption="based on calibration data"
-                  tags={
-                    <>
-                      <Tag
-                        // intent={
-                        //   stateDistance.status === 'bad' ? 'danger' : 'none'
-                        // }
-                        intent="none"
-                        style={{ marginRight: '0.5rem' }}
-                      >
-                        Distance {stateDistance.value}
-                      </Tag>
-                      <Tag
-                        // intent={
-                        //   stateHeight.status === 'bad' ? 'danger' : 'none'
-                        // }
-                        intent="none"
-                        style={{ marginRight: '0.5rem' }}
-                      >
-                        HEIGHT {stateHeight.value}
-                      </Tag>
-                    </>
-                  }
-                >
-                  <div className="p-4 h-48">
-                    <svg
-                      width="724"
-                      height="724"
-                      viewBox="0 0 724 724"
-                      style={{ maxHeight: '100%', maxWidth: '100%' }}
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
+          {/* TIMERS */}
+          <div className="bg-gray-400 py-10 md:py-20">
+            <div className="container px-6 mx-auto">
+              <div className="mb-6 md:mb-12">
+                <div className="flex flex-row items-center">
+                  <h2 className="text-3xl font-bold text-gray-800 leading-tight">
+                    Timers
+                  </h2>
+                  <div className="ml-2">
+                    <Tooltip
+                      content={showTimers ? 'Hide timers' : 'Show timers'}
+                      position={Position.BOTTOM}
                     >
-                      <path
-                        d="M241.346 330.942H178.337C111.984 330.942 58 387.048 58 456.011V702.772C58 714.497 67.1437 724 78.4253 724H341.26C352.542 724 361.685 714.497 361.685 702.772V456.011C361.685 387.048 307.701 330.942 241.346 330.942ZM320.835 681.544H98.8506V456.011C98.8506 410.458 134.509 373.398 178.337 373.398H241.346C285.177 373.398 320.833 410.458 320.833 456.011V681.544H320.835Z"
-                        fill="#c4c4c4"
+                      <Button
+                        className="bp3-minimal"
+                        icon={showTimers ? 'eye-open' : 'eye-off'}
+                        onClick={toggleTimers}
                       />
-                      <path
-                        d="M209.844 316.985C277.22 316.985 332.034 260.016 332.034 189.994C332.034 119.972 277.218 63 209.844 63C142.47 63 87.6528 119.969 87.6528 189.992C87.6528 260.014 142.467 316.985 209.844 316.985ZM209.844 105.456C254.695 105.456 291.184 143.379 291.184 189.992C291.184 236.604 254.695 274.527 209.844 274.527C164.992 274.527 128.503 236.606 128.503 189.992C128.503 143.377 164.992 105.456 209.844 105.456Z"
-                        fill="#c4c4c4"
-                      />
-                      <path
-                        d="M609.923 308.592L609.922 724H578.171V542.775L511 542.782V149H574.506V199.904C585.715 202.652 594.045 212.751 594.045 224.823V308.592H609.923Z"
-                        fill="#c4c4c4"
-                      />
-                    </svg>
+                    </Tooltip>
                   </div>
-                </Widget>
+                </div>
+                <p className="text-gray-600">All event durations we track</p>
               </div>
+
+              <div className="flex flex-wrap -mx-6">
+                <div className="w-full md:w-1/2 xl:w-1/3 px-4 py-4 xl:py-0">
+                  <WidgetModern
+                    name="Session"
+                    value={timerSession
+                      .getTimeValues()
+                      .toString([
+                        'hours',
+                        'minutes',
+                        'seconds',
+                        'secondTenths',
+                      ])}
+                    status={states.NEUTRAL}
+                    minimal={!showTimers}
+                  />
+                </div>
+                <div className="w-full md:w-1/2 xl:w-1/3 px-4 py-4 xl:py-0">
+                  <WidgetModern
+                    name="Good posture"
+                    value={timerOverallGood
+                      .getTimeValues()
+                      .toString([
+                        'hours',
+                        'minutes',
+                        'seconds',
+                        'secondTenths',
+                      ])}
+                    status={ states.NEUTRAL}
+                    minimal={!showTimers}
+                  />
+                </div>
+                <div className="w-full md:w-1/2 xl:w-1/3 px-4 py-4 xl:py-0">
+                  <WidgetModern
+                    name="Bad posture"
+                    value={timerOverallBad
+                      .getTimeValues()
+                      .toString([
+                        'hours',
+                        'minutes',
+                        'seconds',
+                        'secondTenths',
+                      ])}
+                    status={states.NEUTRAL}
+                    minimal={!showTimers}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* SCORES */}
+          <div className="bg-white py-10 md:py-20">
+            <div className="container px-6 mx-auto">
+              <div className="mb-6 md:mb-12">
+                <div className="flex flex-row items-center">
+                  <h2 className="text-3xl font-bold text-gray-800 leading-tight">
+                    Scores
+                  </h2>
+                  <div className="ml-2">
+                    <Tooltip
+                      content={showScores ? 'Hide scores' : 'Show scores'}
+                      position={Position.BOTTOM}
+                    >
+                      <Button
+                        className="bp3-minimal"
+                        icon={showScores ? 'eye-open' : 'eye-off'}
+                        onClick={toggleScores}
+                      />
+                    </Tooltip>
+                  </div>
+                </div>
+                <p className="text-gray-600">
+                  All scores which are calculated in real-time
+                </p>
+              </div>
+
+              <div className="flex flex-wrap -mx-6">
+                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
+                  <WidgetModern
+                    name="Distance"
+                    value={stateDistance.value}
+                    status={(function() {
+                      if (distanceOverTimeIsBad) {
+                        return states.DANGER;
+                      }
+                      if (distanceOverTimeWarning) {
+                        return states.WARNING;
+                      }
+                      return states.SUCCESS;
+                    })()}
+                    minimal={!showScores}
+                  />
+                </div>
+                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
+                  <WidgetModern
+                    name="Height"
+                    value={stateHeight.value}
+                    status={(function() {
+                      if (heightOverTimeIsBad) {
+                        return states.DANGER;
+                      }
+                      if (heightOverTimeWarning) {
+                        return states.WARNING;
+                      }
+                      return states.SUCCESS;
+                    })()}
+                    minimal={!showScores}
+                  />
+                </div>
+                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
+                  <WidgetModern
+                    name="Head"
+                    value={stateHead.value}
+                    status={(function() {
+                      if (headPostureOverTimeIsBad) {
+                        return states.DANGER;
+                      }
+                      if (headPostureOverTimeWarning) {
+                        return states.WARNING;
+                      }
+                      return states.SUCCESS;
+                    })()}
+                    minimal={!showScores}
+                  />
+                </div>
+                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
+                  <WidgetModern
+                    name="Body"
+                    value={stateBody.value}
+                    status={(function() {
+                      if (bodyPostureOverTimeIsBad) {
+                        return states.DANGER;
+                      }
+                      if (bodyPostureOverTimeWarning) {
+                        return states.WARNING;
+                      }
+                      return states.SUCCESS;
+                    })()}
+                    minimal={!showScores}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="py-10 md:py-20">
+            <div className="container px-6 mx-auto">
               <div className="w-full sm:w-full md:w-1/2 my-1 pl-0 md:pl-1">
                 <Widget
                   title="Tilt angle of head and shoulders"
-                  tags={
-                    <>
-                      <Tag
-                        intent={bodyPostureOverTimeIsBad ? 'danger' : 'success'}
-                        style={{ marginRight: '0.5rem' }}
-                      >
-                        BODY {stateBody.value}°
-                      </Tag>
+                  // tags={
+                  //   <>
+                  //     <Tag
+                  //       intent={bodyPostureOverTimeIsBad ? 'danger' : 'success'}
+                  //       style={{ marginRight: '0.5rem' }}
+                  //     >
+                  //       BODY {stateBody.value}°
+                  //     </Tag>
 
-                      <Tag
-                        intent={headPostureOverTimeIsBad ? 'danger' : 'success'}
-                      >
-                        HEAD {stateHead.value}°
-                      </Tag>
-                    </>
-                  }
+                  //     <Tag
+                  //       intent={headPostureOverTimeIsBad ? 'danger' : 'success'}
+                  //     >
+                  //       HEAD {stateHead.value}°
+                  //     </Tag>
+                  //   </>
+                  // }
                 >
                   <div className="p-4 h-48">
                     {Math.abs(stateHead.value) < appContext.threshold_head && (
@@ -880,29 +1033,6 @@ export const PoseNetCamera = () => {
                           </defs>
                         </svg>
                       )}
-                  </div>
-                </Widget>
-              </div>
-            </div>
-            <div className="flex flex-row flex-wrap sm:flex-wrap mx-1 sm:mx-0">
-              <div className="w-full my-1">
-                <Widget className="w" title="Timers">
-                  <div className="flex flex-row flex-wrap sm:flex-wrap">
-                    <div className="w-full sm:w-full md:w-1/3 mt-1 md:mt-0">
-                      <TimerComponent title="Session" timer={timerSession} />
-                    </div>
-                    <div className="w-full sm:w-full md:w-1/3 mt-1 md:mt-0">
-                      <TimerComponent
-                        title="Good posture"
-                        timer={timerOverallGood}
-                      />
-                    </div>
-                    <div className="w-full sm:w-full md:w-1/3 mt-1 md:mt-0">
-                      <TimerComponent
-                        title="Bad posture"
-                        timer={timerOverallBad}
-                      />
-                    </div>
                   </div>
                 </Widget>
               </div>

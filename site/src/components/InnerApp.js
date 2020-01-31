@@ -24,7 +24,7 @@ export const InnerApp = ({ element }) => {
     <>
       <Navigation />
       <ResizeSensor onResize={handleResize}>
-        <div className="pt-16 sm:pt-16 h-full">{element}</div>
+        <div className="h-full">{element}</div>
       </ResizeSensor>
       <DrawerNavigation />
       <DrawerSettings />

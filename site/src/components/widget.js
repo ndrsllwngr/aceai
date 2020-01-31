@@ -36,3 +36,41 @@ Widget.propTypes = {
   children: PropTypes.node,
   style: PropTypes.object,
 };
+
+export const states = {
+  NEUTRAL: 'gray',
+  SUCCESS: 'green',
+  WARNING: 'yellow',
+  DANGER: 'red',
+};
+
+export const WidgetModern = ({
+  name,
+  value,
+  status = states.NEUTRAL,
+  minimal = false,
+}) => {
+  return (
+    <div
+      className={`rounded-lg shadow-xl text-center pt-${
+        minimal ? '6' : '12'
+      } pb-6 bg-gradient-${status === states.WARNING ? 'orange' : status}`}
+    >
+      {minimal === false && (
+        <div
+          className={`leading-none font-number mb-6 text-5xl text-${status}-500`}
+        >
+          {value}
+        </div>
+      )}
+      <div className={`font-semibold text-${status}-700`}>{name}</div>
+    </div>
+  );
+};
+
+WidgetModern.propTypes = {
+  name: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  status: PropTypes.oneOf([states]),
+  minimal: PropTypes.bool,
+};

@@ -33,7 +33,7 @@ export const Navigation = () => {
           height: 'auto',
         }}
       >
-        <div className="container mx-auto flex flex-row h-full justify-between">
+        <div className="container px-6 mx-auto flex flex-row h-full justify-between">
           <Navbar.Group align={Alignment.LEFT}>
             <Navbar.Heading>
               <span className="font-extrabold">BodyPose</span>{' '}
