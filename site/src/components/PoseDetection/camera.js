@@ -24,6 +24,8 @@ import {
   timerOverallBad,
   timerBadBody,
   timerBadHead,
+  timerBadDistance,
+  timerBadHeight,
 } from './utilsTimer';
 import { TimerComponent } from '../timer';
 import { Widget } from '../widget';
@@ -82,9 +84,12 @@ export const PoseNetCamera = () => {
   const [bodyPostureOverTimeIsBad, setBodyPostureOverTimeIsBad] = useState(
     false,
   );
+  const [distanceOverTimeIsBad, setDistanceOverTimeIsBad] = useState(false);
+  const [heightOverTimeIsBad, setHeightOverTimeIsBad] = useState(false);
 
   // TODO: Add calibration functionality (button, calc D_c to mean of Y_(L-r))
   // TODO: Over time? Time counter!
+  // TODO: ADD GANTT CHART maybe use https://github.com/hhru/react-d3-chart-graphs#GanttChart
 
   // FETCH LATEST CALIBRATION DATA and SET IT AS STATE
   useEffect(() => {
@@ -240,40 +245,90 @@ export const PoseNetCamera = () => {
               centralTendencyHeight,
             });
           }
-          // TODO ADD TIMER TO CALIBRATION!
+          // TODO MAYBE SET UUID HERE to prevent retriggering of notifications
+          // TODO reset timers on unmount
 
-          // TIMER
+          // TODO: # TIMERS
+
+          // TRIGGER OVERALL -BAD- TIMER by BODY
           if (
             timerBadBody.getTotalTimeValues().seconds >
             appContext.timer_timeUntilBadPosture
           ) {
-            // GENERAL
+            // START OVERALL -BAD- TIMER
             timerOverallBad.start({ precision: 'secondTenths' });
+            // PAUSE OVERALL -GOOD- TIMER
             if (timerOverallGood.isRunning()) {
               timerOverallGood.pause();
             }
+            // console.log('bad posture body (> 5 seconds)');
+            // ANNOUNCE THAT -BODY- POSTURE is BAD
             setBodyPostureOverTimeIsBad(true);
-            // console.log('bad posture shoulder (> 5 seconds)');
+            // ELSE ANNOUNCE THAT -BODY- POSTURE is GOOD
           } else {
             setBodyPostureOverTimeIsBad(false);
           }
 
+          // TRIGGER OVERALL -BAD- TIMER by HEAD
           if (
             timerBadHead.getTotalTimeValues().seconds >
             appContext.timer_timeUntilBadPosture
           ) {
-            // GENERAL
+            // START OVERALL -BAD- TIMER
             timerOverallBad.start({ precision: 'secondTenths' });
+            // PAUSE OVERALL -GOOD- TIMER
             if (timerOverallGood.isRunning()) {
               timerOverallGood.pause();
             }
             // console.log('bad posture eye (> 5 seconds)');
+            // ANNOUNCE THAT -HEAD- POSTURE is BAD
             setHeadPostureOverTimeIsBad(true);
-            // TODO MAYBE SET UUID HERE to prevent retriggering of notifications
+            // ELSE ANNOUNCE THAT -HEAD- POSTURE is GOOD
           } else {
             setHeadPostureOverTimeIsBad(false);
           }
 
+          // TRIGGER OVERALL -BAD- TIMER by DISTANCE
+          if (
+            timerBadDistance.getTotalTimeValues().seconds >
+            appContext.timer_timeUntilBadPosture
+          ) {
+            // START OVERALL -BAD- TIMER
+            timerOverallBad.start({ precision: 'secondTenths' });
+            // PAUSE OVERALL -GOOD- TIMER
+            if (timerOverallGood.isRunning()) {
+              timerOverallGood.pause();
+            }
+            console.log('bad distance (> 5 seconds)');
+            // ANNOUNCE THAT -DISTANCE- POSTURE is BAD
+            setDistanceOverTimeIsBad(true);
+            // ELSE ANNOUNCE THAT -DISTANCE- POSTURE is GOOD
+          } else {
+            console.log('good distance');
+            setDistanceOverTimeIsBad(false);
+          }
+
+          // TRIGGER OVERALL -BAD- TIMER by HEIGHT
+          if (
+            timerBadHeight.getTotalTimeValues().seconds >
+            appContext.timer_timeUntilBadPosture
+          ) {
+            // START OVERALL -BAD- TIMER
+            timerOverallBad.start({ precision: 'secondTenths' });
+            // PAUSE OVERALL -GOOD- TIMER
+            if (timerOverallGood.isRunning()) {
+              timerOverallGood.pause();
+            }
+            console.log('bad height (> 5 seconds)');
+            // ANNOUNCE THAT -HEIGHT- is BAD
+            setHeightOverTimeIsBad(true);
+            // ELSE ANNOUNCE THAT -HEIGHT- is GOOD
+          } else {
+            setHeightOverTimeIsBad(false);
+            console.log('good height');
+          }
+
+          // IF -BODY- and -HEAD- BAD POSTURE TIMERS & -DISTANCE- & -HEIGHT- TIMERS are less than THRESHOLD
           if (
             !(
               timerBadBody.getTotalTimeValues().seconds >
@@ -282,26 +337,71 @@ export const PoseNetCamera = () => {
             !(
               timerBadHead.getTotalTimeValues().seconds >
               appContext.timer_timeUntilBadPosture
+            ) &&
+            !(
+              timerBadDistance.getTotalTimeValues().seconds >
+              appContext.timer_timeUntilBadPosture
+            ) &&
+            !(
+              timerBadHeight.getTotalTimeValues().seconds >
+              appContext.timer_timeUntilBadPosture
             )
           ) {
+            // PAUSE OVERALL -BAD- TIMER
             if (timerOverallBad.isRunning()) {
               timerOverallBad.pause();
             }
+            // START OVERALL -GOOD- TIMER
             timerOverallGood.start({ precision: 'secondTenths' });
           }
 
+          // TODO: # CALCULATIONS
+
+          // IF CENTRAL TENDENCY OF -BODY- not within THRESHOLD
           if (centralTendencyBody > appContext.threshold_body) {
+            // START -BAD- BODY TIMER
             timerBadBody.start({ precision: 'secondTenths' });
           } else {
+            // RESET -BAD- BODY TIMER
             timerBadBody.reset();
           }
 
+          // IF CENTRAL TENDENCY OF -HEAD- not within THRESHOLD
           if (centralTendencyHead > appContext.threshold_head) {
+            // START -BAD- HEAD TIMER
             timerBadHead.start({ precision: 'secondTenths' });
           } else {
+            // RESET -HEAD- BODY TIMER
             timerBadHead.reset();
           }
-          // TODO reset timers on unmount
+
+          // IF CENTRAL TENDENCY OF -DISTANCE- not within THRESHOLD
+          if (
+            Math.abs(
+              get(calibrationBodyTick, 'lengthOfVector', 0) -
+                get(centralTendencyDistance, 'lengthOfVector', 0),
+            ) > appContext.threshold_distance
+          ) {
+            // START -BAD- DISTANCE TIMER
+            timerBadDistance.start({ precision: 'secondTenths' });
+          } else {
+            // RESET -BAD- DISTANCE TIMER
+            timerBadDistance.reset();
+          }
+
+          // IF CENTRAL TENDENCY OF -HEIGHT- not within THRESHOLD
+          if (
+            Math.abs(
+              get(calibrationBodyTick, 'meanY', 0) -
+                get(centralTendencyHeight, 'meanY', 0),
+            ) > appContext.threshold_height
+          ) {
+            // START -BAD- HEIGHT TIMER
+            timerBadHeight.start({ precision: 'secondTenths' });
+          } else {
+            // RESET -BAD- HEIGHT TIMER
+            timerBadHeight.reset();
+          }
         } catch (e) {
           console.log(e);
         }
@@ -316,8 +416,11 @@ export const PoseNetCamera = () => {
     appContext.posenet_loading,
     appContext.posenet_measurement,
     appContext.threshold_body,
+    appContext.threshold_distance,
     appContext.threshold_head,
+    appContext.threshold_height,
     appContext.timer_timeUntilBadPosture,
+    calibrationBodyTick,
   ]);
 
   // NOTIFICATION LOGIC of HEAD
@@ -389,6 +492,78 @@ export const PoseNetCamera = () => {
     uiContext.showNotificationInApp,
     uiContext.toasterRef,
   ]);
+
+  // NOTIFICATION LOGIC of DISTANCE
+  useEffect(() => {
+    const showToast = (message = '', intent = Intent.PRIMARY) => {
+      if (uiContext.showNotificationInApp && uiContext.toasterRef.current) {
+        const toastObj = {
+          message,
+          intent,
+        };
+        console.log(toastObj);
+        uiContext.toasterRef.current.show(toastObj);
+      }
+      if (uiContext.showNotificationBrowser) {
+        showNotification(message);
+      }
+    };
+
+    if (distanceOverTimeIsBad) {
+      showToast(
+        'Bad distance to screen detected. Correct if possible.',
+        Intent.DANGER,
+      );
+    }
+    if (
+      timerSession.getTotalTimeValues().seconds > 0 &&
+      !distanceOverTimeIsBad
+    ) {
+      showToast(
+        'Well done. Your distance to the scree is well now.',
+        Intent.SUCCESS,
+      );
+    }
+  }, [
+    distanceOverTimeIsBad,
+    uiContext.showNotificationBrowser,
+    uiContext.showNotificationInApp,
+    uiContext.toasterRef,
+  ]);
+
+  // NOTIFICATION LOGIC of HEIGHT
+  useEffect(() => {
+    const showToast = (message = '', intent = Intent.PRIMARY) => {
+      if (uiContext.showNotificationInApp && uiContext.toasterRef.current) {
+        const toastObj = {
+          message,
+          intent,
+        };
+        console.log(toastObj);
+        uiContext.toasterRef.current.show(toastObj);
+      }
+      if (uiContext.showNotificationBrowser) {
+        showNotification(message);
+      }
+    };
+
+    if (heightOverTimeIsBad) {
+      showToast(
+        'Bad sitting height detected. Correct if possible.',
+        Intent.DANGER,
+      );
+    }
+    if (timerSession.getTotalTimeValues().seconds > 0 && !heightOverTimeIsBad) {
+      showToast('Well done. Your sitting height is well now.', Intent.SUCCESS);
+    }
+  }, [
+    heightOverTimeIsBad,
+    uiContext.showNotificationBrowser,
+    uiContext.showNotificationInApp,
+    uiContext.toasterRef,
+  ]);
+
+  // TODO: # LOGIC FOR STATES
 
   // UPDATE STATUS & CHART of BODY
   useEffect(() => {
