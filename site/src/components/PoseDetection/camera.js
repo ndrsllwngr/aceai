@@ -756,7 +756,7 @@ export const PoseNetCamera = () => {
 
   return (
     <>
-      {appContext.calibration_calibrationDataAvailable ? (
+      {!appContext.calibration_calibrationDataAvailable ? (
         <>
           <Portal>
             <VideoCanvas
@@ -766,7 +766,7 @@ export const PoseNetCamera = () => {
             />
           </Portal>
           {/* TIMERS */}
-          <div className="bg-gray-400 py-10 md:py-20">
+          <div className="bg-gray-400 py-20">
             <div className="container px-6 mx-auto">
               <div className="mb-6 md:mb-12">
                 <div className="flex flex-row items-center">
@@ -803,6 +803,7 @@ export const PoseNetCamera = () => {
                       ])}
                     status={states.NEUTRAL}
                     minimal={!showTimers}
+                    description="Overall session time"
                   />
                 </div>
                 <div className="w-full md:w-1/2 xl:w-1/3 px-4 py-4 xl:py-0">
@@ -818,6 +819,7 @@ export const PoseNetCamera = () => {
                       ])}
                     status={states.NEUTRAL}
                     minimal={!showTimers}
+                    description="Overall good posture time within session"
                   />
                 </div>
                 <div className="w-full md:w-1/2 xl:w-1/3 px-4 py-4 xl:py-0">
@@ -833,6 +835,7 @@ export const PoseNetCamera = () => {
                       ])}
                     status={states.NEUTRAL}
                     minimal={!showTimers}
+                    description="Overall bad posture time within session"
                   />
                 </div>
               </div>
@@ -879,6 +882,7 @@ export const PoseNetCamera = () => {
                       return states.SUCCESS;
                     })()}
                     minimal={!showScores}
+                    description="Distance deviation from calibration data distance between user and screen"
                   />
                 </div>
                 <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
@@ -895,6 +899,7 @@ export const PoseNetCamera = () => {
                       return states.SUCCESS;
                     })()}
                     minimal={!showScores}
+                    description="Sitting height deviation from calibration data"
                   />
                 </div>
                 <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
@@ -911,6 +916,7 @@ export const PoseNetCamera = () => {
                       return states.SUCCESS;
                     })()}
                     minimal={!showScores}
+                    description="Tilt angle of head [° degrees]"
                   />
                 </div>
                 <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
@@ -927,6 +933,7 @@ export const PoseNetCamera = () => {
                       return states.SUCCESS;
                     })()}
                     minimal={!showScores}
+                    description="Tilt angle of shoulders [° degrees]"
                   />
                 </div>
               </div>

@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Tooltip, Position } from '@blueprintjs/core';
+import { motion } from 'framer-motion';
 
 export const Widget = ({
   title,
@@ -49,22 +51,29 @@ export const WidgetModern = ({
   value,
   status = states.NEUTRAL,
   minimal = false,
+  description,
 }) => {
   return (
-    <div
-      className={`rounded-lg shadow-xl text-center pt-${
-        minimal ? '6' : '12'
-      } pb-6 bg-gradient-${status === states.WARNING ? 'orange' : status}`}
-    >
-      {minimal === false && (
-        <div
-          className={`leading-none font-number mb-6 text-5xl text-${status}-500`}
-        >
-          {value}
+    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+      <div
+        className={`rounded-lg shadow-xl text-center pt-${
+          minimal ? '6' : '12'
+        } pb-6 bg-gradient-${status === states.WARNING ? 'orange' : status}`}
+      >
+        {minimal === false && (
+          <div
+            className={`leading-none font-number mb-6 text-5xl text-${status}-500`}
+          >
+            {value}
+          </div>
+        )}
+        <div className="flex flex-row justify-center items-center">
+          <Tooltip content={description} position={Position.BOTTOM}>
+            <div className={`font-semibold text-${status}-700`}>{name}</div>
+          </Tooltip>
         </div>
-      )}
-      <div className={`font-semibold text-${status}-700`}>{name}</div>
-    </div>
+      </div>
+    </motion.div>
   );
 };
 
@@ -73,4 +82,5 @@ WidgetModern.propTypes = {
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   status: PropTypes.oneOf([states]),
   minimal: PropTypes.bool,
+  description: PropTypes.string,
 };
