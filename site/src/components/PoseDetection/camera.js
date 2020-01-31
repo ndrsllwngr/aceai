@@ -245,9 +245,10 @@ export const PoseNetCamera = () => {
               centralTendencyHeight,
             });
           }
-          // TODO ADD TIMER TO CALIBRATION!
           // TODO MAYBE SET UUID HERE to prevent retriggering of notifications
           // TODO reset timers on unmount
+
+          // TODO: # TIMERS
 
           // TRIGGER OVERALL -BAD- TIMER by BODY
           if (
@@ -298,10 +299,12 @@ export const PoseNetCamera = () => {
             if (timerOverallGood.isRunning()) {
               timerOverallGood.pause();
             }
+            console.log('bad distance (> 5 seconds)');
             // ANNOUNCE THAT -DISTANCE- POSTURE is BAD
             setDistanceOverTimeIsBad(true);
             // ELSE ANNOUNCE THAT -DISTANCE- POSTURE is GOOD
           } else {
+            console.log('good distance');
             setDistanceOverTimeIsBad(false);
           }
 
@@ -316,11 +319,13 @@ export const PoseNetCamera = () => {
             if (timerOverallGood.isRunning()) {
               timerOverallGood.pause();
             }
+            console.log('bad height (> 5 seconds)');
             // ANNOUNCE THAT -HEIGHT- is BAD
             setHeightOverTimeIsBad(true);
             // ELSE ANNOUNCE THAT -HEIGHT- is GOOD
           } else {
             setHeightOverTimeIsBad(false);
+            console.log('good height');
           }
 
           // IF -BODY- and -HEAD- BAD POSTURE TIMERS & -DISTANCE- & -HEIGHT- TIMERS are less than THRESHOLD
@@ -350,6 +355,8 @@ export const PoseNetCamera = () => {
             timerOverallGood.start({ precision: 'secondTenths' });
           }
 
+          // TODO: # CALCULATIONS
+
           // IF CENTRAL TENDENCY OF -BODY- not within THRESHOLD
           if (centralTendencyBody > appContext.threshold_body) {
             // START -BAD- BODY TIMER
@@ -369,7 +376,12 @@ export const PoseNetCamera = () => {
           }
 
           // IF CENTRAL TENDENCY OF -DISTANCE- not within THRESHOLD
-          if (centralTendencyDistance > appContext.threshold_distance) {
+          if (
+            Math.abs(
+              get(calibrationBodyTick, 'lengthOfVector', 0) -
+                get(centralTendencyDistance, 'lengthOfVector', 0),
+            ) > appContext.threshold_distance
+          ) {
             // START -BAD- DISTANCE TIMER
             timerBadDistance.start({ precision: 'secondTenths' });
           } else {
@@ -378,7 +390,12 @@ export const PoseNetCamera = () => {
           }
 
           // IF CENTRAL TENDENCY OF -HEIGHT- not within THRESHOLD
-          if (centralTendencyHeight > appContext.threshold_height) {
+          if (
+            Math.abs(
+              get(calibrationBodyTick, 'meanY', 0) -
+                get(centralTendencyHeight, 'meanY', 0),
+            ) > appContext.threshold_height
+          ) {
             // START -BAD- HEIGHT TIMER
             timerBadHeight.start({ precision: 'secondTenths' });
           } else {
@@ -403,6 +420,7 @@ export const PoseNetCamera = () => {
     appContext.threshold_head,
     appContext.threshold_height,
     appContext.timer_timeUntilBadPosture,
+    calibrationBodyTick,
   ]);
 
   // NOTIFICATION LOGIC of HEAD
@@ -544,6 +562,8 @@ export const PoseNetCamera = () => {
     uiContext.showNotificationInApp,
     uiContext.toasterRef,
   ]);
+
+  // TODO: # LOGIC FOR STATES
 
   // UPDATE STATUS & CHART of BODY
   useEffect(() => {
