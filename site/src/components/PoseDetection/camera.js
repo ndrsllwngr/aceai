@@ -756,7 +756,7 @@ export const PoseNetCamera = () => {
 
   return (
     <>
-      {!appContext.calibration_calibrationDataAvailable ? (
+      {appContext.calibration_calibrationDataAvailable ? (
         <>
           <Portal>
             <VideoCanvas
