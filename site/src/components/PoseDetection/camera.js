@@ -816,7 +816,7 @@ export const PoseNetCamera = () => {
                         'seconds',
                         'secondTenths',
                       ])}
-                    status={ states.NEUTRAL}
+                    status={states.NEUTRAL}
                     minimal={!showTimers}
                   />
                 </div>
