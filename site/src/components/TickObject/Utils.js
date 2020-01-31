@@ -10,13 +10,8 @@ export function extractPointObj(partName, data) {
   };
 }
 
-export function calcMeanForTimeWindow(
-  tickArray,
-  timeWindowInMs,
-  tickTimeStamp,
-) {
+export function getTimeWindowData(tickArray, timeWindowInMs, tickTimeStamp) {
   let timeWindowData = [];
-
   const momentInPast = new Date(tickTimeStamp - timeWindowInMs);
   // eslint-disable-next-line no-plusplus
   for (let i = tickArray.length - 1; i >= 0; i--) {
@@ -27,7 +22,10 @@ export function calcMeanForTimeWindow(
       break;
     }
   }
-  // console.log(timeWindowData.length);
+  return timeWindowData;
+}
+
+export function calcMeanForTimeWindow(timeWindowData) {
   return (
     timeWindowData
       .map(obj => Math.abs(obj.angleOfVector))
@@ -35,23 +33,7 @@ export function calcMeanForTimeWindow(
   );
 }
 
-export function calcMedianForTimeWindow(
-  tickArray,
-  timeWindowInMs,
-  tickTimeStamp,
-) {
-  let timeWindowData = [];
-
-  const momentInPast = new Date(tickTimeStamp - timeWindowInMs);
-  // eslint-disable-next-line no-plusplus
-  for (let i = tickArray.length - 1; i >= 0; i--) {
-    const object = tickArray[i];
-    const momentOfObject = new Date(object.createdAt);
-    if (momentOfObject < momentInPast) {
-      timeWindowData = tickArray.slice(i + 1);
-      break;
-    }
-  }
+export function calcMedianForTimeWindow(timeWindowData) {
   const revisedData = timeWindowData.map(obj => Math.abs(obj.angleOfVector));
   let result = 0;
   if (revisedData.length === 0) {

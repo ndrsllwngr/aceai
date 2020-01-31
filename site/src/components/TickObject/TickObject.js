@@ -100,21 +100,38 @@ export class TickObject {
   }
 }
 
+function mean(array) {
+  const values = [...array];
+  if (values.length === 0) return 0;
+  const meanVal = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+  return meanVal(values);
+}
+
 function median(array) {
   const values = [...array];
-  // console.log(array);
   if (values.length === 0) return 0;
-
   // eslint-disable-next-line func-names
   values.sort(function(a, b) {
     return a - b;
   });
-
   const half = Math.floor(values.length / 2);
-
   if (values.length % 2) return values[half];
-
   return (values[half - 1] + values[half]) / 2.0;
+}
+
+export function getCalibrationMeanTickObject(name, tickArray) {
+  const values = [...tickArray];
+  const leftPoints = { x: [], y: [] };
+  const rightPoints = { x: [], y: [] };
+  for (let i = 0; i < values.length; i += 1) {
+    leftPoints.x.push(get(values[i], 'leftPoint.x'));
+    leftPoints.y.push(get(values[i], 'leftPoint.y'));
+    rightPoints.x.push(get(values[i], 'rightPoint.x'));
+    rightPoints.y.push(get(values[i], 'rightPoint.y'));
+  }
+  const leftPoint = { x: mean(leftPoints.x), y: mean(leftPoints.y) };
+  const rightPoint = { x: mean(rightPoints.x), y: mean(rightPoints.y) };
+  return new TickObject(name, Date.now(), values.length, leftPoint, rightPoint);
 }
 
 export function getCalibrationMedianTickObject(name, tickArray) {
@@ -129,12 +146,5 @@ export function getCalibrationMedianTickObject(name, tickArray) {
   }
   const leftPoint = { x: median(leftPoints.x), y: median(leftPoints.y) };
   const rightPoint = { x: median(rightPoints.x), y: median(rightPoints.y) };
-  return new TickObject(
-    name,
-    Date.now(),
-    values.length,
-    leftPoint,
-    rightPoint,
-    // get(calibrationData, 'shoulder'),
-  );
+  return new TickObject(name, Date.now(), values.length, leftPoint, rightPoint);
 }

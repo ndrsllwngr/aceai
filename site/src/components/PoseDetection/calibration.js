@@ -64,16 +64,19 @@ export const Calibration = () => {
         if (appContext.global_logging) {
           console.log(history);
         }
-        // TODO add to camera.
-        const objEye = getCalibrationMedianTickObject('eye', historyHead);
-        const objShoulder = getCalibrationMedianTickObject(
+
+        const centralTendencyObjectHead = getCalibrationMedianTickObject(
+          'eye',
+          historyHead,
+        );
+        const centralTendencyObjectBody = getCalibrationMedianTickObject(
           'shoulder',
           historyBody,
         );
-        subjectHeadCalibration.next(objEye);
-        subjectBodyCalibration.next(objShoulder);
-        calibrationHead.push(objEye);
-        calibrationBody.push(objShoulder);
+        subjectHeadCalibration.next(centralTendencyObjectHead);
+        subjectBodyCalibration.next(centralTendencyObjectBody);
+        calibrationHead.push(centralTendencyObjectHead);
+        calibrationBody.push(centralTendencyObjectBody);
         setAppContext({
           ...appContext,
           calibration_calibrationDataAvailable: !appContext.calibration_calibrationDataAvailable,
@@ -254,11 +257,6 @@ export const Calibration = () => {
       </div>
     </>
   );
-};
-
-Calibration.propTypes = {
-  //   title: PropTypes.string,
-  //   timer: PropTypes.any,
 };
 
 /**
@@ -460,39 +458,6 @@ function detectPoseInRealTime(video, _net) {
   }
   poseDetectionFrame();
 }
-
-/**
- * Kicks off the demo by loading the posenet model, finding and loading
- * available camera devices, and setting off the detectPoseInRealTime function.
- */
-// export async function bindPage() {
-//   // toggleLoadingUI(true);
-//   const net = await posenet.load({
-//     architecture: guiState.input.architecture,
-//     outputStride: guiState.input.outputStride,
-//     inputResolution: guiState.input.inputResolution,
-//     multiplier: guiState.input.multiplier,
-//     quantBytes: guiState.input.quantBytes,
-//   });
-//   // toggleLoadingUI(false);
-
-//   let video;
-
-//   try {
-//     video = await loadVideo();
-//   } catch (e) {
-//     const info = document.getElementById('info');
-//     info.textContent =
-//       'this browser does not support video capture,' +
-//       'or this device does not have a camera';
-//     info.style.display = 'block';
-//     throw e;
-//   }
-
-//   // setupGui([], net);
-//   // setupFPS();
-//   detectPoseInRealTime(video, net);
-// }
 
 if (typeof window !== `undefined`) {
   navigator.getUserMedia =

@@ -6,13 +6,15 @@ import get from 'lodash/get';
 import * as posenet from '@tensorflow-models/posenet';
 import { Tag, Portal, Intent } from '@blueprintjs/core';
 import { Subject } from 'rxjs';
-// COMPONENTS
 import { Graph } from '../graph';
 import { VideoCanvas } from '../VideoCanvas';
 import TickObject, {
   extractPointObj,
+  getTimeWindowData,
   calcMeanForTimeWindow,
   calcMedianForTimeWindow,
+  getCalibrationMeanTickObject,
+  getCalibrationMedianTickObject,
 } from '../TickObject';
 import { useApp } from '../context-app';
 import { useUi } from '../context-ui';
@@ -25,7 +27,6 @@ import {
 } from './utilsTimer';
 import { TimerComponent } from '../timer';
 import { Widget } from '../widget';
-// PoseNet
 import {
   drawBoundingBox,
   drawKeypoints,
@@ -35,7 +36,6 @@ import {
   videoWidth,
   videoHeight,
 } from './utils';
-// CSS
 import '../../../node_modules/react-vis/dist/style.css';
 import {
   Calibration,
@@ -43,7 +43,7 @@ import {
   subjectBodyCalibration,
 } from './calibration';
 import { showNotification } from '../showNotification';
-// gets updated every second
+
 export const history = [];
 const subject = new Subject();
 export const historyBody = [];
@@ -56,11 +56,26 @@ const emptyState = { msg: 'Loading...', value: 0.0, status: 'default' };
 let _streamCopy = null;
 
 export const PoseNetCamera = () => {
-  // const classes = useStyles();
-
+  // CONTEXT
   const [appContext, setAppContext] = useApp();
   const [uiContext, setUiContext] = useUi();
+
+  // INTERNAL LOGIC
   const [loading, setLoading] = useState(false);
+
+  // LATEST CALIBRATION DATA
+  const [calibrationHeadTick, setcalibrationHeadTick] = useState();
+  const [calibrationBodyTick, setcalibrationBodyTick] = useState();
+  // LATEST STATES
+  const [stateBody, setStateBody] = useState(emptyState);
+  const [stateHeight, setStateHeight] = useState(emptyState);
+  const [stateDistance, setStateDistance] = useState(emptyState);
+  const [stateHead, setStateHead] = useState(emptyState);
+  // CHART DATA
+  const [chartDataShoulder, setChartDataShoulder] = useState([]);
+  const [chartDataEye, setChartDataEye] = useState([]);
+
+  // TIME LOGIC
   const [headPostureOverTimeIsBad, setHeadPostureOverTimeIsBad] = useState(
     false,
   );
@@ -68,93 +83,32 @@ export const PoseNetCamera = () => {
     false,
   );
 
-  const [statusShoulder, setStatusShoulder] = useState(emptyState);
-  const [statusHeight, setStatusHeight] = useState(emptyState);
-  const [statusDistance, setStatusDistance] = useState(emptyState);
-  // const [thresholdShoulder, setThresholdShoulder] = useState(15);
-  const [chartDataShoulder, setChartDataShoulder] = useState([]);
+  // TODO: Add calibration functionality (button, calc D_c to mean of Y_(L-r))
+  // TODO: Over time? Time counter!
 
-  const [statusEye, setStatusEye] = useState(emptyState);
-
-  // const [thresholdEye, setThresholdEye] = useState(7);
-  const [chartDataEye, setChartDataEye] = useState([]);
-  const [heightDiff, setHeightDiff] = useState(0);
-
-  const [calibrationHeadTick, setcalibrationHeadTick] = useState();
-  const [calibrationBodyTick, setcalibrationBodyTick] = useState();
-
-  // const [calibrationDataRaw, setCalibrationDataRaw] = useState(undefined);
-  // const [calibrationData, setCalibrationData] = useState(undefined);
-
+  // FETCH LATEST CALIBRATION DATA and SET IT AS STATE
   useEffect(() => {
-    const showToast = (message = '', intent = Intent.PRIMARY) => {
-      if (uiContext.showNotificationInApp && uiContext.toasterRef.current) {
-        const toastObj = {
-          message,
-          intent,
-        };
-        console.log(toastObj);
-        uiContext.toasterRef.current.show(toastObj);
-      }
-      if (uiContext.showNotificationBrowser) {
-        showNotification(message);
-      }
+    const headCalibrationSubscription = subjectHeadCalibration.subscribe({
+      next: nextObj => {
+        setcalibrationHeadTick(nextObj);
+        console.log('headCalibrationSubscription', { nextObj });
+      },
+    });
+
+    const bodyCalibrationSubscription = subjectBodyCalibration.subscribe({
+      next: nextObj => {
+        setcalibrationBodyTick(nextObj);
+        console.log('bodyCalibrationSubscription', { nextObj });
+      },
+    });
+
+    return () => {
+      headCalibrationSubscription.unsubscribe();
+      bodyCalibrationSubscription.unsubscribe();
     };
+  }, []);
 
-    if (headPostureOverTimeIsBad) {
-      showToast(
-        'Misalignment of head detected. Correct posture if possible.',
-        Intent.DANGER,
-      );
-    }
-    if (
-      timerSession.getTotalTimeValues().seconds > 0 &&
-      !headPostureOverTimeIsBad
-    ) {
-      showToast('Well done. Your head is well aligned now.', Intent.SUCCESS);
-    }
-  }, [
-    headPostureOverTimeIsBad,
-    uiContext.showNotificationBrowser,
-    uiContext.showNotificationInApp,
-    uiContext.toasterRef,
-  ]);
-
-  useEffect(() => {
-    const showToast = (message = '', intent = Intent.PRIMARY) => {
-      if (uiContext.showNotificationInApp && uiContext.toasterRef.current) {
-        const toastObj = {
-          message,
-          intent,
-        };
-        console.log(toastObj);
-        uiContext.toasterRef.current.show(toastObj);
-      }
-      if (uiContext.showNotificationBrowser) {
-        showNotification(message);
-      }
-    };
-
-    if (bodyPostureOverTimeIsBad) {
-      showToast(
-        'Misalignment of body detected. Correct posture if possible.',
-        Intent.DANGER,
-      );
-    }
-    if (
-      timerSession.getTotalTimeValues().seconds > 0 &&
-      !bodyPostureOverTimeIsBad
-    ) {
-      showToast('Well done. Your body is well aligned now.', Intent.SUCCESS);
-    }
-  }, [
-    bodyPostureOverTimeIsBad,
-    uiContext.showNotificationBrowser,
-    uiContext.showNotificationInApp,
-    uiContext.toasterRef,
-  ]);
-
-  // AFTER CALIBRATION TURN POSENET ON if calibration data is not older than 5sec
+  // AUTO-START POSENET if calibration data is available and (calibration data !== older than 5sec)
   useEffect(() => {
     if (
       appContext.calibration_calibrationDataAvailable &&
@@ -168,7 +122,7 @@ export const PoseNetCamera = () => {
     }
   }, [appContext, calibrationHeadTick, setAppContext]);
 
-  // POWER POSENET
+  // RUN POSENET
   useEffect(() => {
     if (appContext.posenet_turnedOn) {
       // eslint-disable-next-line no-inner-declarations
@@ -209,8 +163,8 @@ export const PoseNetCamera = () => {
         console.log('async function shuttingDown()');
         // timerSession.pause();
         setLoading(false);
-        setStatusShoulder(emptyState);
-        setStatusEye(emptyState);
+        setStateBody(emptyState);
+        setStateHead(emptyState);
         // setChartDataShoulder([]);
         // setChartDataEye([]);
         stopStreamedVideo();
@@ -220,40 +174,73 @@ export const PoseNetCamera = () => {
     }
   }, [appContext.posenet_turnedOn]);
 
-  // CALCULATIONS, TIMERS
+  // CALCULATIONS & TIMERS
   useEffect(() => {
     const subscription = subject.subscribe({
       next: nextObj => {
         try {
-          // CALCULATE POSTURE IF GOOD OR BAD VIA MEAN AND TIME
+          // CALCULATE POSTURE IF GOOD OR BAD VIA MEAN or MEDIAN AND TIME
           const clonehistoryBody = [...historyBody];
           const clonehistoryHead = [...historyHead];
-          let meanOrMedianShoulder;
-          let meanOrMedianEye;
+          const timeWindowDataHead = getTimeWindowData(
+            clonehistoryHead,
+            3000,
+            nextObj.createdAt,
+          );
+          const timeWindowDataBody = getTimeWindowData(
+            clonehistoryBody,
+            3000,
+            nextObj.createdAt,
+          );
+          if (appContext.global_logging) {
+            console.log('cloneHistory & timeWindowData', {
+              clonehistoryBody,
+              clonehistoryHead,
+              timeWindowDataBody,
+              timeWindowDataHead,
+            });
+          }
+          // https://statistics.laerd.com/statistical-guides/measures-central-tendency-mean-mode-median.php
+          let centralTendencyBody;
+          let centralTendencyHead;
+          let centralTendencyDistance;
+          let centralTendencyHeight;
 
           if (appContext.posenet_measurement === 'median') {
-            meanOrMedianShoulder = calcMedianForTimeWindow(
-              clonehistoryBody,
-              3000,
-              nextObj.createdAt,
+            centralTendencyHead = calcMedianForTimeWindow([
+              ...timeWindowDataHead,
+            ]); // returns anglevector
+            centralTendencyBody = calcMedianForTimeWindow([
+              ...timeWindowDataBody,
+            ]);
+            centralTendencyDistance = getCalibrationMedianTickObject(
+              'shoulder',
+              [...timeWindowDataBody],
             );
-            meanOrMedianEye = calcMedianForTimeWindow(
-              clonehistoryHead,
-              3000,
-              nextObj.createdAt,
-            );
+            centralTendencyHeight = getCalibrationMedianTickObject('shoulder', [
+              ...timeWindowDataBody,
+            ]);
           } else {
-            meanOrMedianShoulder = calcMeanForTimeWindow(
-              clonehistoryBody,
-              3000,
-              nextObj.createdAt,
-            );
-            meanOrMedianEye = calcMeanForTimeWindow(
-              clonehistoryHead,
-              3000,
-              nextObj.createdAt,
-            );
+            centralTendencyHead = calcMeanForTimeWindow([
+              ...timeWindowDataHead,
+            ]);
+            centralTendencyBody = calcMeanForTimeWindow(timeWindowDataBody);
+            centralTendencyDistance = getCalibrationMeanTickObject('shoulder', [
+              ...timeWindowDataBody,
+            ]);
+            centralTendencyHeight = getCalibrationMeanTickObject('shoulder', [
+              ...timeWindowDataBody,
+            ]);
           }
+          if (appContext.global_logging) {
+            console.log('centralTendency', {
+              centralTendencyBody,
+              centralTendencyHead,
+              centralTendencyDistance,
+              centralTendencyHeight,
+            });
+          }
+          // TODO ADD TIMER TO CALIBRATION!
 
           // TIMER
           if (
@@ -282,6 +269,7 @@ export const PoseNetCamera = () => {
             }
             // console.log('bad posture eye (> 5 seconds)');
             setHeadPostureOverTimeIsBad(true);
+            // TODO MAYBE SET UUID HERE to prevent retriggering of notifications
           } else {
             setHeadPostureOverTimeIsBad(false);
           }
@@ -302,20 +290,18 @@ export const PoseNetCamera = () => {
             timerOverallGood.start({ precision: 'secondTenths' });
           }
 
-          if (meanOrMedianShoulder > appContext.threshold_body) {
+          if (centralTendencyBody > appContext.threshold_body) {
             timerBadBody.start({ precision: 'secondTenths' });
           } else {
             timerBadBody.reset();
           }
 
-          if (meanOrMedianEye > appContext.threshold_head) {
+          if (centralTendencyHead > appContext.threshold_head) {
             timerBadHead.start({ precision: 'secondTenths' });
           } else {
             timerBadHead.reset();
           }
           // TODO reset timers on unmount
-          // }
-          // }
         } catch (e) {
           console.log(e);
         }
@@ -326,100 +312,96 @@ export const PoseNetCamera = () => {
       subscription.unsubscribe();
     };
   }, [
+    appContext.global_logging,
+    appContext.posenet_loading,
     appContext.posenet_measurement,
     appContext.threshold_body,
     appContext.threshold_head,
     appContext.timer_timeUntilBadPosture,
   ]);
 
-  // TODO: Change STATUS output to angle, switch threshold to angle?
-  // TODO: Add calibration functionality (button, calc D_c to mean of Y_(L-r))
-  // TODO: Over time? Time counter!
-  // TODO: Revamp UI
-
-  // CALIBRATION
-  // useEffect(() => {
-  //   if (calibrationDataRaw) {
-  //     const { time, tick } = calibrationDataRaw;
-  //     const tickObjectShoulder = new TickObject(
-  //       'shoulder',
-  //       time,
-  //       tick,
-  //       extractPointObj('leftShoulder', calibrationDataRaw),
-  //       extractPointObj('rightShoulder', calibrationDataRaw),
-  //     );
-  //     const tickObjectEye = new TickObject(
-  //       'eye',
-  //       time,
-  //       tick,
-  //       extractPointObj('leftEye', calibrationDataRaw),
-  //       extractPointObj('rightEye', calibrationDataRaw),
-  //     );
-  //     setCalibrationData({ eye: tickObjectEye, shoulder: tickObjectShoulder });
-  //     tickObjectShoulder.logData();
-  //     tickObjectEye.logData();
-  //   }
-  // }, [calibrationDataRaw]);
-
-  // FETCH LATEST CALIBRATION DATA and SET (SHOULDER)
+  // NOTIFICATION LOGIC of HEAD
   useEffect(() => {
-    const subscription = subjectBodyCalibration.subscribe({
-      next: nextObj => {
-        setcalibrationBodyTick(nextObj);
-        console.log(nextObj);
-      },
-    });
-
-    return () => {
-      subscription.unsubscribe();
+    const showToast = (message = '', intent = Intent.PRIMARY) => {
+      if (uiContext.showNotificationInApp && uiContext.toasterRef.current) {
+        const toastObj = {
+          message,
+          intent,
+        };
+        console.log(toastObj);
+        uiContext.toasterRef.current.show(toastObj);
+      }
+      if (uiContext.showNotificationBrowser) {
+        showNotification(message);
+      }
     };
-  }, []);
 
-  // FETCH LATEST CALIBRATION DATA and SET (EYE)
+    if (headPostureOverTimeIsBad) {
+      showToast(
+        'Misalignment of head detected. Correct posture if possible.',
+        Intent.DANGER,
+      );
+    }
+    if (
+      timerSession.getTotalTimeValues().seconds > 0 &&
+      !headPostureOverTimeIsBad
+    ) {
+      showToast('Well done. Your head is well aligned now.', Intent.SUCCESS);
+    }
+  }, [
+    headPostureOverTimeIsBad,
+    uiContext.showNotificationBrowser,
+    uiContext.showNotificationInApp,
+    uiContext.toasterRef,
+  ]);
+
+  // NOTIFICATION LOGIC of BODY
   useEffect(() => {
-    const subscription = subjectHeadCalibration.subscribe({
-      next: nextObj => {
-        setcalibrationHeadTick(nextObj);
-        console.log(nextObj);
-      },
-    });
-
-    return () => {
-      subscription.unsubscribe();
+    const showToast = (message = '', intent = Intent.PRIMARY) => {
+      if (uiContext.showNotificationInApp && uiContext.toasterRef.current) {
+        const toastObj = {
+          message,
+          intent,
+        };
+        console.log(toastObj);
+        uiContext.toasterRef.current.show(toastObj);
+      }
+      if (uiContext.showNotificationBrowser) {
+        showNotification(message);
+      }
     };
-  }, []);
 
-  // LOG POSENET DATA
-  useEffect(() => {
-    const subscription = subject.subscribe({
-      next: nextObj => {
-        if (appContext.gobal_logging) {
-          console.log(nextObj);
-          if (nextObj.tick > 0) {
-            historyHead[historyHead.length - 1].logData();
-            historyBody[historyBody.length - 1].logData();
-          }
-        }
-      },
-    });
+    if (bodyPostureOverTimeIsBad) {
+      showToast(
+        'Misalignment of body detected. Correct posture if possible.',
+        Intent.DANGER,
+      );
+    }
+    if (
+      timerSession.getTotalTimeValues().seconds > 0 &&
+      !bodyPostureOverTimeIsBad
+    ) {
+      showToast('Well done. Your body is well aligned now.', Intent.SUCCESS);
+    }
+  }, [
+    bodyPostureOverTimeIsBad,
+    uiContext.showNotificationBrowser,
+    uiContext.showNotificationInApp,
+    uiContext.toasterRef,
+  ]);
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [appContext.gobal_logging]);
-
-  // UPDATE STATUS, CHART of shoulder
+  // UPDATE STATUS & CHART of BODY
   useEffect(() => {
     const subscription = subjectBody.subscribe({
       next: nextObj => {
         if (Math.abs(nextObj.angleOfVector) > appContext.threshold_body) {
-          setStatusShoulder({
+          setStateBody({
             msg: `Bad (${nextObj.name})`,
             value: nextObj.angleOfVector.toFixed(2),
             status: 'bad',
           });
         } else {
-          setStatusShoulder({
+          setStateBody({
             msg: `Good (${nextObj.name})`,
             value: nextObj.angleOfVector.toFixed(2),
             status: 'good',
@@ -431,7 +413,7 @@ export const PoseNetCamera = () => {
             get(calibrationBodyTick, 'meanY', 0) - get(nextObj, 'meanY', 0),
           ) > appContext.threshold_height
         ) {
-          setStatusHeight({
+          setStateHeight({
             msg: `Bad (${nextObj.name})`,
             value: (
               get(calibrationBodyTick, 'meanY', 0) - get(nextObj, 'meanY', 0)
@@ -439,7 +421,7 @@ export const PoseNetCamera = () => {
             status: 'bad',
           });
         } else {
-          setStatusHeight({
+          setStateHeight({
             msg: `Good (${nextObj.name})`,
             value: (
               get(calibrationBodyTick, 'meanY', 0) - get(nextObj, 'meanY', 0)
@@ -454,7 +436,7 @@ export const PoseNetCamera = () => {
               get(nextObj, 'lengthOfVector', 0),
           ) > appContext.threshold_distance
         ) {
-          setStatusDistance({
+          setStateDistance({
             msg: `Bad (${nextObj.name})`,
             value: (
               get(calibrationBodyTick, 'lengthOfVector', 0) -
@@ -463,7 +445,7 @@ export const PoseNetCamera = () => {
             status: 'bad',
           });
         } else {
-          setStatusDistance({
+          setStateDistance({
             msg: `Good (${nextObj.name})`,
             value: (
               get(calibrationBodyTick, 'lengthOfVector', 0) -
@@ -501,18 +483,18 @@ export const PoseNetCamera = () => {
     calibrationBodyTick,
   ]);
 
-  // UPDATE STATUS, CHART of eye
+  // UPDATE STATUS & CHART of HEAD
   useEffect(() => {
     const subscription = subjectHead.subscribe({
       next: nextObj => {
         if (Math.abs(nextObj.angleOfVector) > appContext.threshold_head) {
-          setStatusEye({
+          setStateHead({
             msg: `Bad (${nextObj.name})`,
             value: nextObj.angleOfVector.toFixed(2),
             status: 'bad',
           });
         } else {
-          setStatusEye({
+          setStateHead({
             msg: `Good (${nextObj.name})`,
             value: nextObj.angleOfVector.toFixed(2),
             status: 'good',
@@ -540,6 +522,25 @@ export const PoseNetCamera = () => {
     };
   }, [appContext.posenet_charts, appContext.threshold_head, chartDataEye]);
 
+  // LOG POSENET DATA
+  useEffect(() => {
+    const subscription = subject.subscribe({
+      next: nextObj => {
+        if (appContext.global_logging) {
+          console.log(nextObj);
+          if (nextObj.tick > 0) {
+            historyHead[historyHead.length - 1].logData();
+            historyBody[historyBody.length - 1].logData();
+          }
+        }
+      },
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [appContext.global_logging]);
+
   return (
     <>
       {appContext.calibration_calibrationDataAvailable ? (
@@ -561,21 +562,21 @@ export const PoseNetCamera = () => {
                     <>
                       <Tag
                         // intent={
-                        //   statusDistance.status === 'bad' ? 'danger' : 'none'
+                        //   stateDistance.status === 'bad' ? 'danger' : 'none'
                         // }
                         intent="none"
                         style={{ marginRight: '0.5rem' }}
                       >
-                        Distance {statusDistance.value}
+                        Distance {stateDistance.value}
                       </Tag>
                       <Tag
                         // intent={
-                        //   statusHeight.status === 'bad' ? 'danger' : 'none'
+                        //   stateHeight.status === 'bad' ? 'danger' : 'none'
                         // }
                         intent="none"
                         style={{ marginRight: '0.5rem' }}
                       >
-                        HEIGHT {statusHeight.value}
+                        HEIGHT {stateHeight.value}
                       </Tag>
                     </>
                   }
@@ -614,19 +615,19 @@ export const PoseNetCamera = () => {
                         intent={bodyPostureOverTimeIsBad ? 'danger' : 'success'}
                         style={{ marginRight: '0.5rem' }}
                       >
-                        BODY {statusShoulder.value}°
+                        BODY {stateBody.value}°
                       </Tag>
 
                       <Tag
                         intent={headPostureOverTimeIsBad ? 'danger' : 'success'}
                       >
-                        HEAD {statusEye.value}°
+                        HEAD {stateHead.value}°
                       </Tag>
                     </>
                   }
                 >
                   <div className="p-4 h-48">
-                    {Math.abs(statusEye.value) < appContext.threshold_head && (
+                    {Math.abs(stateHead.value) < appContext.threshold_head && (
                       <svg
                         width="724"
                         height="724"
@@ -645,8 +646,8 @@ export const PoseNetCamera = () => {
                         />
                       </svg>
                     )}
-                    {Math.abs(statusEye.value) > appContext.threshold_head &&
-                      statusEye.value < 0 && (
+                    {Math.abs(stateHead.value) > appContext.threshold_head &&
+                      stateHead.value < 0 && (
                         <svg
                           width="724"
                           height="724"
@@ -677,8 +678,8 @@ export const PoseNetCamera = () => {
                           </defs>
                         </svg>
                       )}
-                    {Math.abs(statusEye.value) > appContext.threshold_head &&
-                      statusEye.value > 0 && (
+                    {Math.abs(stateHead.value) > appContext.threshold_head &&
+                      stateHead.value > 0 && (
                         <svg
                           width="724"
                           height="724"
@@ -781,10 +782,7 @@ export const PoseNetCamera = () => {
   );
 };
 
-/**
- * Loads a the camera to be used in the demo
- *
- */
+// Loads a the camera to be used in the app
 async function setupCamera() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     throw new Error(
