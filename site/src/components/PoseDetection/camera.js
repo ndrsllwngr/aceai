@@ -107,9 +107,14 @@ export const PoseNetCamera = () => {
   const [distanceOverTimeWarning, setDistanceOverTimeWarning] = useState(false);
   const [heightOverTimeWarning, setHeightOverTimeWarning] = useState(false);
 
-  // TODO: Add calibration functionality (button, calc D_c to mean of Y_(L-r))
-  // TODO: Over time? Time counter!
-  // TODO: ADD GANTT CHART maybe use https://github.com/hhru/react-d3-chart-graphs#GanttChart
+  // TODO: ADD CALIBRATION LOGIC TO APP to recalibrate on the fly
+  // TODO: ADD CAMERA AS CUSTOM SECTION
+  // TODO: REFINE STATES and TIMER LOGIC
+  // TODO: FIX DOWNLOAD LOGIC
+  // TODO: FIX SCALING OF GRAPHS (maybe add to scores)
+  // TODO: ADD GANTT CHART (https://github.com/hhru/react-d3-chart-graphs#GanttChart)
+  // TODO: ADD SCALING with the help of calibration
+  // TODO: ADD SVG ANIMATION
 
   // FETCH LATEST CALIBRATION DATA and SET IT AS STATE
   useEffect(() => {
@@ -426,11 +431,11 @@ export const PoseNetCamera = () => {
           ) {
             // START -BAD- HEIGHT TIMER
             timerBadHeight.start({ precision: 'secondTenths' });
-            setHeadPostureOverTimeWarning(true);
+            setHeightOverTimeWarning(true);
           } else {
             // RESET -BAD- HEIGHT TIMER
             timerBadHeight.reset();
-            setHeadPostureOverTimeWarning(false);
+            setHeightOverTimeWarning(false);
           }
         } catch (e) {
           console.log(e);
