@@ -110,7 +110,6 @@ export const PoseNetCamera = () => {
   // TODO: ADD CALIBRATION LOGIC TO APP to recalibrate on the fly
   // TODO: ADD CAMERA AS CUSTOM SECTION
   // TODO: REFINE STATES and TIMER LOGIC
-  // TODO: FIX DOWNLOAD LOGIC
   // TODO: FIX SCALING OF GRAPHS (maybe add to scores)
   // TODO: ADD GANTT CHART (https://github.com/hhru/react-d3-chart-graphs#GanttChart)
   // TODO: ADD SCALING with the help of calibration

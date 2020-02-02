@@ -19,8 +19,8 @@ import { history, historyBody, historyHead } from '../PoseDetection/camera';
 import {
   ObjectsToCsv,
   // convertToCSV,
-  downloadFile,
-  exportCSVFile,
+  // downloadFile,
+  // exportCSVFile,
 } from '../PoseDetection/ObjectsToCsv';
 // import { useApp } from '../../_context-app';
 import { calibrationHead, calibrationBody } from '../PoseDetection/calibration';
@@ -215,11 +215,20 @@ export const Drawer = () => {
               icon="download"
               onClick={() => {
                 const csv = new ObjectsToCsv(calibrationHead);
-                const strCsv = csv.stringify();
-                // TODO use new function
-                downloadFile(strCsv, 'calibrationHead');
+                // const strCsv = csv.stringify();
+                // // TODO use new function
+                // const columnNames = [
+                //   ...calibrationBody.reduce((columns, row) => {
+                //     // check each object to compile a full list of column names
+                //     Object.keys(row).map(rowKey => columns.add(rowKey));
+                //     return columns;
+                //   }, new Set()),
+                // ];
+                // exportCSVFile(columnNames, calibrationBody, 'calibrationBody');
+
+                // downloadFile(strCsv, 'calibrationHead');
                 // Save to file:
-                // csv.toDisk('calibrationHead.csv');
+                csv.toDisk('calibrationHead.csv');
               }}
               intent={Intent.NONE}
             >
@@ -228,17 +237,17 @@ export const Drawer = () => {
             <Button
               icon="download"
               onClick={() => {
-                const columnNames = [
-                  ...calibrationBody.reduce((columns, row) => {
-                    // check each object to compile a full list of column names
-                    Object.keys(row).map(rowKey => columns.add(rowKey));
-                    return columns;
-                  }, new Set()),
-                ];
-                exportCSVFile(columnNames, calibrationBody, 'calibrationBody');
-                // const csv = new ObjectsToCsv(calibrationBody);
-                // // Save to file:
-                // csv.toDisk('calibrationBody.csv');
+                // const columnNames = [
+                //   ...calibrationBody.reduce((columns, row) => {
+                //     // check each object to compile a full list of column names
+                //     Object.keys(row).map(rowKey => columns.add(rowKey));
+                //     return columns;
+                //   }, new Set()),
+                // ];
+                // exportCSVFile(columnNames, calibrationBody, 'calibrationBody');
+                const csv = new ObjectsToCsv(calibrationBody);
+                // Save to file:
+                csv.toDisk('calibrationBody.csv');
               }}
               intent={Intent.NONE}
             >
