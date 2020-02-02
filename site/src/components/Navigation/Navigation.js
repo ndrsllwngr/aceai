@@ -38,7 +38,7 @@ export const Navigation = () => {
             <Navbar.Heading>
               <span className="font-extrabold">BodyPose</span>{' '}
               <span className="text-gray-300 font-medium text-xs">
-                v0.10 (1580663990)
+                v0.9 ({process.env.BUILD_ID ? process.env.BUILD_ID : 'DEVELOP'})
               </span>
             </Navbar.Heading>
           </Navbar.Group>
