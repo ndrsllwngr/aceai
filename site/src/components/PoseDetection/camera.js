@@ -2,7 +2,7 @@
 /* eslint-disable react/button-has-type */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import get from 'lodash/get';
 import * as posenet from '@tensorflow-models/posenet';
 import {
@@ -751,13 +751,13 @@ export const PoseNetCamera = () => {
     };
   }, [appContext.global_logging]);
 
-  const toggleScores = () => {
+  const toggleScores = useCallback(() => {
     setShowScores(!showScores);
-  };
+  }, [showScores]);
 
-  const toggleTimers = () => {
+  const toggleTimers = useCallback(() => {
     setShowTimers(!showTimers);
-  };
+  }, [showTimers]);
 
   return (
     <>
