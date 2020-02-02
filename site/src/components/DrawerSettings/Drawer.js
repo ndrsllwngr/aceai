@@ -216,6 +216,7 @@ export const Drawer = () => {
               onClick={() => {
                 const csv = new ObjectsToCsv(calibrationHead);
                 const strCsv = csv.stringify();
+                // TODO use new function
                 downloadFile(strCsv, 'calibrationHead');
                 // Save to file:
                 // csv.toDisk('calibrationHead.csv');
