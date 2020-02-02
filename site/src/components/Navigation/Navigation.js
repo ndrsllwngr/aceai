@@ -38,7 +38,7 @@ export const Navigation = () => {
             <Navbar.Heading>
               <span className="font-extrabold">BodyPose</span>{' '}
               <span className="text-gray-300 font-medium text-xs">
-                v0.9 (1580658573)
+                v0.10 (1580663990)
               </span>
             </Navbar.Heading>
           </Navbar.Group>

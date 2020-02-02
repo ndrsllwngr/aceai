@@ -18,15 +18,15 @@ export const initialState = {
   posenet_measurement: 'median',
   // EPOCH
   epoch_epochMode: true,
-  epoch_epochCount: 300,
+  epoch_epochCount: 500,
   epoch_timeWindowMeanInMilliseconds: 20000,
   // TIMER
-  timer_timeUntilBadPosture: 5,
+  timer_timeUntilBadPosture: 10,
   // THRESHOLD
-  threshold_body: 15,
-  threshold_head: 7,
-  threshold_height: 5,
-  threshold_distance: 10,
+  threshold_body: 12, // maybe 8
+  threshold_head: 8,
+  threshold_height: 10,
+  threshold_distance: 20,
 };
 
 const AppContext = React.createContext();
