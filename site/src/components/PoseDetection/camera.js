@@ -798,14 +798,12 @@ export const PoseNetCamera = () => {
                 <div className="w-full md:w-1/2 xl:w-1/3 px-4 py-4 xl:py-0">
                   <WidgetModern
                     name="Session"
-                    value={timerSession
-                      .getTimeValues()
-                      .toString([
-                        'hours',
-                        'minutes',
-                        'seconds',
-                        'secondTenths',
-                      ])}
+                    value={timerSession.getTimeValues().toString([
+                      'hours',
+                      'minutes',
+                      'seconds',
+                      // 'secondTenths',
+                    ])}
                     status={states.NEUTRAL}
                     minimal={!showTimers}
                     description="Overall session time"
@@ -814,14 +812,12 @@ export const PoseNetCamera = () => {
                 <div className="w-full md:w-1/2 xl:w-1/3 px-4 py-4 xl:py-0">
                   <WidgetModern
                     name="Good posture"
-                    value={timerOverallGood
-                      .getTimeValues()
-                      .toString([
-                        'hours',
-                        'minutes',
-                        'seconds',
-                        'secondTenths',
-                      ])}
+                    value={timerOverallGood.getTimeValues().toString([
+                      'hours',
+                      'minutes',
+                      'seconds',
+                      // 'secondTenths',
+                    ])}
                     status={states.NEUTRAL}
                     minimal={!showTimers}
                     description="Overall good posture time within session"
@@ -830,14 +826,12 @@ export const PoseNetCamera = () => {
                 <div className="w-full md:w-1/2 xl:w-1/3 px-4 py-4 xl:py-0">
                   <WidgetModern
                     name="Bad posture"
-                    value={timerOverallBad
-                      .getTimeValues()
-                      .toString([
-                        'hours',
-                        'minutes',
-                        'seconds',
-                        'secondTenths',
-                      ])}
+                    value={timerOverallBad.getTimeValues().toString([
+                      'hours',
+                      'minutes',
+                      'seconds',
+                      // 'secondTenths',
+                    ])}
                     status={states.NEUTRAL}
                     minimal={!showTimers}
                     description="Overall bad posture time within session"
@@ -876,7 +870,7 @@ export const PoseNetCamera = () => {
                 <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
                   <WidgetModern
                     name="Distance"
-                    value={stateDistance.value}
+                    value={Math.round(stateDistance.value)}
                     status={(function() {
                       if (distanceOverTimeIsBad) {
                         return states.DANGER;
@@ -893,7 +887,7 @@ export const PoseNetCamera = () => {
                 <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
                   <WidgetModern
                     name="Height"
-                    value={stateHeight.value}
+                    value={Math.round(stateHeight.value)}
                     status={(function() {
                       if (heightOverTimeIsBad) {
                         return states.DANGER;
@@ -910,7 +904,7 @@ export const PoseNetCamera = () => {
                 <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
                   <WidgetModern
                     name="Head"
-                    value={stateHead.value}
+                    value={Math.round(stateHead.value)}
                     status={(function() {
                       if (headPostureOverTimeIsBad) {
                         return states.DANGER;
@@ -927,7 +921,7 @@ export const PoseNetCamera = () => {
                 <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
                   <WidgetModern
                     name="Body"
-                    value={stateBody.value}
+                    value={Math.round(stateBody.value)}
                     status={(function() {
                       if (bodyPostureOverTimeIsBad) {
                         return states.DANGER;

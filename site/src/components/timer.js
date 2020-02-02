@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export const TimerComponent = ({ title, timer }) => {
+export const TimerComponent = React.memo(({ title, timer }) => {
   return (
     <>
       <div className="flex flex-col items-center">
@@ -14,7 +14,7 @@ export const TimerComponent = ({ title, timer }) => {
       </div>
     </>
   );
-};
+});
 
 TimerComponent.propTypes = {
   title: PropTypes.string,
