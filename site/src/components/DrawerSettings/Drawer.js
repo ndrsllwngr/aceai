@@ -112,9 +112,9 @@ export const Drawer = () => {
           <Slider
             value={appContext.epoch_epochCount}
             min={0}
-            max={100}
-            labelStepSize={20}
-            stepSize={1}
+            max={1000}
+            labelStepSize={100}
+            stepSize={10}
             onChange={handleAppContextChangeSlider('epoch_epochCount')}
           />
           <p>Time until bad posture triggers notification (sec)</p>

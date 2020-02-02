@@ -17,8 +17,8 @@ export const initialState = {
   posenet_charts: true,
   posenet_measurement: 'median',
   // EPOCH
-  epoch_epochMode: false,
-  epoch_epochCount: 50,
+  epoch_epochMode: true,
+  epoch_epochCount: 300,
   epoch_timeWindowMeanInMilliseconds: 20000,
   // TIMER
   timer_timeUntilBadPosture: 5,

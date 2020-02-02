@@ -213,16 +213,24 @@ export const PoseNetCamera = () => {
           // CALCULATE POSTURE IF GOOD OR BAD VIA MEAN or MEDIAN AND TIME
           const clonehistoryBody = [...historyBody];
           const clonehistoryHead = [...historyHead];
-          const timeWindowDataHead = getTimeWindowData(
-            clonehistoryHead,
-            3000,
-            nextObj.createdAt,
-          );
-          const timeWindowDataBody = getTimeWindowData(
-            clonehistoryBody,
-            3000,
-            nextObj.createdAt,
-          );
+          let timeWindowDataHead;
+          let timeWindowDataBody;
+          const timeWindowInMs = appContext.epoch_epochCount * 10;
+          if (appContext.epoch_epochMode) {
+            timeWindowDataHead = getTimeWindowData(
+              clonehistoryHead,
+              timeWindowInMs,
+              nextObj.createdAt,
+            );
+            timeWindowDataBody = getTimeWindowData(
+              clonehistoryBody,
+              timeWindowInMs,
+              nextObj.createdAt,
+            );
+          } else {
+            timeWindowDataBody = clonehistoryBody[clonehistoryBody.length];
+            timeWindowDataHead = clonehistoryHead[clonehistoryHead.length];
+          }
           if (appContext.global_logging) {
             console.log('cloneHistory & timeWindowData', {
               clonehistoryBody,
@@ -446,8 +454,9 @@ export const PoseNetCamera = () => {
       subscription.unsubscribe();
     };
   }, [
+    appContext.epoch_epochCount,
+    appContext.epoch_epochMode,
     appContext.global_logging,
-    appContext.posenet_loading,
     appContext.posenet_measurement,
     appContext.threshold_body,
     appContext.threshold_distance,
@@ -510,7 +519,7 @@ export const PoseNetCamera = () => {
 
     if (bodyPostureOverTimeIsBad) {
       showToast(
-        'Misalignment of body detected. Correct posture if possible.',
+        'Misalignment of shoulders detected. Correct posture if possible.',
         Intent.DANGER,
       );
     }
@@ -518,7 +527,10 @@ export const PoseNetCamera = () => {
       timerSession.getTotalTimeValues().seconds > 0 &&
       !bodyPostureOverTimeIsBad
     ) {
-      showToast('Well done. Your body is well aligned now.', Intent.SUCCESS);
+      showToast(
+        'Well done. Your shoulders are well aligned now.',
+        Intent.SUCCESS,
+      );
     }
   }, [
     bodyPostureOverTimeIsBad,
@@ -554,7 +566,7 @@ export const PoseNetCamera = () => {
       !distanceOverTimeIsBad
     ) {
       showToast(
-        'Well done. Your distance to the scree is well now.',
+        'Well done. Your distance to the screen is okay now.',
         Intent.SUCCESS,
       );
     }
@@ -588,7 +600,7 @@ export const PoseNetCamera = () => {
       );
     }
     if (timerSession.getTotalTimeValues().seconds > 0 && !heightOverTimeIsBad) {
-      showToast('Well done. Your sitting height is well now.', Intent.SUCCESS);
+      showToast('Well done. Your sitting height is okay now.', Intent.SUCCESS);
     }
   }, [
     heightOverTimeIsBad,
