@@ -28,6 +28,12 @@ module.exports = {
         showSpinner: false,
       },
     },
+    {
+      resolve: `gatsby-plugin-env-variables`,
+      options: {
+        whitelist: ['COMMIT_REF', 'BUILD_ID'],
+      },
+    },
     `gatsby-plugin-netlify`,
     `gatsby-plugin-sitemap`,
     {

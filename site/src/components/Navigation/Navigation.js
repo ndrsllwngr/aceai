@@ -37,9 +37,12 @@ export const Navigation = () => {
           <Navbar.Group align={Alignment.LEFT}>
             <Navbar.Heading>
               <span className="font-extrabold">BodyPose</span>{' '}
-              <span className="text-gray-300 font-medium text-xs">
-                v0.9 ({process.env.BUILD_ID ? process.env.BUILD_ID : 'DEVELOP'})
-              </span>
+              <Tooltip
+                content={`BUILD: ${process.env.BUILD_ID}, COMMIT: ${process.env.COMMIT_REF}`}
+                position={Position.BOTTOM}
+              >
+                <span className="text-gray-300 font-medium text-xs">v0.9</span>
+              </Tooltip>
             </Navbar.Heading>
           </Navbar.Group>
           <div className="block md:hidden">
