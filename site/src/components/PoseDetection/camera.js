@@ -146,7 +146,6 @@ export const PoseNetCamera = () => {
   // TODO: ADD CAMERA AS CUSTOM SECTION
   // TODO: REFINE STATES and TIMER LOGIC
   // TODO: FIX SCALING OF GRAPHS (maybe add to scores)
-  // TODO: ADD GANTT CHART (https://github.com/hhru/react-d3-chart-graphs#GanttChart)
   // TODO: ADD SCALING with the help of calibration
   // TODO: ADD SVG ANIMATION
 
