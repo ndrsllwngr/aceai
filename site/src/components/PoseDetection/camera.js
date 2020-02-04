@@ -2,7 +2,7 @@
 /* eslint-disable react/button-has-type */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import get from 'lodash/get';
 import * as posenet from '@tensorflow-models/posenet';
 import {
@@ -53,6 +53,8 @@ import {
   subjectBodyCalibration,
 } from './calibration';
 import { showNotification } from '../showNotification';
+import { timelineModel, Timeline } from '../timeline';
+import { statesName, statesColourHex } from '../enums';
 
 export const history = [];
 const subject = new Subject();
@@ -64,6 +66,14 @@ const subjectHead = new Subject();
 const emptyState = { msg: 'Loading...', value: 0.0, status: 'default' };
 // eslint-disable-next-line no-underscore-dangle
 let _streamCopy = null;
+
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
 
 export const PoseNetCamera = () => {
   // CONTEXT
@@ -79,13 +89,38 @@ export const PoseNetCamera = () => {
   const [calibrationHeadTick, setcalibrationHeadTick] = useState();
   const [calibrationBodyTick, setcalibrationBodyTick] = useState();
   // LATEST STATES
-  const [stateBody, setStateBody] = useState(emptyState);
-  const [stateHeight, setStateHeight] = useState(emptyState);
-  const [stateDistance, setStateDistance] = useState(emptyState);
   const [stateHead, setStateHead] = useState(emptyState);
+  const [stateBody, setStateBody] = useState(emptyState);
+  const [stateDistance, setStateDistance] = useState(emptyState);
+  const [stateHeight, setStateHeight] = useState(emptyState);
+  const [currentStateHead, setCurrentStateHead] = useState(statesName.NEUTRAL);
+  const [currentStateBody, setCurrentStateBody] = useState(statesName.NEUTRAL);
+  const [currentStateDistance, setCurrentStateDistance] = useState(
+    statesName.NEUTRAL,
+  );
+  const prevDistanceState = usePrevious(currentStateDistance);
+  const [currentStateHeight, setCurrentStateHeight] = useState(
+    statesName.NEUTRAL,
+  );
+  const [currentStateHeadTimeStamp, setCurrentStateHeadTimeStamp] = useState(
+    Date.now(),
+  );
+  const [currentStateBodyTimeStamp, setCurrentStateBodyTimeStamp] = useState(
+    Date.now(),
+  );
+  const [
+    currentStateDistanceTimeStamp,
+    setCurrentStateDistanceTimeStamp,
+  ] = useState(Date.now());
+  const [
+    currentStateHeightTimeStamp,
+    setCurrentStateHeightTimeStamp,
+  ] = useState(Date.now());
   // CHART DATA
   const [chartDataShoulder, setChartDataShoulder] = useState([]);
   const [chartDataEye, setChartDataEye] = useState([]);
+  // TIMELINE DATA
+  const [timelineData, setTimelineData] = useState([timelineModel]);
 
   // TIME LOGIC
   const [headPostureOverTimeIsBad, setHeadPostureOverTimeIsBad] = useState(
@@ -150,6 +185,21 @@ export const PoseNetCamera = () => {
       }
     }
   }, [appContext, calibrationHeadTick, setAppContext]);
+
+  // TODO TIMELINE LOGIC
+  useEffect(() => {
+    if (prevDistanceState === currentStateDistance) {
+      // console.log('no state change');
+    } else if (currentStateDistance === statesName.NEUTRAL) {
+      console.log(statesName.NEUTRAL);
+    } else if (currentStateDistance === statesName.WARNING) {
+      console.log(statesName.WARNING);
+    } else if (currentStateDistance === statesName.DANGER) {
+      console.log(statesName.DANGER);
+    } else if (currentStateDistance === statesName.SUCCESS) {
+      console.log(statesName.SUCCESS);
+    }
+  }, [currentStateDistance, prevDistanceState]);
 
   // RUN POSENET
   useEffect(() => {
@@ -333,12 +383,12 @@ export const PoseNetCamera = () => {
             if (timerOverallGood.isRunning()) {
               timerOverallGood.pause();
             }
-            console.log('bad distance (> 5 seconds)');
+            // console.log('bad distance (> 5 seconds)');
             // ANNOUNCE THAT -DISTANCE- POSTURE is BAD
             setDistanceOverTimeIsBad(true);
             // ELSE ANNOUNCE THAT -DISTANCE- POSTURE is GOOD
           } else {
-            console.log('good distance');
+            // console.log('good distance');
             setDistanceOverTimeIsBad(false);
           }
 
@@ -353,13 +403,13 @@ export const PoseNetCamera = () => {
             if (timerOverallGood.isRunning()) {
               timerOverallGood.pause();
             }
-            console.log('bad height (> 5 seconds)');
+            // console.log('bad height (> 5 seconds)');
             // ANNOUNCE THAT -HEIGHT- is BAD
             setHeightOverTimeIsBad(true);
             // ELSE ANNOUNCE THAT -HEIGHT- is GOOD
           } else {
             setHeightOverTimeIsBad(false);
-            console.log('good height');
+            // console.log('good height');
           }
 
           // IF -BODY- and -HEAD- BAD POSTURE TIMERS & -DISTANCE- & -HEIGHT- TIMERS are less than THRESHOLD
@@ -391,59 +441,118 @@ export const PoseNetCamera = () => {
 
           // TODO: # CALCULATIONS
 
-          // IF CENTRAL TENDENCY OF -BODY- not within THRESHOLD
-          if (centralTendencyBody > appContext.threshold_body) {
-            // START -BAD- BODY TIMER
-            timerBadBody.start({ precision: 'secondTenths' });
-            setBodyPostureOverTimeWarning(true);
-          } else {
-            // RESET -BAD- BODY TIMER
-            timerBadBody.reset();
-            setBodyPostureOverTimeWarning(false);
-          }
+          // TIMELINE
+          const xState = ({
+            name,
+            value,
+            threshold,
+            timer,
+            currentState,
+            currentStateTimeStamp,
+            cbCurrentStateTimeStamp,
+            cbWarning,
+            cbChange,
+          }) => {
+            let status = statesName.NEUTRAL;
+            // CALCULATE NEW STATUS
+            if (value <= threshold) {
+              timer.reset();
+              cbWarning(false);
+              status = statesName.SUCCESS;
+            } else if (value > threshold) {
+              timer.start({ precision: 'secondTenths' });
+              cbWarning(true);
+              if (
+                timer.getTotalTimeValues().seconds >
+                appContext.timer_timeUntilBadPosture
+              ) {
+                status = statesName.DANGER;
+              } else {
+                status = statesName.WARNING;
+              }
+            }
+            // RUN ONLY IF STATUS CHANGED
+            if (currentState !== status) {
+              setTimelineData([
+                ...timelineData,
+                [
+                  name,
+                  currentState,
+                  statesColourHex[currentState],
+                  currentStateTimeStamp,
+                  nextObj.createdAt,
+                ],
+              ]);
+              cbCurrentStateTimeStamp(nextObj.createdAt);
+              cbChange(status);
+              // console.log("input",
+              //   {
+              //     value,
+              //     threshold,
+              //     timer,
+              //     currentState,
+              //     callback,
+              //   },"output",
+              //   { status },
+              // );
+            }
+          };
 
-          // IF CENTRAL TENDENCY OF -HEAD- not within THRESHOLD
-          if (centralTendencyHead > appContext.threshold_head) {
-            // START -BAD- HEAD TIMER
-            timerBadHead.start({ precision: 'secondTenths' });
-            setHeadPostureOverTimeWarning(true);
-          } else {
-            // RESET -HEAD- BODY TIMER
-            timerBadHead.reset();
-            setHeadPostureOverTimeWarning(false);
-          }
-
-          // IF CENTRAL TENDENCY OF -DISTANCE- not within THRESHOLD
-          if (
-            Math.abs(
+          // RUN xSTATE ON ALL SCORES
+          // HEAD
+          xState({
+            name: 'Head',
+            value: centralTendencyHead,
+            threshold: appContext.threshold_head,
+            timer: timerBadHead,
+            currentState: currentStateHead,
+            currentStateTimeStamp: currentStateHeadTimeStamp,
+            cbCurrentStateTimeStamp: setCurrentStateHeadTimeStamp,
+            cbWarning: setHeadPostureOverTimeWarning,
+            cbChange: setCurrentStateHead,
+          });
+          // BODY
+          xState({
+            name: 'Body',
+            value: centralTendencyBody,
+            threshold: appContext.threshold_body,
+            timer: timerBadBody,
+            currentState: currentStateBody,
+            currentStateTimeStamp: currentStateBodyTimeStamp,
+            cbCurrentStateTimeStamp: setCurrentStateBodyTimeStamp,
+            cbWarning: setBodyPostureOverTimeWarning,
+            cbChange: setCurrentStateBody,
+          });
+          // DISTANCE
+          xState({
+            name: 'Distance',
+            value: Math.abs(
               get(calibrationBodyTick, 'lengthOfVector', 0) -
                 get(centralTendencyDistance, 'lengthOfVector', 0),
-            ) > appContext.threshold_distance
-          ) {
-            // START -BAD- DISTANCE TIMER
-            timerBadDistance.start({ precision: 'secondTenths' });
-            setDistanceOverTimeWarning(true);
-          } else {
-            // RESET -BAD- DISTANCE TIMER
-            timerBadDistance.reset();
-            setDistanceOverTimeWarning(false);
-          }
-
-          // IF CENTRAL TENDENCY OF -HEIGHT- not within THRESHOLD
-          if (
-            Math.abs(
+            ),
+            threshold: appContext.threshold_distance,
+            timer: timerBadDistance,
+            currentState: currentStateDistance,
+            currentStateTimeStamp: currentStateDistanceTimeStamp,
+            cbCurrentStateTimeStamp: setCurrentStateDistanceTimeStamp,
+            cbWarning: setDistanceOverTimeWarning,
+            cbChange: setCurrentStateDistance,
+          });
+          // HEIGHT
+          xState({
+            name: 'Height',
+            value: Math.abs(
               get(calibrationBodyTick, 'meanY', 0) -
                 get(centralTendencyHeight, 'meanY', 0),
-            ) > appContext.threshold_height
-          ) {
-            // START -BAD- HEIGHT TIMER
-            timerBadHeight.start({ precision: 'secondTenths' });
-            setHeightOverTimeWarning(true);
-          } else {
-            // RESET -BAD- HEIGHT TIMER
-            timerBadHeight.reset();
-            setHeightOverTimeWarning(false);
-          }
+            ),
+            threshold: appContext.threshold_height,
+            timer: timerBadHeight,
+            currentState: currentStateHeight,
+            currentStateTimeStamp: currentStateHeightTimeStamp,
+            cbCurrentStateTimeStamp: setCurrentStateHeightTimeStamp,
+            cbWarning: setHeightOverTimeWarning,
+            cbChange: setCurrentStateHeight,
+          });
         } catch (e) {
           console.log(e);
         }
@@ -464,6 +573,16 @@ export const PoseNetCamera = () => {
     appContext.threshold_height,
     appContext.timer_timeUntilBadPosture,
     calibrationBodyTick,
+    currentStateBody,
+    currentStateBodyTimeStamp,
+    currentStateDistance,
+    currentStateDistanceTimeStamp,
+    currentStateHead,
+    currentStateHeadTimeStamp,
+    currentStateHeight,
+    currentStateHeightTimeStamp,
+    prevDistanceState,
+    timelineData,
   ]);
 
   // NOTIFICATION LOGIC of HEAD
@@ -474,7 +593,6 @@ export const PoseNetCamera = () => {
           message,
           intent,
         };
-        console.log(toastObj);
         uiContext.toasterRef.current.show(toastObj);
       }
       if (uiContext.showNotificationBrowser) {
@@ -509,7 +627,6 @@ export const PoseNetCamera = () => {
           message,
           intent,
         };
-        console.log(toastObj);
         uiContext.toasterRef.current.show(toastObj);
       }
       if (uiContext.showNotificationBrowser) {
@@ -547,7 +664,6 @@ export const PoseNetCamera = () => {
           message,
           intent,
         };
-        console.log(toastObj);
         uiContext.toasterRef.current.show(toastObj);
       }
       if (uiContext.showNotificationBrowser) {
@@ -585,7 +701,6 @@ export const PoseNetCamera = () => {
           message,
           intent,
         };
-        console.log(toastObj);
         uiContext.toasterRef.current.show(toastObj);
       }
       if (uiContext.showNotificationBrowser) {
@@ -882,15 +997,7 @@ export const PoseNetCamera = () => {
                   <WidgetModern
                     name="Distance"
                     value={Math.round(stateDistance.value)}
-                    status={(function() {
-                      if (distanceOverTimeIsBad) {
-                        return states.DANGER;
-                      }
-                      if (distanceOverTimeWarning) {
-                        return states.WARNING;
-                      }
-                      return states.SUCCESS;
-                    })()}
+                    status={states[currentStateDistance]}
                     minimal={!showScores}
                     description="Distance deviation from calibration data distance between user and screen"
                   />
@@ -899,15 +1006,7 @@ export const PoseNetCamera = () => {
                   <WidgetModern
                     name="Height"
                     value={Math.round(stateHeight.value)}
-                    status={(function() {
-                      if (heightOverTimeIsBad) {
-                        return states.DANGER;
-                      }
-                      if (heightOverTimeWarning) {
-                        return states.WARNING;
-                      }
-                      return states.SUCCESS;
-                    })()}
+                    status={states[currentStateHeight]}
                     minimal={!showScores}
                     description="Sitting height deviation from calibration data"
                   />
@@ -916,15 +1015,7 @@ export const PoseNetCamera = () => {
                   <WidgetModern
                     name="Head"
                     value={Math.round(stateHead.value)}
-                    status={(function() {
-                      if (headPostureOverTimeIsBad) {
-                        return states.DANGER;
-                      }
-                      if (headPostureOverTimeWarning) {
-                        return states.WARNING;
-                      }
-                      return states.SUCCESS;
-                    })()}
+                    status={states[currentStateHead]}
                     minimal={!showScores}
                     description="Tilt angle of head [° degrees]"
                   />
@@ -933,15 +1024,7 @@ export const PoseNetCamera = () => {
                   <WidgetModern
                     name="Body"
                     value={Math.round(stateBody.value)}
-                    status={(function() {
-                      if (bodyPostureOverTimeIsBad) {
-                        return states.DANGER;
-                      }
-                      if (bodyPostureOverTimeWarning) {
-                        return states.WARNING;
-                      }
-                      return states.SUCCESS;
-                    })()}
+                    status={states[currentStateBody]}
                     minimal={!showScores}
                     description="Tilt angle of shoulders [° degrees]"
                   />
@@ -949,6 +1032,7 @@ export const PoseNetCamera = () => {
               </div>
             </div>
           </div>
+          <Timeline data={timelineData} />
           <div className="py-10 md:py-20">
             <div className="container px-6 mx-auto">
               <div className="w-full sm:w-full md:w-1/2 my-1 pl-0 md:pl-1">
