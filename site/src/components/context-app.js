@@ -18,8 +18,7 @@ export const initialState = {
   posenet_measurement: 'median',
   // EPOCH
   epoch_epochMode: true,
-  epoch_epochCount: 500,
-  epoch_timeWindowMeanInMilliseconds: 20000,
+  epoch_epochCount: 100,
   // TIMER
   timer_timeUntilBadPosture: 10,
   // THRESHOLD

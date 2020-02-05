@@ -47,7 +47,7 @@ export const states = {
 };
 
 export const WidgetModern = React.memo(
-  ({ name, value, status = states.NEUTRAL, minimal = false, description }) => {
+  ({ name, value, status = states.SUCCESS, minimal = false, description }) => {
     return (
       <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
         <div

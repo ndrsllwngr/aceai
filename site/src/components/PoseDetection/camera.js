@@ -63,7 +63,7 @@ const subjectBody = new Subject();
 export const historyHead = [];
 const subjectHead = new Subject();
 
-const emptyState = { msg: 'Loading...', value: 0.0, status: 'default' };
+const emptyState = Number(0);
 // eslint-disable-next-line no-underscore-dangle
 let _streamCopy = null;
 
@@ -512,12 +512,13 @@ export const PoseNetCamera = () => {
             toastMsgDanger: 'Well done. Your shoulders are well aligned now.',
           });
           // DISTANCE
+          const centralTendencyDistanceLengthOfVector = Math.abs(
+            get(calibrationBodyTick, 'lengthOfVector', 0) -
+              get(centralTendencyDistance, 'lengthOfVector', 0),
+          );
           xState({
             name: 'Distance',
-            value: Math.abs(
-              get(calibrationBodyTick, 'lengthOfVector', 0) -
-                get(centralTendencyDistance, 'lengthOfVector', 0),
-            ),
+            value: centralTendencyDistanceLengthOfVector,
             threshold: appContext.threshold_distance,
             timer: timerBadDistance,
             currentState: currentStateDistance || statesName.SUCCESS,
@@ -532,12 +533,13 @@ export const PoseNetCamera = () => {
               'Bad distance to screen detected. Correct if possible.',
           });
           // HEIGHT
+          const centralTendencyHeightMeanY = Math.abs(
+            get(calibrationBodyTick, 'meanY', 0) -
+              get(centralTendencyHeight, 'meanY', 0),
+          );
           xState({
             name: 'Height',
-            value: Math.abs(
-              get(calibrationBodyTick, 'meanY', 0) -
-                get(centralTendencyHeight, 'meanY', 0),
-            ),
+            value: centralTendencyHeightMeanY,
             threshold: appContext.threshold_height,
             timer: timerBadHeight,
             currentState: currentStateHeight || statesName.SUCCESS,
@@ -549,6 +551,27 @@ export const PoseNetCamera = () => {
             toastMsgSuccess: 'Well done. Your sitting height is okay now.',
             toastMsgDanger: 'Bad sitting height detected. Correct if possible.',
           });
+          // SET STATE VALUES
+          // console.log({
+          //   centralTendencyHead,
+          //   centralTendencyBody,
+          //   centralTendencyDistanceLengthOfVector,
+          //   centralTendencyHeightMeanY,
+          // });
+          if (centralTendencyHead) {
+            setStateHead(Number(centralTendencyHead).toFixed(2));
+          }
+          if (centralTendencyBody) {
+            setStateBody(Number(centralTendencyBody).toFixed(2));
+          }
+          if (centralTendencyDistanceLengthOfVector) {
+            setStateDistance(
+              Number(centralTendencyDistanceLengthOfVector).toFixed(2),
+            );
+          }
+          if (centralTendencyHeightMeanY) {
+            setStateHeight(Number(centralTendencyHeightMeanY).toFixed(2));
+          }
         } catch (e) {
           console.log(e);
         }
@@ -603,71 +626,10 @@ export const PoseNetCamera = () => {
 
   // TODO: # LOGIC FOR STATES
 
-  // UPDATE STATUS & CHART of BODY
+  // CHART of BODY
   useEffect(() => {
     const subscription = subjectBody.subscribe({
       next: nextObj => {
-        if (Math.abs(nextObj.angleOfVector) > appContext.threshold_body) {
-          setStateBody({
-            msg: `Bad (${nextObj.name})`,
-            value: nextObj.angleOfVector.toFixed(2),
-            status: 'bad',
-          });
-        } else {
-          setStateBody({
-            msg: `Good (${nextObj.name})`,
-            value: nextObj.angleOfVector.toFixed(2),
-            status: 'good',
-          });
-        }
-        // HEIGHT DIFF
-        if (
-          Math.abs(
-            get(calibrationBodyTick, 'meanY', 0) - get(nextObj, 'meanY', 0),
-          ) > appContext.threshold_height
-        ) {
-          setStateHeight({
-            msg: `Bad (${nextObj.name})`,
-            value: (
-              get(calibrationBodyTick, 'meanY', 0) - get(nextObj, 'meanY', 0)
-            ).toFixed(2),
-            status: 'bad',
-          });
-        } else {
-          setStateHeight({
-            msg: `Good (${nextObj.name})`,
-            value: (
-              get(calibrationBodyTick, 'meanY', 0) - get(nextObj, 'meanY', 0)
-            ).toFixed(2),
-            status: 'good',
-          });
-        }
-        // DISTANCE DIFF
-        if (
-          Math.abs(
-            get(calibrationBodyTick, 'lengthOfVector', 0) -
-              get(nextObj, 'lengthOfVector', 0),
-          ) > appContext.threshold_distance
-        ) {
-          setStateDistance({
-            msg: `Bad (${nextObj.name})`,
-            value: (
-              get(calibrationBodyTick, 'lengthOfVector', 0) -
-              get(nextObj, 'lengthOfVector', 0)
-            ).toFixed(2),
-            status: 'bad',
-          });
-        } else {
-          setStateDistance({
-            msg: `Good (${nextObj.name})`,
-            value: (
-              get(calibrationBodyTick, 'lengthOfVector', 0) -
-              get(nextObj, 'lengthOfVector', 0)
-            ).toFixed(2),
-            status: 'good',
-          });
-        }
-        // PRINT data
         if (appContext.posenet_charts) {
           const copyArr = [...chartDataShoulder];
           // Chart window
@@ -687,32 +649,12 @@ export const PoseNetCamera = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [
-    appContext.posenet_charts,
-    appContext.threshold_body,
-    appContext.threshold_distance,
-    appContext.threshold_height,
-    chartDataShoulder,
-    calibrationBodyTick,
-  ]);
+  }, [appContext.posenet_charts, chartDataShoulder]);
 
-  // UPDATE STATUS & CHART of HEAD
+  // CHART of HEAD
   useEffect(() => {
     const subscription = subjectHead.subscribe({
       next: nextObj => {
-        if (Math.abs(nextObj.angleOfVector) > appContext.threshold_head) {
-          setStateHead({
-            msg: `Bad (${nextObj.name})`,
-            value: nextObj.angleOfVector.toFixed(2),
-            status: 'bad',
-          });
-        } else {
-          setStateHead({
-            msg: `Good (${nextObj.name})`,
-            value: nextObj.angleOfVector.toFixed(2),
-            status: 'good',
-          });
-        }
         // PRINT data
         if (appContext.posenet_charts) {
           const copyArr = [...chartDataEye];
@@ -733,7 +675,7 @@ export const PoseNetCamera = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [appContext.posenet_charts, appContext.threshold_head, chartDataEye]);
+  }, [appContext.posenet_charts, chartDataEye]);
 
   // LOG POSENET DATA
   useEffect(() => {
@@ -873,8 +815,10 @@ export const PoseNetCamera = () => {
                 <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
                   <WidgetModern
                     name="Distance"
-                    value={Math.round(stateDistance.value)}
-                    status={states[currentStateDistance]}
+                    value={Math.round(stateDistance)}
+                    status={
+                      currentStateDistance && states[currentStateDistance]
+                    }
                     minimal={!showScores}
                     description="Distance deviation from calibration data distance between user and screen"
                   />
@@ -882,8 +826,8 @@ export const PoseNetCamera = () => {
                 <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
                   <WidgetModern
                     name="Height"
-                    value={Math.round(stateHeight.value)}
-                    status={states[currentStateHeight]}
+                    value={Math.round(stateHeight)}
+                    status={currentStateHeight && states[currentStateHeight]}
                     minimal={!showScores}
                     description="Sitting height deviation from calibration data"
                   />
@@ -891,8 +835,8 @@ export const PoseNetCamera = () => {
                 <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
                   <WidgetModern
                     name="Head"
-                    value={Math.round(stateHead.value)}
-                    status={states[currentStateHead]}
+                    value={Math.round(stateHead)}
+                    status={currentStateHead && states[currentStateHead]}
                     minimal={!showScores}
                     description="Tilt angle of head [° degrees]"
                   />
@@ -900,8 +844,8 @@ export const PoseNetCamera = () => {
                 <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
                   <WidgetModern
                     name="Body"
-                    value={Math.round(stateBody.value)}
-                    status={states[currentStateBody]}
+                    value={Math.round(stateBody)}
+                    status={currentStateBody && states[currentStateBody]}
                     minimal={!showScores}
                     description="Tilt angle of shoulders [° degrees]"
                   />
@@ -933,7 +877,7 @@ export const PoseNetCamera = () => {
                   // }
                 >
                   <div className="p-4 h-48">
-                    {Math.abs(stateHead.value) < appContext.threshold_head && (
+                    {Math.abs(stateHead) < appContext.threshold_head && (
                       <svg
                         width="724"
                         height="724"
@@ -952,8 +896,8 @@ export const PoseNetCamera = () => {
                         />
                       </svg>
                     )}
-                    {Math.abs(stateHead.value) > appContext.threshold_head &&
-                      stateHead.value < 0 && (
+                    {Math.abs(stateHead) > appContext.threshold_head &&
+                      stateHead < 0 && (
                         <svg
                           width="724"
                           height="724"
@@ -984,8 +928,8 @@ export const PoseNetCamera = () => {
                           </defs>
                         </svg>
                       )}
-                    {Math.abs(stateHead.value) > appContext.threshold_head &&
-                      stateHead.value > 0 && (
+                    {Math.abs(stateHead) > appContext.threshold_head &&
+                      stateHead > 0 && (
                         <svg
                           width="724"
                           height="724"
