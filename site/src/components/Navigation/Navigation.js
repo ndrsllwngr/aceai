@@ -38,10 +38,12 @@ export const Navigation = () => {
             <Navbar.Heading>
               <span className="font-extrabold">BodyPose</span>{' '}
               <Tooltip
-                content={`BUILD: ${process.env.BUILD_ID}, COMMIT: ${process.env.COMMIT_REF}`}
+                content={`${
+                  process.env.COMMIT_REF ? process.env.COMMIT_REF : 'DEVELOP'
+                }`}
                 position={Position.BOTTOM}
               >
-                <span className="text-gray-300 font-medium text-xs">v0.9</span>
+                <span className="text-gray-300 font-medium text-xs">v1.0</span>
               </Tooltip>
             </Navbar.Heading>
           </Navbar.Group>

@@ -2,7 +2,7 @@
 /* eslint-disable react/button-has-type */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import get from 'lodash/get';
 import * as posenet from '@tensorflow-models/posenet';
 import {
@@ -67,13 +67,13 @@ const emptyState = { msg: 'Loading...', value: 0.0, status: 'default' };
 // eslint-disable-next-line no-underscore-dangle
 let _streamCopy = null;
 
-function usePrevious(value) {
-  const ref = useRef();
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
-}
+// function usePrevious(value) {
+//   const ref = useRef();
+//   useEffect(() => {
+//     ref.current = value;
+//   });
+//   return ref.current;
+// }
 
 export const PoseNetCamera = () => {
   // CONTEXT
@@ -93,54 +93,27 @@ export const PoseNetCamera = () => {
   const [stateBody, setStateBody] = useState(emptyState);
   const [stateDistance, setStateDistance] = useState(emptyState);
   const [stateHeight, setStateHeight] = useState(emptyState);
-  const [currentStateHead, setCurrentStateHead] = useState(statesName.NEUTRAL);
-  const [currentStateBody, setCurrentStateBody] = useState(statesName.NEUTRAL);
-  const [currentStateDistance, setCurrentStateDistance] = useState(
-    statesName.NEUTRAL,
-  );
-  const prevDistanceState = usePrevious(currentStateDistance);
-  const [currentStateHeight, setCurrentStateHeight] = useState(
-    statesName.NEUTRAL,
-  );
-  const [currentStateHeadTimeStamp, setCurrentStateHeadTimeStamp] = useState(
-    Date.now(),
-  );
-  const [currentStateBodyTimeStamp, setCurrentStateBodyTimeStamp] = useState(
-    Date.now(),
-  );
+  // TIMELINE
+  const [currentStateHead, setCurrentStateHead] = useState();
+  const [currentStateBody, setCurrentStateBody] = useState();
+  const [currentStateDistance, setCurrentStateDistance] = useState();
+  const [currentStateHeight, setCurrentStateHeight] = useState();
+  // TIMELINE TIMESTAMP
+  const [currentStateHeadTimeStamp, setCurrentStateHeadTimeStamp] = useState();
+  const [currentStateBodyTimeStamp, setCurrentStateBodyTimeStamp] = useState();
   const [
     currentStateDistanceTimeStamp,
     setCurrentStateDistanceTimeStamp,
-  ] = useState(Date.now());
+  ] = useState();
   const [
     currentStateHeightTimeStamp,
     setCurrentStateHeightTimeStamp,
-  ] = useState(Date.now());
+  ] = useState();
   // CHART DATA
   const [chartDataShoulder, setChartDataShoulder] = useState([]);
   const [chartDataEye, setChartDataEye] = useState([]);
   // TIMELINE DATA
   const [timelineData, setTimelineData] = useState([timelineModel]);
-
-  // TIME LOGIC
-  const [headPostureOverTimeIsBad, setHeadPostureOverTimeIsBad] = useState(
-    false,
-  );
-  const [bodyPostureOverTimeIsBad, setBodyPostureOverTimeIsBad] = useState(
-    false,
-  );
-  const [distanceOverTimeIsBad, setDistanceOverTimeIsBad] = useState(false);
-  const [heightOverTimeIsBad, setHeightOverTimeIsBad] = useState(false);
-
-  // WARNING
-  const [headPostureOverTimeWarning, setHeadPostureOverTimeWarning] = useState(
-    false,
-  );
-  const [bodyPostureOverTimeWarning, setBodyPostureOverTimeWarning] = useState(
-    false,
-  );
-  const [distanceOverTimeWarning, setDistanceOverTimeWarning] = useState(false);
-  const [heightOverTimeWarning, setHeightOverTimeWarning] = useState(false);
 
   // TODO: ADD CALIBRATION LOGIC TO APP to recalibrate on the fly
   // TODO: ADD CAMERA AS CUSTOM SECTION
@@ -186,19 +159,19 @@ export const PoseNetCamera = () => {
   }, [appContext, calibrationHeadTick, setAppContext]);
 
   // TODO TIMELINE LOGIC
-  useEffect(() => {
-    if (prevDistanceState === currentStateDistance) {
-      // console.log('no state change');
-    } else if (currentStateDistance === statesName.NEUTRAL) {
-      console.log(statesName.NEUTRAL);
-    } else if (currentStateDistance === statesName.WARNING) {
-      console.log(statesName.WARNING);
-    } else if (currentStateDistance === statesName.DANGER) {
-      console.log(statesName.DANGER);
-    } else if (currentStateDistance === statesName.SUCCESS) {
-      console.log(statesName.SUCCESS);
-    }
-  }, [currentStateDistance, prevDistanceState]);
+  // useEffect(() => {
+  //   if (prevDistanceState === currentStateDistance) {
+  //     // console.log('no state change');
+  //   } else if (currentStateDistance === statesName.NEUTRAL) {
+  //     console.log(statesName.NEUTRAL);
+  //   } else if (currentStateDistance === statesName.WARNING) {
+  //     console.log(statesName.WARNING);
+  //   } else if (currentStateDistance === statesName.DANGER) {
+  //     console.log(statesName.DANGER);
+  //   } else if (currentStateDistance === statesName.SUCCESS) {
+  //     console.log(statesName.SUCCESS);
+  //   }
+  // }, [currentStateDistance, prevDistanceState]);
 
   // RUN POSENET
   useEffect(() => {
@@ -260,8 +233,8 @@ export const PoseNetCamera = () => {
       next: nextObj => {
         try {
           // CALCULATE POSTURE IF GOOD OR BAD VIA MEAN or MEDIAN AND TIME
-          const clonehistoryBody = [...historyBody];
-          const clonehistoryHead = [...historyHead];
+          const clonehistoryBody = historyBody;
+          const clonehistoryHead = historyHead;
           let timeWindowDataHead;
           let timeWindowDataBody;
           const timeWindowInMs = appContext.epoch_epochCount * 10;
@@ -344,12 +317,12 @@ export const PoseNetCamera = () => {
             if (timerOverallGood.isRunning()) {
               timerOverallGood.pause();
             }
-            // console.log('bad posture body (> 5 seconds)');
-            // ANNOUNCE THAT -BODY- POSTURE is BAD
-            setBodyPostureOverTimeIsBad(true);
-            // ELSE ANNOUNCE THAT -BODY- POSTURE is GOOD
-          } else {
-            setBodyPostureOverTimeIsBad(false);
+            //   // console.log('bad posture body (> 5 seconds)');
+            //   // ANNOUNCE THAT -BODY- POSTURE is BAD
+            //   setBodyPostureOverTimeIsBad(true);
+            //   // ELSE ANNOUNCE THAT -BODY- POSTURE is GOOD
+            // } else {
+            //   setBodyPostureOverTimeIsBad(false);
           }
 
           // TRIGGER OVERALL -BAD- TIMER by HEAD
@@ -363,12 +336,12 @@ export const PoseNetCamera = () => {
             if (timerOverallGood.isRunning()) {
               timerOverallGood.pause();
             }
-            // console.log('bad posture eye (> 5 seconds)');
-            // ANNOUNCE THAT -HEAD- POSTURE is BAD
-            setHeadPostureOverTimeIsBad(true);
-            // ELSE ANNOUNCE THAT -HEAD- POSTURE is GOOD
-          } else {
-            setHeadPostureOverTimeIsBad(false);
+            //   // console.log('bad posture eye (> 5 seconds)');
+            //   // ANNOUNCE THAT -HEAD- POSTURE is BAD
+            //   setHeadPostureOverTimeIsBad(true);
+            //   // ELSE ANNOUNCE THAT -HEAD- POSTURE is GOOD
+            // } else {
+            //   setHeadPostureOverTimeIsBad(false);
           }
 
           // TRIGGER OVERALL -BAD- TIMER by DISTANCE
@@ -382,13 +355,13 @@ export const PoseNetCamera = () => {
             if (timerOverallGood.isRunning()) {
               timerOverallGood.pause();
             }
-            // console.log('bad distance (> 5 seconds)');
-            // ANNOUNCE THAT -DISTANCE- POSTURE is BAD
-            setDistanceOverTimeIsBad(true);
-            // ELSE ANNOUNCE THAT -DISTANCE- POSTURE is GOOD
-          } else {
-            // console.log('good distance');
-            setDistanceOverTimeIsBad(false);
+            //   // console.log('bad distance (> 5 seconds)');
+            //   // ANNOUNCE THAT -DISTANCE- POSTURE is BAD
+            //   setDistanceOverTimeIsBad(true);
+            //   // ELSE ANNOUNCE THAT -DISTANCE- POSTURE is GOOD
+            // } else {
+            //   // console.log('good distance');
+            //   setDistanceOverTimeIsBad(false);
           }
 
           // TRIGGER OVERALL -BAD- TIMER by HEIGHT
@@ -402,13 +375,13 @@ export const PoseNetCamera = () => {
             if (timerOverallGood.isRunning()) {
               timerOverallGood.pause();
             }
-            // console.log('bad height (> 5 seconds)');
-            // ANNOUNCE THAT -HEIGHT- is BAD
-            setHeightOverTimeIsBad(true);
-            // ELSE ANNOUNCE THAT -HEIGHT- is GOOD
-          } else {
-            setHeightOverTimeIsBad(false);
-            // console.log('good height');
+            //   // console.log('bad height (> 5 seconds)');
+            //   // ANNOUNCE THAT -HEIGHT- is BAD
+            //   setHeightOverTimeIsBad(true);
+            //   // ELSE ANNOUNCE THAT -HEIGHT- is GOOD
+            // } else {
+            //   setHeightOverTimeIsBad(false);
+            //   // console.log('good height');
           }
 
           // IF -BODY- and -HEAD- BAD POSTURE TIMERS & -DISTANCE- & -HEIGHT- TIMERS are less than THRESHOLD
@@ -449,18 +422,18 @@ export const PoseNetCamera = () => {
             currentState,
             currentStateTimeStamp,
             cbCurrentStateTimeStamp,
-            cbWarning,
+            // cbWarning,
             cbChange,
+            toastMsgSuccess,
+            toastMsgDanger,
           }) => {
-            let status = statesName.NEUTRAL;
+            let status = statesName.SUCCESS;
             // CALCULATE NEW STATUS
             if (value <= threshold) {
               timer.reset();
-              cbWarning(false);
               status = statesName.SUCCESS;
             } else if (value > threshold) {
               timer.start({ precision: 'secondTenths' });
-              cbWarning(true);
               if (
                 timer.getTotalTimeValues().seconds >
                 appContext.timer_timeUntilBadPosture
@@ -484,6 +457,14 @@ export const PoseNetCamera = () => {
               ]);
               cbCurrentStateTimeStamp(nextObj.createdAt);
               cbChange(status);
+              if (status) {
+                if (status && status === statesName.SUCCESS) {
+                  showToast(toastMsgSuccess, Intent.SUCCESS);
+                }
+                if (status === statesName.DANGER) {
+                  showToast(toastMsgDanger, Intent.DANGER);
+                }
+              }
               // console.log("input",
               //   {
               //     value,
@@ -504,11 +485,15 @@ export const PoseNetCamera = () => {
             value: centralTendencyHead,
             threshold: appContext.threshold_head,
             timer: timerBadHead,
-            currentState: currentStateHead,
-            currentStateTimeStamp: currentStateHeadTimeStamp,
+            currentState: currentStateHead || statesName.SUCCESS,
+            currentStateTimeStamp:
+              currentStateHeadTimeStamp ||
+              get(clonehistoryHead, '[0].createdAt', Date.now()),
             cbCurrentStateTimeStamp: setCurrentStateHeadTimeStamp,
-            cbWarning: setHeadPostureOverTimeWarning,
             cbChange: setCurrentStateHead,
+            toastMsgSuccess: 'Well done. Your head is well aligned now.',
+            toastMsgDanger:
+              'Misalignment of head detected. Correct posture if possible.',
           });
           // BODY
           xState({
@@ -516,11 +501,15 @@ export const PoseNetCamera = () => {
             value: centralTendencyBody,
             threshold: appContext.threshold_body,
             timer: timerBadBody,
-            currentState: currentStateBody,
-            currentStateTimeStamp: currentStateBodyTimeStamp,
+            currentState: currentStateBody || statesName.SUCCESS,
+            currentStateTimeStamp:
+              currentStateBodyTimeStamp ||
+              get(clonehistoryBody, '[0].createdAt', Date.now()),
             cbCurrentStateTimeStamp: setCurrentStateBodyTimeStamp,
-            cbWarning: setBodyPostureOverTimeWarning,
             cbChange: setCurrentStateBody,
+            toastMsgSuccess:
+              'Misalignment of shoulders detected. Correct posture if possible.',
+            toastMsgDanger: 'Well done. Your shoulders are well aligned now.',
           });
           // DISTANCE
           xState({
@@ -531,11 +520,16 @@ export const PoseNetCamera = () => {
             ),
             threshold: appContext.threshold_distance,
             timer: timerBadDistance,
-            currentState: currentStateDistance,
-            currentStateTimeStamp: currentStateDistanceTimeStamp,
+            currentState: currentStateDistance || statesName.SUCCESS,
+            currentStateTimeStamp:
+              currentStateDistanceTimeStamp ||
+              get(clonehistoryBody, '[0].createdAt', Date.now()),
             cbCurrentStateTimeStamp: setCurrentStateDistanceTimeStamp,
-            cbWarning: setDistanceOverTimeWarning,
             cbChange: setCurrentStateDistance,
+            toastMsgSuccess:
+              'Well done. Your distance to the screen is okay now.',
+            toastMsgDanger:
+              'Bad distance to screen detected. Correct if possible.',
           });
           // HEIGHT
           xState({
@@ -546,11 +540,14 @@ export const PoseNetCamera = () => {
             ),
             threshold: appContext.threshold_height,
             timer: timerBadHeight,
-            currentState: currentStateHeight,
-            currentStateTimeStamp: currentStateHeightTimeStamp,
+            currentState: currentStateHeight || statesName.SUCCESS,
+            currentStateTimeStamp:
+              currentStateHeightTimeStamp ||
+              get(clonehistoryBody, '[0].createdAt', Date.now()),
             cbCurrentStateTimeStamp: setCurrentStateHeightTimeStamp,
-            cbWarning: setHeightOverTimeWarning,
             cbChange: setCurrentStateHeight,
+            toastMsgSuccess: 'Well done. Your sitting height is okay now.',
+            toastMsgDanger: 'Bad sitting height detected. Correct if possible.',
           });
         } catch (e) {
           console.log(e);
@@ -580,13 +577,12 @@ export const PoseNetCamera = () => {
     currentStateHeadTimeStamp,
     currentStateHeight,
     currentStateHeightTimeStamp,
-    prevDistanceState,
+    showToast,
     timelineData,
   ]);
 
-  // NOTIFICATION LOGIC of HEAD
-  useEffect(() => {
-    const showToast = (message = '', intent = Intent.PRIMARY) => {
+  const showToast = useCallback(
+    (message = '', intent = Intent.PRIMARY) => {
       if (uiContext.showNotificationInApp && uiContext.toasterRef.current) {
         const toastObj = {
           message,
@@ -597,131 +593,13 @@ export const PoseNetCamera = () => {
       if (uiContext.showNotificationBrowser) {
         showNotification(message);
       }
-    };
-
-    if (headPostureOverTimeIsBad) {
-      showToast(
-        'Misalignment of head detected. Correct posture if possible.',
-        Intent.DANGER,
-      );
-    }
-    if (
-      timerSession.getTotalTimeValues().seconds > 0 &&
-      !headPostureOverTimeIsBad
-    ) {
-      showToast('Well done. Your head is well aligned now.', Intent.SUCCESS);
-    }
-  }, [
-    headPostureOverTimeIsBad,
-    uiContext.showNotificationBrowser,
-    uiContext.showNotificationInApp,
-    uiContext.toasterRef,
-  ]);
-
-  // NOTIFICATION LOGIC of BODY
-  useEffect(() => {
-    const showToast = (message = '', intent = Intent.PRIMARY) => {
-      if (uiContext.showNotificationInApp && uiContext.toasterRef.current) {
-        const toastObj = {
-          message,
-          intent,
-        };
-        uiContext.toasterRef.current.show(toastObj);
-      }
-      if (uiContext.showNotificationBrowser) {
-        showNotification(message);
-      }
-    };
-
-    if (bodyPostureOverTimeIsBad) {
-      showToast(
-        'Misalignment of shoulders detected. Correct posture if possible.',
-        Intent.DANGER,
-      );
-    }
-    if (
-      timerSession.getTotalTimeValues().seconds > 0 &&
-      !bodyPostureOverTimeIsBad
-    ) {
-      showToast(
-        'Well done. Your shoulders are well aligned now.',
-        Intent.SUCCESS,
-      );
-    }
-  }, [
-    bodyPostureOverTimeIsBad,
-    uiContext.showNotificationBrowser,
-    uiContext.showNotificationInApp,
-    uiContext.toasterRef,
-  ]);
-
-  // NOTIFICATION LOGIC of DISTANCE
-  useEffect(() => {
-    const showToast = (message = '', intent = Intent.PRIMARY) => {
-      if (uiContext.showNotificationInApp && uiContext.toasterRef.current) {
-        const toastObj = {
-          message,
-          intent,
-        };
-        uiContext.toasterRef.current.show(toastObj);
-      }
-      if (uiContext.showNotificationBrowser) {
-        showNotification(message);
-      }
-    };
-
-    if (distanceOverTimeIsBad) {
-      showToast(
-        'Bad distance to screen detected. Correct if possible.',
-        Intent.DANGER,
-      );
-    }
-    if (
-      timerSession.getTotalTimeValues().seconds > 0 &&
-      !distanceOverTimeIsBad
-    ) {
-      showToast(
-        'Well done. Your distance to the screen is okay now.',
-        Intent.SUCCESS,
-      );
-    }
-  }, [
-    distanceOverTimeIsBad,
-    uiContext.showNotificationBrowser,
-    uiContext.showNotificationInApp,
-    uiContext.toasterRef,
-  ]);
-
-  // NOTIFICATION LOGIC of HEIGHT
-  useEffect(() => {
-    const showToast = (message = '', intent = Intent.PRIMARY) => {
-      if (uiContext.showNotificationInApp && uiContext.toasterRef.current) {
-        const toastObj = {
-          message,
-          intent,
-        };
-        uiContext.toasterRef.current.show(toastObj);
-      }
-      if (uiContext.showNotificationBrowser) {
-        showNotification(message);
-      }
-    };
-
-    if (heightOverTimeIsBad) {
-      showToast(
-        'Bad sitting height detected. Correct if possible.',
-        Intent.DANGER,
-      );
-    }
-    if (timerSession.getTotalTimeValues().seconds > 0 && !heightOverTimeIsBad) {
-      showToast('Well done. Your sitting height is okay now.', Intent.SUCCESS);
-    }
-  }, [
-    heightOverTimeIsBad,
-    uiContext.showNotificationBrowser,
-    uiContext.showNotificationInApp,
-    uiContext.toasterRef,
-  ]);
+    },
+    [
+      uiContext.showNotificationBrowser,
+      uiContext.showNotificationInApp,
+      uiContext.toasterRef,
+    ],
+  );
 
   // TODO: # LOGIC FOR STATES
 
