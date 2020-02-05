@@ -478,15 +478,19 @@ export const PoseNetCamera = () => {
                 ],
               ]);
               cbCurrentStateTimeStamp(nextObj.createdAt);
-              cbChange(status);
               if (status) {
-                if (status && status === statesName.SUCCESS) {
+                if (
+                  status &&
+                  currentState === statesName.DANGER &&
+                  status === statesName.SUCCESS
+                ) {
                   showToast(toastMsgSuccess, Intent.SUCCESS);
                 }
                 if (status === statesName.DANGER) {
                   showToast(toastMsgDanger, Intent.DANGER);
                 }
               }
+              cbChange(status);
               // console.log("input",
               //   {
               //     value,
