@@ -31,7 +31,7 @@ module.exports = {
     {
       resolve: `gatsby-plugin-env-variables`,
       options: {
-        whitelist: ['BUILD_ID'],
+        whitelist: ['COMMIT_REF'],
       },
     },
     `gatsby-plugin-netlify`,

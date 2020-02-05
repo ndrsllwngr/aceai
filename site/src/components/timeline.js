@@ -14,7 +14,7 @@ export const Timeline = ({ data }) => {
   return (
     <Chart
       width="100%"
-      height="300px"
+      // height="300px"
       chartType="Timeline"
       loader={<div>Loading Chart</div>}
       data={data}
