@@ -115,6 +115,26 @@ export const PoseNetCamera = () => {
   // TIMELINE DATA
   const [timelineData, setTimelineData] = useState([timelineModel]);
 
+  const showToast = useCallback(
+    (message = '', intent = Intent.PRIMARY) => {
+      if (uiContext.showNotificationInApp && uiContext.toasterRef.current) {
+        const toastObj = {
+          message,
+          intent,
+        };
+        uiContext.toasterRef.current.show(toastObj);
+      }
+      if (uiContext.showNotificationBrowser) {
+        showNotification(message);
+      }
+    },
+    [
+      uiContext.showNotificationBrowser,
+      uiContext.showNotificationInApp,
+      uiContext.toasterRef,
+    ],
+  );
+
   // TODO: ADD CALIBRATION LOGIC TO APP to recalibrate on the fly
   // TODO: ADD CAMERA AS CUSTOM SECTION
   // TODO: REFINE STATES and TIMER LOGIC
@@ -603,26 +623,6 @@ export const PoseNetCamera = () => {
     showToast,
     timelineData,
   ]);
-
-  const showToast = useCallback(
-    (message = '', intent = Intent.PRIMARY) => {
-      if (uiContext.showNotificationInApp && uiContext.toasterRef.current) {
-        const toastObj = {
-          message,
-          intent,
-        };
-        uiContext.toasterRef.current.show(toastObj);
-      }
-      if (uiContext.showNotificationBrowser) {
-        showNotification(message);
-      }
-    },
-    [
-      uiContext.showNotificationBrowser,
-      uiContext.showNotificationInApp,
-      uiContext.toasterRef,
-    ],
-  );
 
   // TODO: # LOGIC FOR STATES
 
