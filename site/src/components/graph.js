@@ -15,6 +15,7 @@ export const Graph = ({
   // width, height,
   yDomain,
   loading,
+  color,
 }) => {
   const [showGraph] = useState(true);
   return (
@@ -44,13 +45,14 @@ export const Graph = ({
               data={data}
               opacity={0.25}
               stroke="transparent"
+              color={color}
               style={{}}
             />
             <LineSeries
               curve={null}
               data={data}
               opacity={1}
-              stroke="#12939a"
+              stroke={color}
               strokeStyle="solid"
               style={{}}
             />
@@ -66,4 +68,5 @@ Graph.propTypes = {
   // height: PropTypes.number,
   yDomain: PropTypes.array,
   loading: PropTypes.bool,
+  color: PropTypes.string,
 };

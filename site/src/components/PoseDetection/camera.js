@@ -113,8 +113,10 @@ export const PoseNetCamera = () => {
     setCurrentStateHeightTimeStamp,
   ] = useState();
   // CHART DATA
-  const [chartDataShoulder, setChartDataShoulder] = useState([]);
   const [chartDataEye, setChartDataEye] = useState([]);
+  const [chartDataShoulder, setChartDataShoulder] = useState([]);
+  const [chartDataDistance, setChartDataDistance] = useState([]);
+  const [chartDataHeight, setChartDataHeight] = useState([]);
   // TIMELINE DATA
   const [timelineData, setTimelineData] = useState([timelineModel]);
 
@@ -140,9 +142,10 @@ export const PoseNetCamera = () => {
 
   // TODO: ADD CALIBRATION LOGIC TO APP to recalibrate on the fly
   // TODO: ADD CAMERA AS CUSTOM SECTION
-  // TODO: FIX SCALING OF GRAPHS (maybe add to scores)
   // TODO: ADD SCALING with the help of calibration
   // TODO: ADD SVG ANIMATION
+  // TODO reset timers on unmount
+  // TODO THROTTLE CHARTS! https://blog.bitsrc.io/improve-your-react-app-performance-by-using-throttling-and-debouncing-101afbe9055
 
   // FETCH LATEST CALIBRATION DATA and SET IT AS STATE
   useEffect(() => {
@@ -179,21 +182,6 @@ export const PoseNetCamera = () => {
       }
     }
   }, [appContext, calibrationHeadTick, setAppContext]);
-
-  // TODO TIMELINE LOGIC
-  // useEffect(() => {
-  //   if (prevDistanceState === currentStateDistance) {
-  //     // console.log('no state change');
-  //   } else if (currentStateDistance === statesName.NEUTRAL) {
-  //     console.log(statesName.NEUTRAL);
-  //   } else if (currentStateDistance === statesName.WARNING) {
-  //     console.log(statesName.WARNING);
-  //   } else if (currentStateDistance === statesName.DANGER) {
-  //     console.log(statesName.DANGER);
-  //   } else if (currentStateDistance === statesName.SUCCESS) {
-  //     console.log(statesName.SUCCESS);
-  //   }
-  // }, [currentStateDistance, prevDistanceState]);
 
   // RUN POSENET
   useEffect(() => {
@@ -323,10 +311,6 @@ export const PoseNetCamera = () => {
               centralTendencyHeight,
             });
           }
-          // TODO MAYBE SET UUID HERE to prevent retriggering of notifications
-          // TODO reset timers on unmount
-
-          // TODO: # TIMERS
 
           // TRIGGER OVERALL -BAD- TIMER by BODY
           if (
@@ -339,12 +323,6 @@ export const PoseNetCamera = () => {
             if (timerOverallGood.isRunning()) {
               timerOverallGood.pause();
             }
-            //   // console.log('bad posture body (> 5 seconds)');
-            //   // ANNOUNCE THAT -BODY- POSTURE is BAD
-            //   setBodyPostureOverTimeIsBad(true);
-            //   // ELSE ANNOUNCE THAT -BODY- POSTURE is GOOD
-            // } else {
-            //   setBodyPostureOverTimeIsBad(false);
           }
 
           // TRIGGER OVERALL -BAD- TIMER by HEAD
@@ -358,12 +336,6 @@ export const PoseNetCamera = () => {
             if (timerOverallGood.isRunning()) {
               timerOverallGood.pause();
             }
-            //   // console.log('bad posture eye (> 5 seconds)');
-            //   // ANNOUNCE THAT -HEAD- POSTURE is BAD
-            //   setHeadPostureOverTimeIsBad(true);
-            //   // ELSE ANNOUNCE THAT -HEAD- POSTURE is GOOD
-            // } else {
-            //   setHeadPostureOverTimeIsBad(false);
           }
 
           // TRIGGER OVERALL -BAD- TIMER by DISTANCE
@@ -377,13 +349,6 @@ export const PoseNetCamera = () => {
             if (timerOverallGood.isRunning()) {
               timerOverallGood.pause();
             }
-            //   // console.log('bad distance (> 5 seconds)');
-            //   // ANNOUNCE THAT -DISTANCE- POSTURE is BAD
-            //   setDistanceOverTimeIsBad(true);
-            //   // ELSE ANNOUNCE THAT -DISTANCE- POSTURE is GOOD
-            // } else {
-            //   // console.log('good distance');
-            //   setDistanceOverTimeIsBad(false);
           }
 
           // TRIGGER OVERALL -BAD- TIMER by HEIGHT
@@ -397,13 +362,6 @@ export const PoseNetCamera = () => {
             if (timerOverallGood.isRunning()) {
               timerOverallGood.pause();
             }
-            //   // console.log('bad height (> 5 seconds)');
-            //   // ANNOUNCE THAT -HEIGHT- is BAD
-            //   setHeightOverTimeIsBad(true);
-            //   // ELSE ANNOUNCE THAT -HEIGHT- is GOOD
-            // } else {
-            //   setHeightOverTimeIsBad(false);
-            //   // console.log('good height');
           }
 
           // IF -BODY- and -HEAD- BAD POSTURE TIMERS & -DISTANCE- & -HEIGHT- TIMERS are less than THRESHOLD
@@ -432,8 +390,6 @@ export const PoseNetCamera = () => {
             // START OVERALL -GOOD- TIMER
             timerOverallGood.start({ precision: 'secondTenths' });
           }
-
-          // TODO: # CALCULATIONS
 
           // TIMELINE
           const xState = ({
@@ -578,12 +534,6 @@ export const PoseNetCamera = () => {
             toastMsgDanger: 'Bad sitting height detected. Correct if possible.',
           });
           // SET STATE VALUES
-          // console.log({
-          //   centralTendencyHead,
-          //   centralTendencyBody,
-          //   centralTendencyDistanceLengthOfVector,
-          //   centralTendencyHeightMeanY,
-          // });
           if (centralTendencyHead) {
             setStateHead(Number(centralTendencyHead).toFixed(2));
           }
@@ -598,6 +548,57 @@ export const PoseNetCamera = () => {
           if (centralTendencyHeightMeanY) {
             setStateHeight(Number(centralTendencyHeightMeanY).toFixed(2));
           }
+          // CHARTS
+          if (appContext.posenet_charts) {
+            const copyArr1 = [...chartDataEye];
+            // CHART WINDOW OF HEAD
+            // eslint-disable-next-line no-console
+            if (copyArr1.length >= 50) {
+              copyArr1.shift();
+            }
+            copyArr1.push({
+              x: nextObj.createdAt,
+              y: centralTendencyHead,
+            });
+            // CHART WINDOW OF BODY
+            const copyArr2 = [...chartDataShoulder];
+            // Chart window
+            // eslint-disable-next-line no-console
+            if (copyArr2.length >= 50) {
+              copyArr2.shift();
+            }
+            copyArr2.push({
+              x: nextObj.createdAt,
+              y: centralTendencyBody,
+            });
+            // CHART WINDOW OF HEIGHT
+            const copyArr3 = [...chartDataHeight];
+            // CHART WINDOW OF HEAD
+            // eslint-disable-next-line no-console
+            if (copyArr3.length >= 50) {
+              copyArr3.shift();
+            }
+            copyArr3.push({
+              x: nextObj.createdAt,
+              y: centralTendencyHeightMeanY,
+            });
+            // CHART WINDOW OF DISTANCE
+            const copyArr4 = [...chartDataDistance];
+            // CHART WINDOW OF HEAD
+            // eslint-disable-next-line no-console
+            if (copyArr4.length >= 50) {
+              copyArr4.shift();
+            }
+            copyArr4.push({
+              x: nextObj.createdAt,
+              y: centralTendencyDistanceLengthOfVector,
+            });
+            // SET CHART DATA
+            setChartDataEye(copyArr1);
+            setChartDataShoulder(copyArr2);
+            setChartDataHeight(copyArr3);
+            setChartDataDistance(copyArr4);
+          }
         } catch (e) {
           console.log(e);
         }
@@ -611,6 +612,7 @@ export const PoseNetCamera = () => {
     appContext.epoch_epochCount,
     appContext.epoch_epochMode,
     appContext.global_logging,
+    appContext.posenet_charts,
     appContext.posenet_measurement,
     appContext.threshold_body,
     appContext.threshold_distance,
@@ -618,6 +620,10 @@ export const PoseNetCamera = () => {
     appContext.threshold_height,
     appContext.timer_timeUntilBadPosture,
     calibrationBodyTick,
+    chartDataDistance,
+    chartDataEye,
+    chartDataHeight,
+    chartDataShoulder,
     currentStateBody,
     currentStateBodyTimeStamp,
     currentStateDistance,
@@ -629,59 +635,6 @@ export const PoseNetCamera = () => {
     showToast,
     timelineData,
   ]);
-
-  // TODO: # LOGIC FOR STATES
-
-  // CHART of BODY
-  useEffect(() => {
-    const subscription = subjectBody.subscribe({
-      next: nextObj => {
-        if (appContext.posenet_charts) {
-          const copyArr = [...chartDataShoulder];
-          // Chart window
-          // eslint-disable-next-line no-console
-          if (copyArr.length >= 50) {
-            copyArr.shift();
-          }
-          copyArr.push({
-            x: nextObj.createdAt,
-            y: nextObj.angleOfVector,
-          });
-          setChartDataShoulder(copyArr);
-        }
-      },
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [appContext.posenet_charts, chartDataShoulder]);
-
-  // CHART of HEAD
-  useEffect(() => {
-    const subscription = subjectHead.subscribe({
-      next: nextObj => {
-        // PRINT data
-        if (appContext.posenet_charts) {
-          const copyArr = [...chartDataEye];
-          // Chart window
-          // eslint-disable-next-line no-console
-          if (copyArr.length >= 50) {
-            copyArr.shift();
-          }
-          copyArr.push({
-            x: nextObj.createdAt,
-            y: nextObj.angleOfVector,
-          });
-          setChartDataEye(copyArr);
-        }
-      },
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [appContext.posenet_charts, chartDataEye]);
 
   // LOG POSENET DATA
   useEffect(() => {
@@ -826,7 +779,7 @@ export const PoseNetCamera = () => {
               </div>
 
               <div className="flex flex-wrap -mx-6">
-                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
+                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0 relative">
                   <WidgetModern
                     name="Distance"
                     value={Math.round(stateDistance)}
@@ -836,8 +789,19 @@ export const PoseNetCamera = () => {
                     minimal={!showScores}
                     description="Distance deviation from calibration data distance between user and screen"
                   />
+                  <div className="absolute w-full h-full px-4 py-4 xl:py-0 top-0 left-0">
+                    <div className="rounded-lg overflow-hidden w-full h-full">
+                      <Graph
+                        data={chartDataDistance}
+                        // yDomain={[-50, 50]}
+                        yDomain={[0, 60]}
+                        loading={loading}
+                        color={statesColourHex[currentStateDistance]}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
+                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0 relative">
                   <WidgetModern
                     name="Height"
                     value={Math.round(stateHeight)}
@@ -845,6 +809,17 @@ export const PoseNetCamera = () => {
                     minimal={!showScores}
                     description="Sitting height deviation from calibration data"
                   />
+                  <div className="absolute w-full h-full px-4 py-4 xl:py-0 top-0 left-0">
+                    <div className="rounded-lg overflow-hidden w-full h-full">
+                      <Graph
+                        data={chartDataHeight}
+                        // yDomain={[-50, 50]}
+                        yDomain={[0, 60]}
+                        loading={loading}
+                        color={statesColourHex[currentStateHeight]}
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0 relative">
                   <WidgetModern
@@ -855,11 +830,15 @@ export const PoseNetCamera = () => {
                     description="Tilt angle of head [° degrees]"
                   />
                   <div className="absolute w-full h-full px-4 py-4 xl:py-0 top-0 left-0">
-                    <Graph
-                      data={chartDataEye}
-                      yDomain={[-50, 50]}
-                      loading={loading}
-                    />
+                    <div className="rounded-lg overflow-hidden w-full h-full">
+                      <Graph
+                        data={chartDataEye}
+                        // yDomain={[-50, 50]}
+                        yDomain={[0, 60]}
+                        loading={loading}
+                        color={statesColourHex[currentStateHead]}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0 relative">
@@ -871,11 +850,15 @@ export const PoseNetCamera = () => {
                     description="Tilt angle of shoulders [° degrees]"
                   />
                   <div className="absolute w-full h-full px-4 py-4 xl:py-0 top-0 left-0">
-                    <Graph
-                      data={chartDataShoulder}
-                      yDomain={[-50, 50]}
-                      loading={loading}
-                    />
+                    <div className="rounded-lg overflow-hidden w-full h-full">
+                      <Graph
+                        data={chartDataShoulder}
+                        // yDomain={[-50, 50]}
+                        yDomain={[0, 60]}
+                        loading={loading}
+                        color={statesColourHex[currentStateBody]}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
