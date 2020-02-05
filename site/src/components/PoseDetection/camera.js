@@ -846,7 +846,7 @@ export const PoseNetCamera = () => {
                     description="Sitting height deviation from calibration data"
                   />
                 </div>
-                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
+                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0 relative">
                   <WidgetModern
                     name="Head"
                     value={Math.round(stateHead)}
@@ -854,8 +854,15 @@ export const PoseNetCamera = () => {
                     minimal={!showScores}
                     description="Tilt angle of head [° degrees]"
                   />
+                  <div className="absolute w-full h-full px-4 py-4 xl:py-0 top-0 left-0">
+                    <Graph
+                      data={chartDataEye}
+                      yDomain={[-50, 50]}
+                      loading={loading}
+                    />
+                  </div>
                 </div>
-                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
+                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0 relative">
                   <WidgetModern
                     name="Body"
                     value={Math.round(stateBody)}
@@ -863,6 +870,13 @@ export const PoseNetCamera = () => {
                     minimal={!showScores}
                     description="Tilt angle of shoulders [° degrees]"
                   />
+                  <div className="absolute w-full h-full px-4 py-4 xl:py-0 top-0 left-0">
+                    <Graph
+                      data={chartDataShoulder}
+                      yDomain={[-50, 50]}
+                      loading={loading}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -895,30 +909,23 @@ export const PoseNetCamera = () => {
 
               <div className="flex flex-wrap -mx-6">
                 <div className="w-full px-4 py-4 xl:py-0">
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
+                  <div
+                    className={`rounded-lg shadow-xl text-center pt-${
+                      !showTimeline ? '6' : '12'
+                    } pb-6 bg-gradient-gray`}
                   >
-                    <div
-                      className={`rounded-lg shadow-xl text-center pt-${
-                        !showTimeline ? '6' : '12'
-                      } pb-6 bg-gradient-gray`}
-                    >
-                      {showTimeline === true && (
-                        <Timeline data={timelineData} />
-                      )}
-                      <div className="flex flex-row justify-center items-center">
-                        <Tooltip
-                          content="Interactive timline of states"
-                          position={Position.BOTTOM}
-                        >
-                          <div className="font-semibold text-gray-700">
-                            Timeline
-                          </div>
-                        </Tooltip>
-                      </div>
+                    {showTimeline === true && <Timeline data={timelineData} />}
+                    <div className="flex flex-row justify-center items-center">
+                      <Tooltip
+                        content="Interactive timline of states"
+                        position={Position.BOTTOM}
+                      >
+                        <div className="font-semibold text-gray-700">
+                          Timeline
+                        </div>
+                      </Tooltip>
                     </div>
-                  </motion.div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1059,45 +1066,6 @@ export const PoseNetCamera = () => {
                     </div>
                   </motion.div>
                 </div>
-              </div>
-            </div>
-          </div>
-          <div className="py-10 md:py-20">
-            <div className="container px-6 mx-auto">
-              <div className="w-full sm:w-full md:w-1/2 my-1 pl-0 md:pl-1"></div>
-            </div>
-            <div className="flex flex-row flex-wrap sm:flex-wrap mx-1 sm:mx-0">
-              <div className="w-full sm:w-full md:w-1/2 my-1 pr-0 md:pr-1">
-                <Widget
-                  title="History of head tilt angle"
-                  caption="in real-time"
-                >
-                  <div className="p-4">
-                    <Graph
-                      data={chartDataEye}
-                      width={videoWidth}
-                      height={videoHeight}
-                      yDomain={[-50, 50]}
-                      loading={loading}
-                    />
-                  </div>
-                </Widget>
-              </div>
-              <div className="w-full sm:w-full md:w-1/2 my-1 pl-0 md:pl-1">
-                <Widget
-                  title="History of shoulder tilt angle"
-                  caption="in real-time"
-                >
-                  <div className="p-4">
-                    <Graph
-                      data={chartDataShoulder}
-                      width={videoWidth}
-                      height={videoHeight}
-                      yDomain={[-50, 50]}
-                      loading={loading}
-                    />
-                  </div>
-                </Widget>
               </div>
             </div>
           </div>

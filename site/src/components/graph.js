@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
-  XYPlot,
-  XAxis,
-  YAxis,
-  HorizontalGridLines,
-  VerticalGridLines,
+  FlexibleXYPlot,
+  // XAxis,
+  // YAxis,
+  // HorizontalGridLines,
+  // VerticalGridLines,
   LineSeries,
   AreaSeries,
 } from 'react-vis';
 
-export const Graph = ({ data, width, height, yDomain, loading }) => {
+export const Graph = ({
+  data,
+  // width, height,
+  yDomain,
+  loading,
+}) => {
   const [showGraph] = useState(true);
   return (
     <>
@@ -18,15 +23,13 @@ export const Graph = ({ data, width, height, yDomain, loading }) => {
         (loading ? (
           <>Loading...</>
         ) : (
-          <XYPlot
-            width={width}
-            height={height}
+          <FlexibleXYPlot
             yDomain={yDomain}
-            margin={{ bottom: 100 }}
+            margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
           >
-            <HorizontalGridLines />
-            <VerticalGridLines />
-            <XAxis
+            {/* <HorizontalGridLines />
+            <VerticalGridLines /> */}
+            {/* <XAxis
               attr="x"
               attrAxis="y"
               orientation="bottom"
@@ -36,7 +39,7 @@ export const Graph = ({ data, width, height, yDomain, loading }) => {
               }}
               tickLabelAngle={-60}
             />
-            <YAxis />
+            <YAxis /> */}
             <AreaSeries
               data={data}
               opacity={0.25}
@@ -51,7 +54,7 @@ export const Graph = ({ data, width, height, yDomain, loading }) => {
               strokeStyle="solid"
               style={{}}
             />
-          </XYPlot>
+          </FlexibleXYPlot>
         ))}
     </>
   );
@@ -59,8 +62,8 @@ export const Graph = ({ data, width, height, yDomain, loading }) => {
 
 Graph.propTypes = {
   data: PropTypes.array,
-  width: PropTypes.number,
-  height: PropTypes.number,
+  // width: PropTypes.number,
+  // height: PropTypes.number,
   yDomain: PropTypes.array,
   loading: PropTypes.bool,
 };
