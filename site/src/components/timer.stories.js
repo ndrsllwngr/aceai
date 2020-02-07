@@ -7,10 +7,7 @@ export default {
   component: TimerComponent,
 };
 
-export const Test = () => {
+export const Default = () => {
   const exampleTimer = new Timer();
-  //   useEffect(() => {
-  //     exampleTimer.start();
-  //   }, [exampleTimer]);
   return <TimerComponent title="Title" timer={exampleTimer} />;
 };

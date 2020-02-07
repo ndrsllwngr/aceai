@@ -6,7 +6,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import get from 'lodash/get';
 import * as posenet from '@tensorflow-models/posenet';
 import {
-  Tag,
+  // Tag,
   Portal,
   Intent,
   Tooltip,
@@ -36,8 +36,8 @@ import {
   timerBadDistance,
   timerBadHeight,
 } from './utilsTimer';
-import { TimerComponent } from '../timer';
-import { Widget, WidgetModern, states } from '../widget';
+// import { TimerComponent } from '../timer';
+import { WidgetModern, states } from '../widget';
 import {
   drawBoundingBox,
   drawKeypoints,
@@ -709,7 +709,7 @@ export const PoseNetCamera = () => {
 
               <div className="flex flex-wrap -mx-6">
                 <div className="w-full md:w-1/2 xl:w-1/3 px-4 py-4 xl:py-0">
-                  <WidgetModern
+                  <Tile
                     name="Session"
                     value={timerSession.getTimeValues().toString([
                       'hours',
@@ -723,7 +723,7 @@ export const PoseNetCamera = () => {
                   />
                 </div>
                 <div className="w-full md:w-1/2 xl:w-1/3 px-4 py-4 xl:py-0">
-                  <WidgetModern
+                  <Tile
                     name="Good posture"
                     value={timerOverallGood.getTimeValues().toString([
                       'hours',
@@ -737,7 +737,7 @@ export const PoseNetCamera = () => {
                   />
                 </div>
                 <div className="w-full md:w-1/2 xl:w-1/3 px-4 py-4 xl:py-0">
-                  <WidgetModern
+                  <Tile
                     name="Bad posture"
                     value={timerOverallBad.getTimeValues().toString([
                       'hours',
@@ -1043,13 +1043,17 @@ export const PoseNetCamera = () => {
           </div>
         </>
       ) : (
-        <div className="bp3-non-ideal-state">
-          <div className="bp3-non-ideal-state-visual">
-            <span className="bp3-icon bp3-icon-cube-add"></span>
+        <div className="bg-gray-400 flex flex-grow h-full">
+          <div className="container px-6 mx-auto flex flex-col flex-grow h-full">
+            <div className="bp3-non-ideal-state">
+              <div className="bp3-non-ideal-state-visual">
+                <span className="bp3-icon bp3-icon-cube-add"></span>
+              </div>
+              <h4 className="bp3-heading">BodyPose not yet calibrated</h4>
+              <div>Calibrate to start now</div>
+              <Calibration />
+            </div>
           </div>
-          <h4 className="bp3-heading">BodyPose not yet calibrated</h4>
-          <div>Calibrate to start now</div>
-          <Calibration />
         </div>
       )}
     </>
