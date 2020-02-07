@@ -5,7 +5,7 @@ import SEO from '../components/seo';
 
 const NotFoundPage = () => (
   <>
-    <SEO title="404: Not found" />
+    <SEO title="404: Not found | BodyPose - Break Slouching Habits." />
     <div className="bp3-non-ideal-state">
       <div className="bp3-non-ideal-state-visual">
         <span className="bp3-icon bp3-icon-zoom-out"></span>

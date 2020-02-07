@@ -176,7 +176,7 @@ export const Calibration = () => {
           intent={Intent.PRIMARY}
           onClick={handleDialogIsOpen(true)}
         >
-          Calibrate
+          Start
         </Button>
         <Dialog
           icon="cube-add"
@@ -190,8 +190,12 @@ export const Calibration = () => {
           usePortal
         >
           <div
-            className={`${Classes.DIALOG_BODY} flex flex-row items-center justify-center`}
+            className={`${Classes.DIALOG_BODY} flex flex-col items-center justify-center`}
           >
+            <p className="text-center" style={{ width: videoWidth }}>
+              Please sit up straight and place yourself at your usual distance
+              to the screen.
+            </p>
             <div style={{ height: videoHeight, width: videoWidth }}>
               <video
                 id="video-cal"

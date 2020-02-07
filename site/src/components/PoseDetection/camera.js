@@ -703,7 +703,7 @@ export const PoseNetCamera = () => {
                     </Tooltip>
                   </div>
                 </div>
-                <p className="text-gray-600">All event durations we track</p>
+                <p className="text-gray-600">Overview of your session</p>
               </div>
 
               <div className="flex flex-wrap -mx-6">
@@ -718,7 +718,7 @@ export const PoseNetCamera = () => {
                     ])}
                     status={states.NEUTRAL}
                     minimal={!showTimers}
-                    description="Overall session time"
+                    description="Total session time"
                   />
                 </div>
                 <div className="w-full md:w-1/2 xl:w-1/3 px-4 py-4 xl:py-0">
@@ -732,7 +732,7 @@ export const PoseNetCamera = () => {
                     ])}
                     status={states.NEUTRAL}
                     minimal={!showTimers}
-                    description="Overall good posture time within session"
+                    description="Overall good posture time within your session"
                   />
                 </div>
                 <div className="w-full md:w-1/2 xl:w-1/3 px-4 py-4 xl:py-0">
@@ -746,7 +746,7 @@ export const PoseNetCamera = () => {
                     ])}
                     status={states.NEUTRAL}
                     minimal={!showTimers}
-                    description="Overall bad posture time within session"
+                    description="Overall bad posture time within your session"
                   />
                 </div>
               </div>
@@ -773,9 +773,7 @@ export const PoseNetCamera = () => {
                     </Tooltip>
                   </div>
                 </div>
-                <p className="text-gray-600">
-                  All scores which are calculated in real-time
-                </p>
+                <p className="text-gray-600">Real-time BodyPose values</p>
               </div>
 
               <div className="flex flex-wrap -mx-6">
@@ -787,7 +785,7 @@ export const PoseNetCamera = () => {
                       currentStateDistance && states[currentStateDistance]
                     }
                     minimal={!showScores}
-                    description="Distance deviation from calibration data distance between user and screen"
+                    description="Changes in calibrated screen distance"
                   />
                   <div className="absolute w-full h-full px-4 py-4 xl:py-0 top-0 left-0">
                     <div className="rounded-lg overflow-hidden w-full h-full">
@@ -807,7 +805,7 @@ export const PoseNetCamera = () => {
                     value={Math.round(stateHeight)}
                     status={currentStateHeight && states[currentStateHeight]}
                     minimal={!showScores}
-                    description="Sitting height deviation from calibration data"
+                    description="Changes in calibrated sitting height"
                   />
                   <div className="absolute w-full h-full px-4 py-4 xl:py-0 top-0 left-0">
                     <div className="rounded-lg overflow-hidden w-full h-full">
@@ -885,9 +883,7 @@ export const PoseNetCamera = () => {
                     </Tooltip>
                   </div>
                 </div>
-                <p className="text-gray-600">
-                  All scores which are calculated in real-time
-                </p>
+                <p className="text-gray-600">Aggregated session data</p>
               </div>
 
               <div className="flex flex-wrap -mx-6">
@@ -919,7 +915,7 @@ export const PoseNetCamera = () => {
               <div className="mb-6 md:mb-12">
                 <div className="flex flex-row items-center">
                   <h2 className="text-3xl font-bold text-gray-800 leading-tight">
-                    Head
+                    Figures
                   </h2>
                   <div className="ml-2">
                     <Tooltip
@@ -935,7 +931,7 @@ export const PoseNetCamera = () => {
                   </div>
                 </div>
                 <p className="text-gray-600">
-                  All scores which are calculated in real-time
+                  Graphical representation of your posture
                 </p>
               </div>
 
@@ -1058,8 +1054,8 @@ export const PoseNetCamera = () => {
           <div className="bp3-non-ideal-state-visual">
             <span className="bp3-icon bp3-icon-cube-add"></span>
           </div>
-          <h4 className="bp3-heading">No calibration data found</h4>
-          <div>Calibrate the app to start.</div>
+          <h4 className="bp3-heading">BodyPose not yet calibrated</h4>
+          <div>Calibrate to start now</div>
           <Calibration />
         </div>
       )}

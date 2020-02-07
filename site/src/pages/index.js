@@ -1,8 +1,12 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
-import { Icon, Intent, Tab, Tabs } from '@blueprintjs/core';
-import { IconNames } from '@blueprintjs/icons';
+import {
+  // Icon, Intent,
+  Tab,
+  Tabs,
+} from '@blueprintjs/core';
+// import { IconNames } from '@blueprintjs/icons';
 import { useUi } from '../components/context-ui';
 import SEO from '../components/seo';
 
@@ -11,7 +15,7 @@ const IndexPage = () => {
 
   return (
     <>
-      <SEO title="About" />
+      <SEO title="BodyPose - Break Slouching Habits." />
       <div className="bg-gray-400 pt-20 flex flex-grow h-full">
         <div className="container px-6 mx-auto flex flex-col flex-grow h-full">
           <div
@@ -60,24 +64,40 @@ const IndexPage = () => {
                       <h2 className="font-normal leading-none text-2xl">
                         How does BodyPose work?
                       </h2>
-                      <p className="text-base mt-6 max-w-3xl">tbd</p>
+                      <ol className="list-decimal mt-6 max-w-3xl text-base ml-5">
+                        <li>Go to Dashboard</li>
+                        <li>Sit straight and calibrate your pose</li>
+                        <li>
+                          Start working. BodyPose monitors your posture and
+                          notifies you when you start slouching
+                        </li>
+                      </ol>
                     </div>
                   }
                 />
                 <Tab
-                  disabled
                   id="research"
                   title="Research"
                   panel={
-                    <p>
-                      Rapidly build beautiful and accessible experiences. The
-                      Carbon kit contains all resources you need to get started.
-                    </p>
+                    <div className="pt-8 sm:pt-2 pb-6 pl-0 sm:pl-3">
+                      <h2 className="font-normal leading-none text-2xl">
+                        Why BodyPose?
+                      </h2>
+                      <p className="mt-6 max-w-3xl text-base">
+                        We developed BodyPose within the practical course
+                        Affective Computing / Empathic Artificial Intelligence
+                        of{' '}
+                        <a href="http://www.en.uni-muenchen.de/">LMU Munich</a>.
+                        <br /> <br />
+                        For futher information see our{' '}
+                        <a href="cache/paper.pdf">paper</a>.
+                      </p>
+                    </div>
                   }
                 />
               </Tabs>
             </div>
-            <section className="my-10">
+            {/* <section className="my-10">
               <div className="flex flex-row flex-wrap sm:flex-wrap">
                 <div className="w-full sm:w-full md:w-1/4 mt-1">
                   <h3 className="font-normal leading-none text-2xl py-4">
@@ -116,7 +136,7 @@ const IndexPage = () => {
                   </div>
                 </div>
               </div>
-            </section>
+            </section> */}
           </div>
           <div className="my-1 flex-shrink-0">
             <div className="flex flex-row justify-between text-gray-700 mb-10">
@@ -144,27 +164,27 @@ const IndexPage = () => {
   );
 };
 
-const InfoCard = props => {
-  const splitHeading = createArrayFromPhrase(props.heading);
-  return (
-    <article className="w-full sm:w-full md:w-1/3 mt-1 flex flex-col justify-between md:pr-4">
-      <div>
-        <h4 className="font-normal text-lg leading-snug mb-3">
-          {`${splitHeading[0]} `}
-          <span className="font-semibold">{splitHeading[1]}</span>
-        </h4>
-        <p>{props.body}</p>
-      </div>
-      <div className="py-4">{props.icon}</div>
-    </article>
-  );
-};
+// const InfoCard = props => {
+//   const splitHeading = createArrayFromPhrase(props.heading);
+//   return (
+//     <article className="w-full sm:w-full md:w-1/3 mt-1 flex flex-col justify-between md:pr-4">
+//       <div>
+//         <h4 className="font-normal text-lg leading-snug mb-3">
+//           {`${splitHeading[0]} `}
+//           <span className="font-semibold">{splitHeading[1]}</span>
+//         </h4>
+//         <p>{props.body}</p>
+//       </div>
+//       <div className="py-4">{props.icon}</div>
+//     </article>
+//   );
+// };
 
 // Take in a phrase and separate the third word in an array
-function createArrayFromPhrase(phrase) {
-  const splitPhrase = phrase.split(' ');
-  const thirdWord = splitPhrase.pop();
-  return [splitPhrase.join(' '), thirdWord];
-}
+// function createArrayFromPhrase(phrase) {
+//   const splitPhrase = phrase.split(' ');
+//   const thirdWord = splitPhrase.pop();
+//   return [splitPhrase.join(' '), thirdWord];
+// }
 
 export default IndexPage;
