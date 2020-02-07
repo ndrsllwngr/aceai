@@ -30,7 +30,7 @@ export const Tile = React.memo(
               {background}
             </div>
           )}
-          <div className="w-full h-full top-0 left-0">
+          <div className="relative w-full h-full top-0 left-0">
             <div
               className={`rounded-lg shadow-xl text-center pt-${
                 minimal ? '6' : '12'
