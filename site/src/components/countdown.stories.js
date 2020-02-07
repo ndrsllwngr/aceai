@@ -7,10 +7,8 @@ export default {
   component: CountDownComponent,
 };
 
-export const Test = () => {
-  //   const exampleTimer = new Timer();
-  //   useEffect(() => {
-  //     exampleTimer.start();
-  //   }, [exampleTimer]);
-  return <CountDownComponent period={10} />;
+const noop = () => {};
+
+export const Default = () => {
+  return <CountDownComponent period={10} callback={noop} />;
 };

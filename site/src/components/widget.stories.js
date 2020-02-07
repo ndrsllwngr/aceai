@@ -2,10 +2,10 @@ import React from 'react';
 
 export default {
   title: 'Widget',
-  component: Widget,
+  component: Default,
 };
 
-export const Widget = () => {
+export const Default = () => {
   return (
     <div className="py-10 md:py-20">
       <div className="container px-6 mx-auto">

@@ -3,10 +3,10 @@ import { Tile, states } from './tile';
 
 export default {
   title: 'Tile',
-  component: Test,
+  component: Tile,
 };
 
-export const Test = () => {
+export const Default = () => {
   const [minimal] = React.useState(false);
   return (
     <div className="bg-white py-10 md:py-20 w-full h-full">

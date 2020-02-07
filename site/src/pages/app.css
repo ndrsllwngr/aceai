@@ -35,7 +35,7 @@ html {
 }
 
 body {
-  @apply min-h-full h-full bg-gray-400;
+  @apply min-h-full h-full;
 }
 
 html,

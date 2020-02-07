@@ -16,13 +16,13 @@ const IndexPage = () => {
   return (
     <>
       <SEO title="BodyPose - Break Slouching Habits." />
-      <div className="bg-gray-400 pt-20 flex flex-grow h-full">
+      <div className="bg-gray-400 flex flex-grow h-full">
         <div className="container px-6 mx-auto flex flex-col flex-grow h-full">
           <div
             className="flex-grow flex-shrink-0"
             style={{ flexBasis: 'auto' }}
           >
-            <div className="mb-10">
+            <div className="mt-20 sm:mt-40 mb-10">
               <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-4xl font-light leading-tight">
                 Improve your posture{' '}
                 <span className="sm:block font-normal">with BodyPose</span>
