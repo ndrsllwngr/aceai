@@ -94,7 +94,9 @@ export const PoseNetCamera = () => {
   const [calibrationBodyTick, setcalibrationBodyTick] = useState();
   // LATEST STATES
   const [stateHead, setStateHead] = useState(emptyState);
+  const [stateHeadSign, setStateHeadSign] = useState(emptyState);
   const [stateBody, setStateBody] = useState(emptyState);
+  const [stateBodySign, setStateBodySign] = useState(emptyState);
   const [stateDistance, setStateDistance] = useState(emptyState);
   const [stateHeight, setStateHeight] = useState(emptyState);
   // TIMELINE
@@ -304,6 +306,29 @@ export const PoseNetCamera = () => {
               ...timeWindowDataBody,
             ]);
           }
+          // GET SIGN OF SCORES
+          let signOfHead;
+          let signOfBody;
+          // let signOfDistance;
+          // let signOfHeight;
+          if (
+            clonehistoryHead.length > 0 &&
+            clonehistoryHead[clonehistoryHead.length - 1].angleOfVector
+          ) {
+            signOfHead = Math.sign(
+              clonehistoryHead[clonehistoryHead.length - 1].angleOfVector,
+            );
+          }
+          if (
+            clonehistoryBody.length > 0 &&
+            clonehistoryBody[clonehistoryBody.length - 1].angleOfVector
+          ) {
+            signOfBody = Math.sign(
+              clonehistoryBody[clonehistoryBody.length - 1].angleOfVector,
+            );
+          }
+          setStateHeadSign(signOfHead);
+          setStateBodySign(signOfBody);
           if (appContext.global_logging) {
             console.log('centralTendency', {
               centralTendencyBody,
@@ -927,116 +952,208 @@ export const PoseNetCamera = () => {
                   Graphical representation of your posture
                 </p>
               </div>
-
+              {/* DISTANCE & HEIGHT */}
               <div className="flex flex-wrap -mx-6">
-                <div className="w-full px-4 py-4 xl:py-0">
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
+                <div className="w-full md:w-1/2 px-4 py-4 xl:py-0">
+                  <div
+                    className={`rounded-lg shadow-xl text-center pt-${
+                      !showHead ? '6' : '12'
+                    } pb-6 bg-gradient-gray`}
                   >
-                    <div
-                      className={`rounded-lg shadow-xl text-center pt-${
-                        !showHead ? '6' : '12'
-                      } pb-6 bg-gradient-gray`}
-                    >
-                      {showHead === true && (
-                        <div className="p-4 h-48">
-                          {Math.abs(stateHead) < appContext.threshold_head && (
+                    {showHead === true && (
+                      <div className="p-4">
+                        <svg
+                          viewBox="0 0 733 733"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-48 mx-auto"
+                        >
+                          <path
+                            d="M610.833 641.375V580.292C610.833 547.891 597.962 516.818 575.052 493.907C552.141 470.996 521.067 458.125 488.667 458.125H244.333C211.933 458.125 180.859 470.996 157.949 493.907C135.038 516.818 122.167 547.891 122.167 580.292V641.375"
+                            stroke="black"
+                            strokeWidth="61.0833"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="stroke-current text-gray-700"
+                          />
+                          <path
+                            d="M366.5 366.5C433.971 366.5 488.667 311.804 488.667 244.333C488.667 176.863 433.971 122.167 366.5 122.167C299.029 122.167 244.333 176.863 244.333 244.333C244.333 311.804 299.029 366.5 366.5 366.5Z"
+                            stroke="black"
+                            strokeWidth="61.0833"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="stroke-current text-gray-700"
+                          />
+                          <path
+                            d="M84 446L107.5 454.5M148.262 396L153.215 420.494M90.9922 401.464L123.415 430.991"
+                            stroke="black"
+                            strokeWidth="18"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className={`stroke-current ${
+                              Math.abs(stateBody) > appContext.threshold_body &&
+                              stateBodySign < 0
+                                ? 'text-red-700'
+                                : 'text-transparent'
+                            }`}
+                          />
+                          <path
+                            d="M649.476 451L625.976 459.5M585.214 401L580.262 425.494M642.484 406.464L610.061 435.991"
+                            stroke="black"
+                            strokeWidth="18"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className={`stroke-current ${
+                              Math.abs(stateBody) > appContext.threshold_body &&
+                              stateBodySign > 0
+                                ? 'text-red-700'
+                                : 'text-transparent'
+                            }`}
+                          />
+                          <path
+                            d="M545.088 412.138L520.101 412.54M500.561 343.969L487.918 365.525M552.947 367.747L512.689 385.135"
+                            stroke="black"
+                            strokeWidth="18"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className={`stroke-current ${
+                              Math.abs(stateHead) > appContext.threshold_head &&
+                              stateHeadSign > 0
+                                ? 'text-red-700'
+                                : 'text-transparent'
+                            }`}
+                          />
+                          <path
+                            d="M188.248 412.138L213.235 412.54M232.774 343.969L245.418 365.525M180.388 367.747L220.647 385.135"
+                            stroke="black"
+                            strokeWidth="18"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className={`stroke-current ${
+                              Math.abs(stateHead) > appContext.threshold_head &&
+                              stateHeadSign < 0
+                                ? 'text-red-700'
+                                : 'text-transparent'
+                            }`}
+                          />
+                        </svg>
+                      </div>
+                    )}
+                    <div className="flex flex-row justify-center items-center">
+                      <Tooltip
+                        content="Interactive front view of head"
+                        position={Position.BOTTOM}
+                      >
+                        <div className="font-semibold text-gray-700">
+                          Distance & Height
+                        </div>
+                      </Tooltip>
+                    </div>
+                  </div>
+                </div>
+                {/* HEAD & BODY */}
+                <div className="w-full md:w-1/2 px-4 py-4 xl:py-0">
+                  <div
+                    className={`rounded-lg shadow-xl text-center pt-${
+                      !showHead ? '6' : '12'
+                    } pb-6 bg-gradient-gray`}
+                  >
+                    {showHead === true && (
+                      <div className="p-4">
+                        {Math.abs(stateHead) < appContext.threshold_head && (
+                          <svg
+                            className="h-48 mx-auto"
+                            viewBox="0 0 724 724"
+                            style={{ maxHeight: '100%', maxWidth: '100%' }}
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M362 0C242.045 0 144.8 121.56 144.8 271.5C144.8 421.44 242.045 543 362 543C481.955 543 579.2 421.44 579.2 271.5C579.2 121.56 481.955 0 362 0ZM362 506.8C262.197 506.8 181 401.24 181 271.5C181 141.76 262.197 36.2 362 36.2C461.803 36.2 543 141.76 543 271.5C543 401.24 461.803 506.8 362 506.8Z"
+                              fill="#c4c4c4"
+                              className="fill-current text-gray-700"
+                            />
+                            <path
+                              d="M520.109 511.554C510.396 521.003 500.055 529.497 489.254 537.147C523.74 553.171 553.992 566.493 579.826 577.776C675.696 619.611 687.799 627.889 687.799 651.6C687.799 667.999 671.653 687.8 651.599 687.8H72.4C52.3458 687.8 36.2 667.999 36.2 651.6C36.2 627.889 48.303 619.611 144.161 577.776C170.007 566.493 200.258 553.173 234.733 537.147C223.934 529.497 213.593 521.001 203.878 511.554C53.1659 580.528 0 589.77 0 651.6C0 687.8 32.4117 724 72.4 724H651.6C691.588 724 724 687.8 724 651.6C724 589.77 670.834 580.528 520.109 511.554Z"
+                              fill="#c4c4c4"
+                              className="fill-current text-gray-700"
+                            />
+                          </svg>
+                        )}
+                        {Math.abs(stateHead) > appContext.threshold_head &&
+                          stateHeadSign < 0 && (
                             <svg
-                              width="724"
-                              height="724"
+                              className="h-48 mx-auto"
                               viewBox="0 0 724 724"
                               style={{ maxHeight: '100%', maxWidth: '100%' }}
                               fill="none"
                               xmlns="http://www.w3.org/2000/svg"
                             >
-                              <path
-                                d="M362 0C242.045 0 144.8 121.56 144.8 271.5C144.8 421.44 242.045 543 362 543C481.955 543 579.2 421.44 579.2 271.5C579.2 121.56 481.955 0 362 0ZM362 506.8C262.197 506.8 181 401.24 181 271.5C181 141.76 262.197 36.2 362 36.2C461.803 36.2 543 141.76 543 271.5C543 401.24 461.803 506.8 362 506.8Z"
-                                fill="#c4c4c4"
-                              />
-                              <path
-                                d="M520.109 511.554C510.396 521.003 500.055 529.497 489.254 537.147C523.74 553.171 553.992 566.493 579.826 577.776C675.696 619.611 687.799 627.889 687.799 651.6C687.799 667.999 671.653 687.8 651.599 687.8H72.4C52.3458 687.8 36.2 667.999 36.2 651.6C36.2 627.889 48.303 619.611 144.161 577.776C170.007 566.493 200.258 553.173 234.733 537.147C223.934 529.497 213.593 521.001 203.878 511.554C53.1659 580.528 0 589.77 0 651.6C0 687.8 32.4117 724 72.4 724H651.6C691.588 724 724 687.8 724 651.6C724 589.77 670.834 580.528 520.109 511.554Z"
-                                fill="#c4c4c4"
-                              />
+                              <g clipPath="url(#clip0)">
+                                <path
+                                  d="M176.706 41.1602C279.095 -21.3358 425.432 31.7586 503.55 159.741C581.668 287.724 561.996 442.147 459.607 504.643C357.218 567.139 210.882 514.045 132.764 386.062C54.6455 258.079 74.3178 103.656 176.706 41.1602ZM440.747 473.744C525.935 421.747 540.245 289.342 472.651 178.601C405.057 67.8604 280.754 20.0621 195.566 72.0591C110.379 124.056 96.0684 256.461 163.662 367.202C231.256 477.943 355.559 525.741 440.747 473.744Z"
+                                  fill="#c4c4c4"
+                                  className="fill-current text-gray-700"
+                                />
+                                <path
+                                  d="M203.891 511.554C213.604 521.003 223.945 529.497 234.746 537.147C200.26 553.171 170.008 566.493 144.174 577.776C48.3044 619.611 36.2014 627.889 36.2014 651.6C36.2014 667.999 52.3472 687.8 72.4014 687.8H651.6C671.654 687.8 687.8 667.999 687.8 651.6C687.8 627.889 675.697 619.611 579.839 577.776C553.993 566.493 523.742 553.173 489.267 537.147C500.066 529.497 510.407 521.001 520.122 511.554C670.834 580.528 724 589.77 724 651.6C724 687.8 691.588 724 651.6 724H72.4C32.4117 724 0 687.8 0 651.6C0 589.77 53.1659 580.528 203.891 511.554Z"
+                                  fill="#c4c4c4"
+                                  className="fill-current text-gray-700"
+                                />
+                              </g>
+                              <defs>
+                                <clipPath id="clip0">
+                                  <rect
+                                    width="724"
+                                    height="724"
+                                    transform="matrix(-1 0 0 1 724 0)"
+                                    fill="white"
+                                  />
+                                </clipPath>
+                              </defs>
                             </svg>
                           )}
-                          {Math.abs(stateHead) > appContext.threshold_head &&
-                            stateHead < 0 && (
-                              <svg
-                                width="724"
-                                height="724"
-                                viewBox="0 0 724 724"
-                                style={{ maxHeight: '100%', maxWidth: '100%' }}
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <g clipPath="url(#clip0)">
-                                  <path
-                                    d="M176.706 41.1602C279.095 -21.3358 425.432 31.7586 503.55 159.741C581.668 287.724 561.996 442.147 459.607 504.643C357.218 567.139 210.882 514.045 132.764 386.062C54.6455 258.079 74.3178 103.656 176.706 41.1602ZM440.747 473.744C525.935 421.747 540.245 289.342 472.651 178.601C405.057 67.8604 280.754 20.0621 195.566 72.0591C110.379 124.056 96.0684 256.461 163.662 367.202C231.256 477.943 355.559 525.741 440.747 473.744Z"
-                                    fill="#c4c4c4"
-                                  />
-                                  <path
-                                    d="M203.891 511.554C213.604 521.003 223.945 529.497 234.746 537.147C200.26 553.171 170.008 566.493 144.174 577.776C48.3044 619.611 36.2014 627.889 36.2014 651.6C36.2014 667.999 52.3472 687.8 72.4014 687.8H651.6C671.654 687.8 687.8 667.999 687.8 651.6C687.8 627.889 675.697 619.611 579.839 577.776C553.993 566.493 523.742 553.173 489.267 537.147C500.066 529.497 510.407 521.001 520.122 511.554C670.834 580.528 724 589.77 724 651.6C724 687.8 691.588 724 651.6 724H72.4C32.4117 724 0 687.8 0 651.6C0 589.77 53.1659 580.528 203.891 511.554Z"
-                                    fill="#c4c4c4"
-                                  />
-                                </g>
-                                <defs>
-                                  <clipPath id="clip0">
-                                    <rect
-                                      width="724"
-                                      height="724"
-                                      transform="matrix(-1 0 0 1 724 0)"
-                                      fill="white"
-                                    />
-                                  </clipPath>
-                                </defs>
-                              </svg>
-                            )}
-                          {Math.abs(stateHead) > appContext.threshold_head &&
-                            stateHead > 0 && (
-                              <svg
-                                width="724"
-                                height="724"
-                                viewBox="0 0 724 724"
-                                style={{ maxHeight: '100%', maxWidth: '100%' }}
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <g clipPath="url(#clip0)">
-                                  <path
-                                    d="M547.294 41.1602C444.905 -21.3358 298.568 31.7586 220.45 159.741C142.332 287.724 162.004 442.147 264.393 504.643C366.782 567.139 513.118 514.045 591.237 386.062C669.355 258.079 649.682 103.656 547.294 41.1602ZM283.253 473.744C198.065 421.747 183.755 289.342 251.349 178.601C318.943 67.8604 443.246 20.0621 528.434 72.0591C613.622 124.056 627.932 256.461 560.338 367.202C492.744 477.943 368.441 525.741 283.253 473.744Z"
-                                    fill="#c4c4c4"
-                                  />
-                                  <path
-                                    d="M520.109 511.554C510.396 521.003 500.055 529.497 489.254 537.147C523.74 553.171 553.992 566.493 579.826 577.776C675.696 619.611 687.799 627.889 687.799 651.6C687.799 667.999 671.653 687.8 651.599 687.8H72.4C52.3458 687.8 36.2 667.999 36.2 651.6C36.2 627.889 48.303 619.611 144.161 577.776C170.007 566.493 200.258 553.173 234.733 537.147C223.934 529.497 213.593 521.001 203.878 511.554C53.1659 580.528 0 589.77 0 651.6C0 687.8 32.4117 724 72.4 724H651.6C691.588 724 724 687.8 724 651.6C724 589.77 670.834 580.528 520.109 511.554Z"
-                                    fill="#c4c4c4"
-                                  />
-                                </g>
-                                <defs>
-                                  <clipPath id="clip0">
-                                    <rect
-                                      width="724"
-                                      height="724"
-                                      fill="white"
-                                    />
-                                  </clipPath>
-                                </defs>
-                              </svg>
-                            )}
-                        </div>
-                      )}
-                      <div className="flex flex-row justify-center items-center">
-                        <Tooltip
-                          content="Interactive front view of head"
-                          position={Position.BOTTOM}
-                        >
-                          <div className="font-semibold text-gray-700">
-                            Head
-                          </div>
-                        </Tooltip>
+                        {Math.abs(stateHead) > appContext.threshold_head &&
+                          stateHeadSign > 0 && (
+                            <svg
+                              className="h-48 mx-auto"
+                              viewBox="0 0 724 724"
+                              style={{ maxHeight: '100%', maxWidth: '100%' }}
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <g clipPath="url(#clip0)">
+                                <path
+                                  d="M547.294 41.1602C444.905 -21.3358 298.568 31.7586 220.45 159.741C142.332 287.724 162.004 442.147 264.393 504.643C366.782 567.139 513.118 514.045 591.237 386.062C669.355 258.079 649.682 103.656 547.294 41.1602ZM283.253 473.744C198.065 421.747 183.755 289.342 251.349 178.601C318.943 67.8604 443.246 20.0621 528.434 72.0591C613.622 124.056 627.932 256.461 560.338 367.202C492.744 477.943 368.441 525.741 283.253 473.744Z"
+                                  fill="#c4c4c4"
+                                  className="fill-current text-gray-700"
+                                />
+                                <path
+                                  d="M520.109 511.554C510.396 521.003 500.055 529.497 489.254 537.147C523.74 553.171 553.992 566.493 579.826 577.776C675.696 619.611 687.799 627.889 687.799 651.6C687.799 667.999 671.653 687.8 651.599 687.8H72.4C52.3458 687.8 36.2 667.999 36.2 651.6C36.2 627.889 48.303 619.611 144.161 577.776C170.007 566.493 200.258 553.173 234.733 537.147C223.934 529.497 213.593 521.001 203.878 511.554C53.1659 580.528 0 589.77 0 651.6C0 687.8 32.4117 724 72.4 724H651.6C691.588 724 724 687.8 724 651.6C724 589.77 670.834 580.528 520.109 511.554Z"
+                                  fill="#c4c4c4"
+                                  className="fill-current text-gray-700"
+                                />
+                              </g>
+                              <defs>
+                                <clipPath id="clip0">
+                                  <rect width="724" height="724" fill="white" />
+                                </clipPath>
+                              </defs>
+                            </svg>
+                          )}
                       </div>
+                    )}
+                    <div className="flex flex-row justify-center items-center">
+                      <Tooltip
+                        content="Interactive front view of head"
+                        position={Position.BOTTOM}
+                      >
+                        <div className="font-semibold text-gray-700">
+                          Head & Shoulders
+                        </div>
+                      </Tooltip>
                     </div>
-                  </motion.div>
+                  </div>
                 </div>
               </div>
             </div>
