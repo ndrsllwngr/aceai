@@ -56,6 +56,7 @@ import {
 import { showNotification } from '../showNotification';
 import { timelineModel, Timeline } from '../timeline';
 import { statesName, statesColourHex } from '../enums';
+import { Tile } from '../tile';
 
 export const history = [];
 const subject = new Subject();
@@ -777,8 +778,8 @@ export const PoseNetCamera = () => {
               </div>
 
               <div className="flex flex-wrap -mx-6">
-                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0 relative">
-                  <WidgetModern
+                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
+                  <Tile
                     name="Distance"
                     value={Math.round(stateDistance)}
                     status={
@@ -786,49 +787,43 @@ export const PoseNetCamera = () => {
                     }
                     minimal={!showScores}
                     description="Changes in calibrated screen distance"
-                  />
-                  <div className="absolute w-full h-full px-4 py-4 xl:py-0 top-0 left-0">
-                    <div className="rounded-lg overflow-hidden w-full h-full">
+                    background={
                       <Graph
                         data={chartDataDistance}
                         // yDomain={[-50, 50]}
-                        yDomain={[0, 60]}
+                        yDomain={[0, 250]}
                         loading={loading}
                         color={statesColourHex[currentStateDistance]}
                       />
-                    </div>
-                  </div>
+                    }
+                  />
                 </div>
-                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0 relative">
-                  <WidgetModern
+                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
+                  <Tile
                     name="Height"
                     value={Math.round(stateHeight)}
                     status={currentStateHeight && states[currentStateHeight]}
                     minimal={!showScores}
                     description="Changes in calibrated sitting height"
-                  />
-                  <div className="absolute w-full h-full px-4 py-4 xl:py-0 top-0 left-0">
-                    <div className="rounded-lg overflow-hidden w-full h-full">
+                    background={
                       <Graph
                         data={chartDataHeight}
                         // yDomain={[-50, 50]}
-                        yDomain={[0, 60]}
+                        yDomain={[0, 250]}
                         loading={loading}
                         color={statesColourHex[currentStateHeight]}
                       />
-                    </div>
-                  </div>
+                    }
+                  />
                 </div>
-                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0 relative">
-                  <WidgetModern
+                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
+                  <Tile
                     name="Head"
                     value={Math.round(stateHead)}
                     status={currentStateHead && states[currentStateHead]}
                     minimal={!showScores}
                     description="Tilt angle of head [° degrees]"
-                  />
-                  <div className="absolute w-full h-full px-4 py-4 xl:py-0 top-0 left-0">
-                    <div className="rounded-lg overflow-hidden w-full h-full">
+                    background={
                       <Graph
                         data={chartDataEye}
                         // yDomain={[-50, 50]}
@@ -836,19 +831,17 @@ export const PoseNetCamera = () => {
                         loading={loading}
                         color={statesColourHex[currentStateHead]}
                       />
-                    </div>
-                  </div>
+                    }
+                  />
                 </div>
-                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0 relative">
-                  <WidgetModern
+                <div className="w-full md:w-1/2 xl:w-1/4 px-4 py-4 xl:py-0">
+                  <Tile
                     name="Body"
                     value={Math.round(stateBody)}
                     status={currentStateBody && states[currentStateBody]}
                     minimal={!showScores}
                     description="Tilt angle of shoulders [° degrees]"
-                  />
-                  <div className="absolute w-full h-full px-4 py-4 xl:py-0 top-0 left-0">
-                    <div className="rounded-lg overflow-hidden w-full h-full">
+                    background={
                       <Graph
                         data={chartDataShoulder}
                         // yDomain={[-50, 50]}
@@ -856,8 +849,8 @@ export const PoseNetCamera = () => {
                         loading={loading}
                         color={statesColourHex[currentStateBody]}
                       />
-                    </div>
-                  </div>
+                    }
+                  />
                 </div>
               </div>
             </div>
