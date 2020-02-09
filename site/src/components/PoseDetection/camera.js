@@ -14,7 +14,6 @@ import {
   Button,
   ProgressBar,
 } from '@blueprintjs/core';
-import { motion } from 'framer-motion';
 import { Subject } from 'rxjs';
 import { Graph } from '../graph';
 import { VideoCanvas } from '../VideoCanvas';
@@ -38,7 +37,7 @@ import {
   timerBadHeight,
 } from './utilsTimer';
 // import { TimerComponent } from '../timer';
-import { WidgetModern, states } from '../widget';
+import { states } from '../widget';
 import {
   drawBoundingBox,
   drawKeypoints,
@@ -60,7 +59,7 @@ import { showNotification } from '../showNotification';
 import { timelineModel, Timeline } from '../timeline';
 import { statesName, statesColourHex } from '../enums';
 import { Tile } from '../tile';
-import { CountDownComponent } from '../countdown';
+import { CountDownComponentMinimal } from '../countdown';
 
 export const history = [];
 const subject = new Subject();
@@ -766,7 +765,7 @@ export const PoseNetCamera = () => {
   }, [showTimeline]);
 
   const toggleHead = useCallback(() => {
-    setShowTimeline(!showHead);
+    setShowHead(!showHead);
   }, [showHead]);
 
   return (
@@ -788,7 +787,7 @@ export const PoseNetCamera = () => {
                   <h2 className="text-3xl font-bold text-gray-800 leading-tight">
                     Timers
                   </h2>
-                  <div className="ml-2">
+                  <div className="flex flex-row ml-2 w-full">
                     <Tooltip
                       content={showTimers ? 'Hide timers' : 'Show timers'}
                       position={Position.BOTTOM}
@@ -799,31 +798,6 @@ export const PoseNetCamera = () => {
                         onClick={toggleTimers}
                       />
                     </Tooltip>
-                    <Button
-                      icon="cube-add"
-                      className="bp3-minimal"
-                      disabled={isStarted || countDownIsFinished}
-                      onClick={() => {
-                        setRecalibrationIsRunning(true);
-                        setIsStarted(true);
-                      }}
-                    >
-                      Recalibrate
-                    </Button>
-                    {isStarted && !loading && !countDownIsFinished && (
-                      <CountDownComponent
-                        period={3}
-                        callback={handleCountDown}
-                      />
-                    )}
-                    {countDownIsFinished && (
-                      <ProgressBar
-                        value={progress}
-                        intent={Intent.SUCCESS}
-                        stripes
-                        animate
-                      />
-                    )}
                   </div>
                 </div>
                 <p className="text-gray-600">Overview of your session</p>
@@ -883,7 +857,7 @@ export const PoseNetCamera = () => {
                   <h2 className="text-3xl font-bold text-gray-800 leading-tight">
                     Scores
                   </h2>
-                  <div className="ml-2">
+                  <div className="flex flex-row ml-2 w-full">
                     <Tooltip
                       content={showScores ? 'Hide scores' : 'Show scores'}
                       position={Position.BOTTOM}
@@ -894,6 +868,33 @@ export const PoseNetCamera = () => {
                         onClick={toggleScores}
                       />
                     </Tooltip>
+                    <Button
+                      icon="cube-add"
+                      className="bp3-minimal"
+                      disabled={isStarted || countDownIsFinished}
+                      onClick={() => {
+                        setRecalibrationIsRunning(true);
+                        setIsStarted(true);
+                      }}
+                    >
+                      Recalibrate
+                    </Button>
+                    {isStarted && !loading && !countDownIsFinished && (
+                      <CountDownComponentMinimal
+                        period={3}
+                        callback={handleCountDown}
+                      />
+                    )}
+                    {countDownIsFinished && (
+                      <div className="w-32 h-full flex flex-row items-end">
+                        <ProgressBar
+                          value={progress}
+                          intent={Intent.SUCCESS}
+                          stripes
+                          animate
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
                 <p className="text-gray-600">Real-time BodyPose values</p>

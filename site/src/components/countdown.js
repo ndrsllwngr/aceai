@@ -33,3 +33,31 @@ CountDownComponent.propTypes = {
   period: PropTypes.number,
   callback: PropTypes.func,
 };
+
+export const CountDownComponentMinimal = ({ period, callback }) => {
+  const [timeLeft, setTimeLeft] = useState(period);
+  useEffect(() => {
+    if (timeLeft === 0) {
+      callback();
+    }
+    if (timeLeft > 0) {
+      setTimeout(() => {
+        if (timeLeft > 0) {
+          setTimeLeft(timeLeft - 1);
+        }
+      }, 1000);
+    }
+  }, [callback, timeLeft]);
+  return (
+    <>
+      <div key={timeLeft} className="flex flex-row items-center">
+        <span className="text-gray-900">{timeLeft}</span>
+      </div>
+    </>
+  );
+};
+
+CountDownComponentMinimal.propTypes = {
+  period: PropTypes.number,
+  callback: PropTypes.func,
+};
