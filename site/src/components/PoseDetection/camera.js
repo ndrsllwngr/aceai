@@ -1,6 +1,3 @@
-/* eslint-disable func-names */
-/* eslint-disable react/button-has-type */
-/* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 import React, { useEffect, useState, useCallback } from 'react';
 import get from 'lodash/get';
@@ -36,7 +33,6 @@ import {
   timerBadDistance,
   timerBadHeight,
 } from './utilsTimer';
-// import { TimerComponent } from '../timer';
 import { states } from '../widget';
 import {
   drawBoundingBox,
@@ -83,7 +79,7 @@ let _streamCopy = null;
 export const PoseNetCamera = () => {
   // CONTEXT
   const [appContext, setAppContext] = useApp();
-  const [uiContext, setUiContext] = useUi();
+  const [uiContext] = useUi();
 
   // INTERNAL LOGIC
   const [loading, setLoading] = useState(false);
@@ -146,7 +142,6 @@ export const PoseNetCamera = () => {
     ],
   );
 
-  // TODO: PAUSE TIMER, START TIMER
   const [recalibrationIsRunning, setRecalibrationIsRunning] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
   const [countDownIsFinished, setCountDownIsFinished] = useState(false);
