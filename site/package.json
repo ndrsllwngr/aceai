@@ -75,7 +75,7 @@
     "eslint-plugin-react-hooks": "2.3.0",
     "gatsby-plugin-eslint": "2.0.8",
     "prettier": "1.19.1",
-    "stylelint": "13.0.0",
+    "stylelint": "13.1.0",
     "stylelint-config-recommended": "3.0.0",
     "stylelint-config-styled-components": "0.1.1",
     "stylelint-processor-styled-components": "1.9.0",
