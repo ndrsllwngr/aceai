@@ -12,6 +12,7 @@ import {
   Tooltip,
   Position,
   Button,
+  ProgressBar,
 } from '@blueprintjs/core';
 import { motion } from 'framer-motion';
 import { Subject } from 'rxjs';
@@ -52,11 +53,14 @@ import {
   Calibration,
   subjectHeadCalibration,
   subjectBodyCalibration,
+  calibrationBody,
+  calibrationHead,
 } from './calibration';
 import { showNotification } from '../showNotification';
 import { timelineModel, Timeline } from '../timeline';
 import { statesName, statesColourHex } from '../enums';
 import { Tile } from '../tile';
+import { CountDownComponent } from '../countdown';
 
 export const history = [];
 const subject = new Subject();
@@ -143,8 +147,83 @@ export const PoseNetCamera = () => {
     ],
   );
 
-  // TODO: ADD CALIBRATION LOGIC TO APP to recalibrate on the fly
-  // TODO: ADD CAMERA AS CUSTOM SECTION
+  // TODO: PAUSE TIMER, START TIMER
+  const [recalibrationIsRunning, setRecalibrationIsRunning] = useState(false);
+  const [isStarted, setIsStarted] = useState(false);
+  const [countDownIsFinished, setCountDownIsFinished] = useState(false);
+  const [timeLeftCalibrating, setTimeLeftCalibrating] = useState(3);
+  const [progress, setProgress] = useState(0.0);
+
+  useEffect(() => {
+    if (recalibrationIsRunning) {
+      if (countDownIsFinished) {
+        // callback
+        if (timeLeftCalibrating === 0) {
+          setProgress(1);
+          if (appContext.global_logging) {
+            console.log(history);
+          }
+
+          const centralTendencyObjectHead = getCalibrationMedianTickObject(
+            'eye',
+            historyHead,
+          );
+          const centralTendencyObjectBody = getCalibrationMedianTickObject(
+            'shoulder',
+            historyBody,
+          );
+          subjectHeadCalibration.next(centralTendencyObjectHead);
+          subjectBodyCalibration.next(centralTendencyObjectBody);
+          calibrationHead.push(centralTendencyObjectHead);
+          calibrationBody.push(centralTendencyObjectBody);
+          setAppContext({
+            ...appContext,
+            calibration_calibrationDataAvailable: true,
+          });
+          // CLEANUP
+          setProgress(0.0);
+          setIsStarted(false);
+          setTimeLeftCalibrating(3);
+          setCountDownIsFinished(false);
+          setRecalibrationIsRunning(false);
+        } else if (timeLeftCalibrating === 3) {
+          setProgress(0.0);
+        } else if (timeLeftCalibrating === 2) {
+          setProgress(0.33);
+        } else if (timeLeftCalibrating === 1) {
+          setProgress(0.66);
+        }
+        // countdown
+        if (timeLeftCalibrating > 0) {
+          setTimeout(() => {
+            if (timeLeftCalibrating > 0) {
+              setTimeLeftCalibrating(timeLeftCalibrating - 1);
+            }
+          }, 1000);
+        }
+      }
+    }
+  }, [
+    appContext,
+    countDownIsFinished,
+    recalibrationIsRunning,
+    setAppContext,
+    timeLeftCalibrating,
+  ]);
+
+  useEffect(() => {
+    if (recalibrationIsRunning) {
+      if (countDownIsFinished) {
+        historyHead.slice(0, historyHead.length);
+        historyBody.slice(0, historyBody);
+      }
+    }
+  }, [countDownIsFinished, recalibrationIsRunning]);
+
+  const handleCountDown = () => {
+    setCountDownIsFinished(true);
+  };
+  // TODO: LET USER DRAG CAMERA AROUND
   // TODO: ADD SCALING with the help of calibration
   // TODO: ADD SVG ANIMATION
   // TODO reset timers on unmount
@@ -225,14 +304,7 @@ export const PoseNetCamera = () => {
       // eslint-disable-next-line no-inner-declarations
       async function shuttingDown() {
         console.log('async function shuttingDown()');
-        // timerSession.pause();
         setLoading(false);
-        setStateBody(emptyState);
-        setStateHead(emptyState);
-        setStateDistance(emptyState);
-        setStateHeight(emptyState);
-        // setChartDataShoulder([]);
-        // setChartDataEye([]);
         stopStreamedVideo();
         clearCanvas();
       }
@@ -727,6 +799,31 @@ export const PoseNetCamera = () => {
                         onClick={toggleTimers}
                       />
                     </Tooltip>
+                    <Button
+                      icon="cube-add"
+                      className="bp3-minimal"
+                      disabled={isStarted || countDownIsFinished}
+                      onClick={() => {
+                        setRecalibrationIsRunning(true);
+                        setIsStarted(true);
+                      }}
+                    >
+                      Recalibrate
+                    </Button>
+                    {isStarted && !loading && !countDownIsFinished && (
+                      <CountDownComponent
+                        period={3}
+                        callback={handleCountDown}
+                      />
+                    )}
+                    {countDownIsFinished && (
+                      <ProgressBar
+                        value={progress}
+                        intent={Intent.SUCCESS}
+                        stripes
+                        animate
+                      />
+                    )}
                   </div>
                 </div>
                 <p className="text-gray-600">Overview of your session</p>
@@ -1218,6 +1315,7 @@ async function loadVideo() {
 function stopStreamedVideo() {
   try {
     try {
+      _streamCopy.getVideoTracks()[0].stop();
       _streamCopy.stop(); // if this method doesn't exist, the catch will be executed.
     } catch (e) {
       if (_streamCopy && _streamCopy.getVideoTracks() !== null) {

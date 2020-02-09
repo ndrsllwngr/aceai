@@ -99,13 +99,6 @@ export const Navigation = () => {
                   }
                 />
               </Tooltip>
-              <Tooltip content="Calibrate" position={Position.BOTTOM}>
-                <Button
-                  className="bp3-minimal"
-                  icon="cube-add"
-                  // onClick={handleChange}
-                />
-              </Tooltip>
               <Tooltip
                 content={
                   uiContext.videoCanvasIsOpen
