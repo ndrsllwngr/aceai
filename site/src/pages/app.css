@@ -70,6 +70,7 @@ a,
 }
 
 body > #___gatsby,
+#gatsby-focus-wrapper,
 div[role="group"][tabindex] {
   @apply h-full;
 }
