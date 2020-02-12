@@ -129,6 +129,18 @@ export const Drawer = () => {
           <div className="my-4">
             <Divider />
           </div>
+          <p>PoseNet update threshold (ms)</p>
+          <Slider
+            value={appContext.posenet_threshold}
+            min={0}
+            max={1000}
+            labelStepSize={100}
+            stepSize={10}
+            onChange={handleAppContextChangeSlider('posenet_threshold')}
+          />
+          <div className="my-4">
+            <Divider />
+          </div>
           <Switch
             label="Logging (consoleLog)"
             checked={appContext.global_logging}

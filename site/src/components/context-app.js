@@ -16,6 +16,7 @@ export const initialState = {
   posenet_webcamAvailable: false,
   posenet_charts: true,
   posenet_measurement: 'median',
+  posenet_threshold: 0,
   // EPOCH
   epoch_epochMode: true,
   epoch_epochCount: 100,
