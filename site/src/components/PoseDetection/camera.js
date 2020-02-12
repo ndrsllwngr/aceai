@@ -68,6 +68,8 @@ const subjectHead = new Subject();
 const emptyState = Number(0);
 // eslint-disable-next-line no-underscore-dangle
 let _streamCopy = null;
+let lastExecution = Date.now();
+let posenetThreshold = 0;
 
 // function usePrevious(value) {
 //   const ref = useRef();
@@ -98,7 +100,9 @@ export const PoseNetCamera = () => {
   const [stateBody, setStateBody] = useState(emptyState);
   const [stateBodySign, setStateBodySign] = useState(emptyState);
   const [stateDistance, setStateDistance] = useState(emptyState);
+  const [stateDistanceSign, setStateDistanceSign] = useState(emptyState);
   const [stateHeight, setStateHeight] = useState(emptyState);
+  const [stateHeightSign, setStateHeightSign] = useState(emptyState);
   // TIMELINE
   const [currentStateHead, setCurrentStateHead] = useState();
   const [currentStateBody, setCurrentStateBody] = useState();
@@ -246,6 +250,11 @@ export const PoseNetCamera = () => {
     };
   }, []);
 
+  // CHANGE POSNET_THRESHOLD
+  useEffect(() => {
+    posenetThreshold = appContext.posenet_threshold;
+  }, [appContext.posenet_threshold]);
+
   // AUTO-START POSENET if calibration data is available and (calibration data !== older than 5sec)
   useEffect(() => {
     if (
@@ -376,26 +385,46 @@ export const PoseNetCamera = () => {
           // GET SIGN OF SCORES
           let signOfHead;
           let signOfBody;
-          // let signOfDistance;
-          // let signOfHeight;
+          let signOfDistance;
+          let signOfHeight;
           if (
             clonehistoryHead.length > 0 &&
             clonehistoryHead[clonehistoryHead.length - 1].angleOfVector
           ) {
-            signOfHead = Math.sign(
-              clonehistoryHead[clonehistoryHead.length - 1].angleOfVector,
-            );
+            signOfHead =
+              clonehistoryHead[clonehistoryHead.length - 1].angleOfVector;
           }
           if (
             clonehistoryBody.length > 0 &&
             clonehistoryBody[clonehistoryBody.length - 1].angleOfVector
           ) {
-            signOfBody = Math.sign(
-              clonehistoryBody[clonehistoryBody.length - 1].angleOfVector,
-            );
+            signOfBody =
+              clonehistoryBody[clonehistoryBody.length - 1].angleOfVector;
+          }
+          if (
+            clonehistoryBody.length > 0 &&
+            clonehistoryBody[clonehistoryBody.length - 1].meanY
+          ) {
+            signOfHeight =
+              get(calibrationBodyTick, 'meanY', 0) -
+              get(clonehistoryBody[clonehistoryBody.length - 1], 'meanY', 0);
+          }
+          if (
+            clonehistoryBody.length > 0 &&
+            clonehistoryBody[clonehistoryBody.length - 1].lengthOfVector
+          ) {
+            signOfDistance =
+              get(calibrationBodyTick, 'lengthOfVector', 0) -
+              get(
+                clonehistoryBody[clonehistoryBody.length - 1],
+                'lengthOfVector',
+                0,
+              );
           }
           setStateHeadSign(signOfHead);
           setStateBodySign(signOfBody);
+          setStateHeightSign(signOfHeight);
+          setStateDistanceSign(signOfDistance);
           if (appContext.global_logging) {
             console.log('centralTendency', {
               centralTendencyBody,
@@ -1055,7 +1084,79 @@ export const PoseNetCamera = () => {
                     } pb-6 bg-gradient-gray`}
                   >
                     {showHead === true && (
-                      <div className="p-4">{/* TODO */}</div>
+                      <div className="p-4">
+                        {/* HEIGHT MINUS  */}
+                        {Math.abs(stateHeightSign) >
+                          appContext.threshold_height &&
+                          stateHeightSign < 0 && (
+                            <>
+                              {/* DISTANCE MINUS */}
+                              {Math.abs(stateDistanceSign) >
+                                appContext.threshold_distance &&
+                                stateDistanceSign < 0 && (
+                                  <Figures.HeightMinusDistanceMinus className="h-48 mx-auto" />
+                                )}
+                              {/* DISTANCE NEUTRAL */}
+                              {Math.abs(stateDistanceSign) <
+                                appContext.threshold_distance && (
+                                <Figures.HeightMinusDistanceNeutral className="h-48 mx-auto" />
+                              )}
+                              {/* DISTANCE PLUS */}
+                              {Math.abs(stateDistanceSign) >
+                                appContext.threshold_distance &&
+                                stateDistanceSign > 0 && (
+                                  <Figures.HeightMinusDistancePlus className="h-48 mx-auto" />
+                                )}
+                            </>
+                          )}
+                        {/* HEIGHT NEUTRAL */}
+                        {Math.abs(stateHeightSign) <
+                          appContext.threshold_height && (
+                          <>
+                            {/* DISTANCE MINUS */}
+                            {Math.abs(stateDistanceSign) >
+                              appContext.threshold_distance &&
+                              stateDistanceSign < 0 && (
+                                <Figures.HeightNeutralDistanceMinus className="h-48 mx-auto" />
+                              )}
+                            {/* DISTANCE NEUTRAL */}
+                            {Math.abs(stateDistanceSign) <
+                              stateDistanceSign.threshold_distance && (
+                              <Figures.HeightNeutralDistanceNeutral className="h-48 mx-auto" />
+                            )}
+                            {/* DISTANCE PLUS */}
+                            {Math.abs(stateDistanceSign) >
+                              appContext.threshold_distance &&
+                              stateDistanceSign > 0 && (
+                                <Figures.HeightMinusDistancePlus className="h-48 mx-auto" />
+                              )}
+                          </>
+                        )}
+                        {/* HEIGHT PLUS */}
+                        {Math.abs(stateHeightSign) >
+                          appContext.threshold_height &&
+                          stateHeightSign > 0 && (
+                            <>
+                              {/* DISTANCE MINUS */}
+                              {Math.abs(stateDistanceSign) >
+                                appContext.threshold_distance &&
+                                stateDistanceSign < 0 && (
+                                  <Figures.HeightPlusDistanceMinus className="h-48 mx-auto" />
+                                )}
+                              {/* DISTANCE NEUTRAL */}
+                              {Math.abs(stateDistanceSign) <
+                                appContext.threshold_distance && (
+                                <Figures.HeightPlusDistanceNeutral className="h-48 mx-auto" />
+                              )}
+                              {/* DISTANCE PLUS */}
+                              {Math.abs(stateDistanceSign) >
+                                appContext.threshold_distance &&
+                                stateDistanceSign > 0 && (
+                                  <Figures.HeightPlusDistancePlus className="h-48 mx-auto" />
+                                )}
+                            </>
+                          )}
+                      </div>
                     )}
                     <div className="flex flex-row justify-center items-center">
                       <Tooltip
@@ -1079,22 +1180,22 @@ export const PoseNetCamera = () => {
                     {showHead === true && (
                       <div className="p-4">
                         {/* HEAD LEFT  */}
-                        {Math.abs(stateHead) > appContext.threshold_head &&
+                        {Math.abs(stateHeadSign) > appContext.threshold_head &&
                           stateHeadSign < 0 && (
                             <>
                               {/* BODY LEFT */}
-                              {Math.abs(stateBody) >
+                              {Math.abs(stateBodySign) >
                                 appContext.threshold_body &&
                                 stateBodySign < 0 && (
                                   <Figures.HeadLeftBodyLeft className="h-48 mx-auto" />
                                 )}
                               {/* BODY NEUTRAL */}
-                              {Math.abs(stateBody) <
+                              {Math.abs(stateBodySign) <
                                 appContext.threshold_body && (
                                 <Figures.HeadLeftBodyNeutral className="h-48 mx-auto" />
                               )}
                               {/* BODY RIGHT */}
-                              {Math.abs(stateBody) >
+                              {Math.abs(stateBodySign) >
                                 appContext.threshold_body &&
                                 stateBodySign > 0 && (
                                   <Figures.HeadLeftBodyRight className="h-48 mx-auto" />
@@ -1102,42 +1203,45 @@ export const PoseNetCamera = () => {
                             </>
                           )}
                         {/* HEAD NEUTRAL */}
-                        {Math.abs(stateHead) < appContext.threshold_head && (
+                        {Math.abs(stateHeadSign) <
+                          appContext.threshold_head && (
                           <>
                             {/* BODY LEFT */}
-                            {Math.abs(stateBody) > appContext.threshold_body &&
+                            {Math.abs(stateBodySign) >
+                              appContext.threshold_body &&
                               stateBodySign < 0 && (
                                 <Figures.HeadNeutralBodyLeft className="h-48 mx-auto" />
                               )}
                             {/* BODY NEUTRAL */}
-                            {Math.abs(stateBody) <
+                            {Math.abs(stateBodySign) <
                               appContext.threshold_body && (
                               <Figures.HeadNeutralBodyNeutral className="h-48 mx-auto" />
                             )}
                             {/* BODY RIGHT */}
-                            {Math.abs(stateBody) > appContext.threshold_body &&
+                            {Math.abs(stateBodySign) >
+                              appContext.threshold_body &&
                               stateBodySign > 0 && (
                                 <Figures.HeadNeutralBodyRight className="h-48 mx-auto" />
                               )}
                           </>
                         )}
                         {/* HEAD RIGHT */}
-                        {Math.abs(stateHead) > appContext.threshold_head &&
+                        {Math.abs(stateHeadSign) > appContext.threshold_head &&
                           stateHeadSign > 0 && (
                             <>
                               {/* BODY LEFT */}
-                              {Math.abs(stateBody) >
+                              {Math.abs(stateBodySign) >
                                 appContext.threshold_body &&
                                 stateBodySign < 0 && (
                                   <Figures.HeadRightBodyLeft className="h-48 mx-auto" />
                                 )}
                               {/* BODY NEUTRAL */}
-                              {Math.abs(stateBody) <
+                              {Math.abs(stateBodySign) <
                                 appContext.threshold_body && (
                                 <Figures.HeadRightBodyNeutral className="h-48 mx-auto" />
                               )}
                               {/* BODY RIGHT */}
-                              {Math.abs(stateBody) >
+                              {Math.abs(stateBodySign) >
                                 appContext.threshold_body &&
                                 stateBodySign > 0 && (
                                   <Figures.HeadRightBodyRight className="h-48 mx-auto" />
@@ -1296,73 +1400,86 @@ function detectPoseInRealTime(video, _net) {
         default:
           console.log('reached default case (poseDetectionFrame)');
       }
+      // check if intervall
+      const timestamp = Date.now();
+      const timeDiff = timestamp - lastExecution;
+      const rest = timeDiff > posenetThreshold;
+      // console.log({
+      //   timestamp,
+      //   lastExecution,
+      //   posenetThreshold,
+      //   timeDiff,
+      //   rest,
+      // });
+      if (rest) {
+        // IF POSE DATA IS AVAILABLE PUSH NEW DATA TO GLOBAL STORAGE,
+        // CALCULATE TICK OBJECTS AND STORE THEM ACCORDINGLY
+        if (poses[0] !== undefined) {
+          const timeStamp = Date.now();
+          const tick = history.length;
+          const rawPoseDataObject = {
+            name: 'rawPoseData',
+            createdAt: timeStamp,
+            tick,
+            poseData: poses[0],
+          };
 
-      // IF POSE DATA IS AVAILABLE PUSH NEW DATA TO GLOBAL STORAGE,
-      // CALCULATE TICK OBJECTS AND STORE THEM ACCORDINGLY
-      if (poses[0] !== undefined) {
-        const timeStamp = Date.now();
-        const tick = history.length;
-        const rawPoseDataObject = {
-          name: 'rawPoseData',
-          createdAt: timeStamp,
-          tick,
-          poseData: poses[0],
-        };
+          const tickObjectShoulder = new TickObject(
+            'shoulder',
+            timeStamp,
+            tick,
+            extractPointObj('leftShoulder', rawPoseDataObject),
+            extractPointObj('rightShoulder', rawPoseDataObject),
+            // get(calibrationData, 'shoulder'),
+          );
+          const tickObjectEye = new TickObject(
+            'eye',
+            timeStamp,
+            tick,
+            extractPointObj('leftEye', rawPoseDataObject),
+            extractPointObj('rightEye', rawPoseDataObject),
+            // get(calibrationData, 'eye'),
+          );
+          // ADD TICK OBJECTS TO STORAGE and ANNOUNCE NEW TICK OBJECTS
+          history.push(rawPoseDataObject);
+          historyBody.push(tickObjectShoulder);
+          historyHead.push(tickObjectEye);
 
-        const tickObjectShoulder = new TickObject(
-          'shoulder',
-          timeStamp,
-          tick,
-          extractPointObj('leftShoulder', rawPoseDataObject),
-          extractPointObj('rightShoulder', rawPoseDataObject),
-          // get(calibrationData, 'shoulder'),
-        );
-        const tickObjectEye = new TickObject(
-          'eye',
-          timeStamp,
-          tick,
-          extractPointObj('leftEye', rawPoseDataObject),
-          extractPointObj('rightEye', rawPoseDataObject),
-          // get(calibrationData, 'eye'),
-        );
-        // ADD TICK OBJECTS TO STORAGE and ANNOUNCE NEW TICK OBJECTS
-        history.push(rawPoseDataObject);
-        historyBody.push(tickObjectShoulder);
-        historyHead.push(tickObjectEye);
-
-        subject.next(rawPoseDataObject);
-        subjectBody.next(tickObjectShoulder);
-        subjectHead.next(tickObjectEye);
-      }
-
-      // DRAWING
-      ctx.clearRect(0, 0, videoWidth, videoHeight);
-
-      if (poseNetState.output.showVideo) {
-        ctx.save();
-        ctx.scale(-1, 1);
-        ctx.translate(-videoWidth, 0);
-        ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
-        ctx.restore();
-      }
-
-      // For each pose (i.e. person) detected in an image, loop through the poses
-      // and draw the resulting skeleton and keypoints if over certain confidence
-      // scores
-      poses.forEach(({ score, keypoints }) => {
-        if (score >= minPoseConfidence) {
-          if (poseNetState.output.showPoints) {
-            drawKeypoints(keypoints, minPartConfidence, ctx);
-          }
-          if (poseNetState.output.showSkeleton) {
-            drawSkeleton(keypoints, minPartConfidence, ctx);
-          }
-          if (poseNetState.output.showBoundingBox) {
-            drawBoundingBox(keypoints, ctx);
-          }
+          subject.next(rawPoseDataObject);
+          subjectBody.next(tickObjectShoulder);
+          subjectHead.next(tickObjectEye);
         }
-      });
 
+        // DRAWING
+        ctx.clearRect(0, 0, videoWidth, videoHeight);
+
+        if (poseNetState.output.showVideo) {
+          ctx.save();
+          ctx.scale(-1, 1);
+          ctx.translate(-videoWidth, 0);
+          ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
+          ctx.restore();
+        }
+
+        // For each pose (i.e. person) detected in an image, loop through the poses
+        // and draw the resulting skeleton and keypoints if over certain confidence
+        // scores
+        poses.forEach(({ score, keypoints }) => {
+          if (score >= minPoseConfidence) {
+            if (poseNetState.output.showPoints) {
+              drawKeypoints(keypoints, minPartConfidence, ctx);
+            }
+            if (poseNetState.output.showSkeleton) {
+              drawSkeleton(keypoints, minPartConfidence, ctx);
+            }
+            if (poseNetState.output.showBoundingBox) {
+              drawBoundingBox(keypoints, ctx);
+            }
+          }
+        });
+
+        lastExecution = Date.now();
+      }
       // End monitoring code for frames per second
       // stats.end();
       // TODO stop loop here!
