@@ -13,6 +13,12 @@ Node `lts/erbium`
 ### Installation
 Run in the project `/site` folder `npm install`.
 
+### Develop
+Run `npm start`.
+
+### Build
+Run `npm build`.
+
 ## Contributors (Group Body Posture)
 
 - Andreas Ellwanger
