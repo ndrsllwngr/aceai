@@ -1128,7 +1128,7 @@ export const PoseNetCamera = () => {
                             {Math.abs(stateDistanceSign) >
                               appContext.threshold_distance &&
                               stateDistanceSign > 0 && (
-                                <Figures.HeightMinusDistancePlus className="h-48 mx-auto" />
+                                <Figures.HeightNeutralDistancePlus className="h-48 mx-auto" />
                               )}
                           </>
                         )}
