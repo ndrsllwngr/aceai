@@ -5,13 +5,20 @@ export const showNotification = (
   title = 'Title',
   body = 'Body',
   tag = uuidv4(),
+  timestamp = Date.now(),
 ) => {
   // eslint-disable-next-line no-restricted-globals
   self.registration.showNotification(title, {
     body,
     tag,
-    renotify: true,
-    vibrate: [200, 100, 200, 100, 200, 100, 400],
-    // icon: '../../../images/tab-illo.png',
+    timestamp,
+    silent: false,
+    actions: [
+      {
+        action: () => function() {},
+        title: 'dismiss',
+      },
+    ],
+    icon: './images/logo-icon.png',
   });
 };
