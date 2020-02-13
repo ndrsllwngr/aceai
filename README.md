@@ -10,13 +10,13 @@ https://www.bodypose.io/
 
 Node `lts/erbium`
 
-### Installation
+## Installation
 Run in the project `/site` folder `npm install`.
 
-### Develop
+## Develop
 Run `npm start`.
 
-### Build
+## Build
 Run `npm build`.
 
 ## Contributors (Group Body Posture)
