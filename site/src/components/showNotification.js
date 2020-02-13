@@ -22,7 +22,7 @@ export const showNotification = (
                 title: 'dismiss',
               },
             ],
-            icon: './images/logo-icon.png',
+            // icon: './images/logo-icon.png',
           });
         });
       }
