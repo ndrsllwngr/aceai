@@ -1,0 +1,100 @@
+@import "~normalize.css";
+@import url('https://rsms.me/inter/inter.css');
+@import "~@blueprintjs/core/lib/css/blueprint.css";
+@import "~@blueprintjs/icons/lib/css/blueprint-icons.css";
+
+/**
+ * This injects Tailwind's base styles and any base styles registered by
+ * plugins.
+ */
+@tailwind base;
+
+/**
+  * This injects Tailwind's component classes and any component classes
+  * registered by plugins.
+  */
+@tailwind components;
+
+/**
+  * This injects Tailwind's utility classes and any utility classes registered
+  * by plugins.
+  */
+@tailwind utilities;
+
+/**
+  * Use this directive to control where Tailwind injects the responsive
+  * variations of each utility.
+  *
+  * If omitted, Tailwind will append these classes to the very end of
+  * your stylesheet by default.
+  */
+@tailwind screens;
+
+html {
+  @apply min-h-full h-full;
+}
+
+body {
+  @apply min-h-full h-full;
+}
+
+html,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+a,
+* {
+  font-family: 'Inter', sans-serif;
+}
+
+@supports (font-variation-settings: normal) {
+
+  html,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  a,
+  * {
+    font-family: 'Inter var', sans-serif;
+  }
+}
+
+body > #___gatsby,
+#gatsby-focus-wrapper,
+div[role="group"][tabindex] {
+  @apply h-full;
+}
+
+.bg-gradient-green {
+  background: #c6f7e1;
+  background: -webkit-gradient(linear,left bottom,left top,from(#c6f7e1),to(#eefcf6));
+  background: linear-gradient(0deg,#c6f7e1,#eefcf6)
+}
+
+.bg-gradient-orange {
+  background: #fff3c4;
+  background: -webkit-gradient(linear,left bottom,left top,from(#fff3c4),to(#fffaea));
+  background: linear-gradient(0deg,#fff3c4,#fffaea)
+}
+
+.bg-gradient-red {
+  background: #facdcd;
+  background: -webkit-gradient(linear,left bottom,left top,from(#facdcd),to(#ffeded));
+  background: linear-gradient(0deg,#facdcd,#ffeded)
+}
+
+.bg-gradient-gray {
+  background: #d9e2ec;
+  background: -webkit-gradient(linear,left bottom,left top,from(#d9e2ec),to(#f0f4f8));
+  background: linear-gradient(0deg,#d9e2ec,#f0f4f8)
+}

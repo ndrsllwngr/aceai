@@ -1,0 +1,10 @@
+Geistige Anforderung#75
+Körperliche Anforderung#30
+Zeitliche Anforderung#60
+Leistung#65
+Anstrengung#25
+Frustration#35
+Kontrolle#60
+Exploration#100
+Motivation#70
+Freude#40
