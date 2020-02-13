@@ -4,7 +4,14 @@ Affective Computing / Empathic Artificial Intelligence - Group project (2019/202
 
 ## Demo
 
-https://aceai.netlify.com/
+https://www.bodypose.io/
+
+## Requirements
+
+Node `lts/erbium`
+
+### Installation
+Run in the project `/site` folder `npm install`.
 
 ## Contributors (Group Body Posture)
 
