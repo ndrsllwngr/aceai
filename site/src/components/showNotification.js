@@ -7,18 +7,25 @@ export const showNotification = (
   tag = uuidv4(),
   timestamp = Date.now(),
 ) => {
-  // eslint-disable-next-line no-restricted-globals
-  self.registration.showNotification(title, {
-    body,
-    tag,
-    timestamp,
-    silent: false,
-    actions: [
-      {
-        action: () => function() {},
-        title: 'dismiss',
-      },
-    ],
-    icon: './images/logo-icon.png',
-  });
+  if (typeof Notification !== 'undefined') {
+    Notification.requestPermission(result => {
+      if (result === 'granted') {
+        navigator.serviceWorker.ready.then(registration => {
+          registration.showNotification(title, {
+            body,
+            tag,
+            timestamp,
+            silent: false,
+            actions: [
+              {
+                action: () => function() {},
+                title: 'dismiss',
+              },
+            ],
+            icon: './images/logo-icon.png',
+          });
+        });
+      }
+    });
+  }
 };
