@@ -60,9 +60,6 @@ module.exports = {
     // To learn more, visit: https://gatsby.dev/offline
     {
       resolve: `gatsby-plugin-offline`,
-      options: {
-        appendScript: `${__dirname}/src/custom-sw-code.js`,
-      },
     },
   ],
 };

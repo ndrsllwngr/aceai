@@ -89,11 +89,8 @@ const IndexPage = () => {
                         of{' '}
                         <a href="http://www.en.uni-muenchen.de/">LMU Munich</a>.
                         <br /> <br />
-                        For futher information see our{' '}
-                        <a href="cache/ellwangererdeltkuehntochtermann2020bodypose.pdf">
-                          paper
-                        </a>
-                        .
+                        For futher information request our research paper per
+                        email.
                       </p>
                     </div>
                   }

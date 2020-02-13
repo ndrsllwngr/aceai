@@ -51,8 +51,8 @@ import {
   calibrationBody,
   calibrationHead,
 } from './calibration';
-// import { showNotification } from '../showNotification';
-import { showNotification } from '../../custom-sw-code';
+import { showNotification } from '../showNotification';
+// import { showNotification } from '../../custom-sw-code';
 import { timelineModel, Timeline } from '../timeline';
 import { statesName, statesColourHex } from '../enums';
 import { Tile } from '../tile';

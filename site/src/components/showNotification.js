@@ -5,20 +5,20 @@ export const showNotification = (
   title = 'Title',
   body = 'Body',
   tag = uuidv4(),
+  timestamp = Date.now(),
 ) => {
-  if (typeof Notification !== 'undefined') {
-    Notification.requestPermission(result => {
-      if (result === 'granted') {
-        navigator.serviceWorker.ready.then(registration => {
-          registration.showNotification(title, {
-            body,
-            tag,
-            renotify: true,
-            vibrate: [200, 100, 200, 100, 200, 100, 400],
-            // icon: '../../../images/tab-illo.png',
-          });
-        });
-      }
-    });
-  }
+  // eslint-disable-next-line no-restricted-globals
+  self.registration.showNotification(title, {
+    body,
+    tag,
+    timestamp,
+    silent: false,
+    actions: [
+      {
+        action: () => function() {},
+        title: 'dismiss',
+      },
+    ],
+    icon: './images/logo-icon.png',
+  });
 };
