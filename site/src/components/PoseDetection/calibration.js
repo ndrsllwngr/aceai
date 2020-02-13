@@ -194,7 +194,8 @@ export const Calibration = () => {
           >
             <p className="text-center" style={{ width: videoWidth }}>
               Please sit up straight and place yourself at your usual distance
-              to the screen.
+              to the screen. Furthermore try to set up the webcam to center
+              yourself (head and shoulders) in the webcam feed below.
             </p>
             <div style={{ height: videoHeight, width: videoWidth }}>
               <video
