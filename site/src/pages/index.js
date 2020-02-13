@@ -90,7 +90,10 @@ const IndexPage = () => {
                         <a href="http://www.en.uni-muenchen.de/">LMU Munich</a>.
                         <br /> <br />
                         For futher information see our{' '}
-                        <a href="cache/paper.pdf">paper</a>.
+                        <a href="cache/ellwangererdeltkuehntochtermann2020bodypose.pdf">
+                          paper
+                        </a>
+                        .
                       </p>
                     </div>
                   }
