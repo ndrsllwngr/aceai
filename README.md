@@ -4,7 +4,7 @@ Affective Computing / Empathic Artificial Intelligence - Group project (2019/202
 
 ## Demo
 
-https://www.bodypose.io/
+https://aceai.netlify.app/
 
 ## Requirements
 
